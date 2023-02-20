@@ -7,6 +7,9 @@ import tn.esprit.usermanagement.entities.User;
 import tn.esprit.usermanagement.enumerations.Role;
 import tn.esprit.usermanagement.repositories.UserRepo;
 import tn.esprit.usermanagement.services.AdminService;
+
+import java.util.Optional;
+
 @Service
 @AllArgsConstructor
 public class AdminServiceImpl implements AdminService {
@@ -27,6 +30,15 @@ public class AdminServiceImpl implements AdminService {
         String token = jwtService.generateJwtToken(mod);
         token += " | "+mod.getEmail()+" | "+ password;
         return token;
+    }
+
+    @Override
+    public String banUser(String email) {
+        Optional<User> optuser = userRepo.findByEmail(email);
+        User user = optuser.get();
+        user.setEnabled(false);
+        userRepo.save(user);
+        return "banned! ";
     }
 
 

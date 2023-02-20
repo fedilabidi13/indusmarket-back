@@ -4,4 +4,5 @@ import tn.esprit.usermanagement.entities.User;
 
 public interface AdminService {
     String addMod(String email);
+    String banUser(String email);
 }

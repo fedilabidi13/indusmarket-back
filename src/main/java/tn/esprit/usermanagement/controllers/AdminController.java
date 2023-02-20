@@ -17,4 +17,9 @@ public class AdminController {
     {
         return adminService.addMod(email);
     }
+    @GetMapping("/ban")
+    public String banUser(@RequestBody String email)
+    {
+        return adminService.banUser(email);
+    }
 }
