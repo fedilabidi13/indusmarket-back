@@ -1,9 +1,7 @@
 package tn.esprit.usermanagement.servicesImpl;
 
 import org.springframework.stereotype.Service;
-import org.w3c.dom.CharacterData;
 
-import java.util.List;
 import java.util.Random;
 
 @Service

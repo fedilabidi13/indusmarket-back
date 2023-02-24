@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import tn.esprit.usermanagement.entities.AuthenticationRequest;
 import tn.esprit.usermanagement.entities.AuthenticationResponse;
 import tn.esprit.usermanagement.entities.RegistrationRequest;
+import tn.esprit.usermanagement.entities.User;
 import tn.esprit.usermanagement.servicesImpl.AuthenticationService;
 
 @RestController
@@ -14,9 +15,9 @@ import tn.esprit.usermanagement.servicesImpl.AuthenticationService;
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> register(@RequestBody RegistrationRequest request)
+    public User register(@RequestBody RegistrationRequest request)
     {
-        return ResponseEntity.ok(authenticationService.register(request));
+        return authenticationService.register(request);
 
     }
     @PostMapping("/authenticate")

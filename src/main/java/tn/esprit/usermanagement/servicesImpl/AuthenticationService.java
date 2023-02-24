@@ -1,15 +1,17 @@
 package tn.esprit.usermanagement.servicesImpl;
 
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tn.esprit.usermanagement.entities.*;
 import tn.esprit.usermanagement.enumerations.Role;
+import tn.esprit.usermanagement.enumerations.TokenType;
+import tn.esprit.usermanagement.repositories.JwtTokenRepo;
 import tn.esprit.usermanagement.repositories.UserRepo;
 import tn.esprit.usermanagement.services.EmailSender;
 
@@ -23,6 +25,7 @@ public class AuthenticationService {
     private final UserRepo userRepo;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+    private final JwtTokenRepo jwtTokenRepo;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final EmailSender emailSender;
@@ -34,13 +37,26 @@ public class AuthenticationService {
         var user = userRepo.findByEmail(request.getEmail()).orElseThrow(
                 () -> new UsernameNotFoundException("User not found")
         );
-        var jwtToken = jwtService.generateJwtToken(user);
+        var jwtTokenString = jwtService.generateJwtToken(user);
+        revokeAllUserTokens(user);
+        saveJwtToken(user, jwtTokenString);
         return AuthenticationResponse.builder()
-                .jwtToken(jwtToken)
+                .jwtToken(jwtTokenString)
                 .build();
     }
 
-    public AuthenticationResponse register(RegistrationRequest request) {
+    private void saveJwtToken(User user, String jwtTokenString) {
+        var jwtToken = JwtToken.builder()
+                .token(jwtTokenString)
+                .user(user)
+                .tokenType(TokenType.BEARER)
+                .expired(false)
+                .revoked(false)
+                .build();
+        jwtTokenRepo.save(jwtToken);
+    }
+
+    public User register(RegistrationRequest request) {
         var user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
@@ -56,10 +72,9 @@ public class AuthenticationService {
         tokenService.saveConfirmationToken(confirmationToken);
         String link = "http://localhost:8085/api/v1/auth/confirm?token="+token;
         emailSender.send(request.getEmail(),buildEmail(request.getFirstName(),link));
-        var jwtToken = jwtService.generateJwtToken(user);
-        return AuthenticationResponse.builder()
-                .jwtToken(jwtToken)
-                .build();
+        var jwtTokenString = jwtService.generateJwtToken(user);
+        //saveJwtToken(user,jwtTokenString);
+        return user;
     }
     @Transactional
     public String confirmToken(String token) {
@@ -82,6 +97,16 @@ public class AuthenticationService {
         userService.enableAppUser(
                 confirmationToken.getUser().getEmail());
         return "confirmed";
+    }
+    public void revokeAllUserTokens(User user) {
+        var validUserTokens = jwtTokenRepo.findAllValidTokenByUser(user.getId());
+        if (validUserTokens.isEmpty())
+            return;
+        validUserTokens.forEach(token -> {
+            token.setExpired(true);
+            token.setRevoked(true);
+        });
+        jwtTokenRepo.saveAll(validUserTokens);
     }
 
     private String buildEmail(String name, String link) {
@@ -151,5 +176,10 @@ public class AuthenticationService {
                 "  </tbody></table><div class=\"yj6qo\"></div><div class=\"adL\">\n" +
                 "\n" +
                 "</div></div>";
+    }
+    public User currentlyAuthenticatedUser()
+    {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepo.findByEmail(email).get();
     }
 }

@@ -2,17 +2,17 @@ package tn.esprit.usermanagement.entities;
 
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import tn.esprit.usermanagement.enumerations.Role;
 
-
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.SimpleTimeZone;
 
 @Entity
 @Table(name="_user")
@@ -32,12 +32,18 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @OneToMany(mappedBy = "user")
+    private List<JwtToken> jwtTokens;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));
     }
-
+    @Override
+    public String getPassword() {
+        return password;
+    }
     @Override
     public String getUsername() {
         return email;
