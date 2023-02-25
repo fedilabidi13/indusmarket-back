@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>new Pass</title>
+</head>
+<body>
+u need a new password
+<p>
+<form method="post" action="/api/v1/auth/mod/confirmPassword">
+    <input type="email" name="email" placeholder="email" value="${formData2.email}">
+
+
+    <input type="password" name="password" placeholder="password" value="${formData2.password}">
+    <button type="submit">Submit</button>
+</form>
+
+</p>
+
+</body>
+</html>

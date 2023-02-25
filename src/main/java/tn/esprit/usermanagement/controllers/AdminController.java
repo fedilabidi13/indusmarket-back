@@ -1,17 +1,20 @@
 package tn.esprit.usermanagement.controllers;
 
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import tn.esprit.usermanagement.entities.User;
+import tn.esprit.usermanagement.enumerations.Role;
 import tn.esprit.usermanagement.services.AdminService;
+import tn.esprit.usermanagement.servicesImpl.AuthenticationService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/auth/admin")
 @AllArgsConstructor
 public class AdminController {
     private AdminService adminService;
+    private AuthenticationService authenticationService;
     @GetMapping("/addMod")
     public String createModAccount(@RequestBody String email)
     {
@@ -21,5 +24,18 @@ public class AdminController {
     public String banUser(@RequestBody String email)
     {
         return adminService.banUser(email);
+    }
+    @GetMapping("/findByRole")
+    public List<User> getuserss(@RequestParam String role)
+    {
+    //todo convert string to Enum type role
+        Role enumrole = Role.valueOf(role);
+        return adminService.getUsers(enumrole);
+    }
+
+    @GetMapping("/currentUser")
+    public User getcurrentuser()
+    {
+        return authenticationService.currentlyAuthenticatedUser();
     }
 }

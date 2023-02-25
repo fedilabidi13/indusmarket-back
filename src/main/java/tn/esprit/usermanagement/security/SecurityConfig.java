@@ -26,6 +26,8 @@ public class SecurityConfig{
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        // todo reconfigure url structure
+        // todo lets make it more conivienet to our project
         http
                 .csrf()
                 .disable()

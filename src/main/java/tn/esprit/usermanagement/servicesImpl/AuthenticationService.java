@@ -57,6 +57,8 @@ public class AuthenticationService {
     }
 
     public User register(RegistrationRequest request) {
+        // todo validate email
+        // todo refuse same mail registration
         var user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())

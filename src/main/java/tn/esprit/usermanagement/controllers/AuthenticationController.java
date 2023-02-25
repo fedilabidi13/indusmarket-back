@@ -7,6 +7,7 @@ import tn.esprit.usermanagement.entities.AuthenticationRequest;
 import tn.esprit.usermanagement.entities.AuthenticationResponse;
 import tn.esprit.usermanagement.entities.RegistrationRequest;
 import tn.esprit.usermanagement.entities.User;
+import tn.esprit.usermanagement.repositories.UserRepo;
 import tn.esprit.usermanagement.servicesImpl.AuthenticationService;
 
 @RestController
@@ -14,6 +15,8 @@ import tn.esprit.usermanagement.servicesImpl.AuthenticationService;
 @RequiredArgsConstructor
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
+    private final UserRepo userRepo;
+
     @PostMapping("/register")
     public User register(@RequestBody RegistrationRequest request)
     {
@@ -23,9 +26,11 @@ public class AuthenticationController {
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request)
     {
+
         return ResponseEntity.ok(authenticationService.authenticate(request));
 
     }
+
     @GetMapping(path = "confirm")
     public String confirm(@RequestParam("token") String token) {
         return authenticationService.confirmToken(token);

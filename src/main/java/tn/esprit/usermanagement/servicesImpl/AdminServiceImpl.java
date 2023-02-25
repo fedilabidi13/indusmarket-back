@@ -8,6 +8,7 @@ import tn.esprit.usermanagement.enumerations.Role;
 import tn.esprit.usermanagement.repositories.UserRepo;
 import tn.esprit.usermanagement.services.AdminService;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -39,6 +40,11 @@ public class AdminServiceImpl implements AdminService {
         user.setEnabled(false);
         userRepo.save(user);
         return "banned! ";
+    }
+
+    @Override
+    public List<User> getUsers(Role role) {
+        return userRepo.findByRole(role);
     }
 
 

@@ -28,13 +28,17 @@ public class User implements UserDetails {
     private String lastName;
     private String email;
     private String password;
-    private boolean enabled=false;
+    private Boolean enabled= null;
+    private Boolean firtAttempt = true;
     @Enumerated(EnumType.STRING)
     private Role role;
 
     @OneToMany(mappedBy = "user")
     private List<JwtToken> jwtTokens;
 
+
+    //todo Picture
+    //todo more attributes (shops products address phone number )
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
