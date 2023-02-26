@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import tn.esprit.usermanagement.entities.AuthenticationRequest;
+import tn.esprit.usermanagement.entities.AuthenticationResponse;
 import tn.esprit.usermanagement.entities.User;
 import tn.esprit.usermanagement.repositories.UserRepo;
 import tn.esprit.usermanagement.servicesImpl.AuthenticationService;
@@ -25,8 +26,10 @@ public class ModController {
     }
 
     @PostMapping("/api/v1/auth/mod/submit")
-    public String submitForm(@ModelAttribute("formData") AuthenticationRequest formData) {
+    public String submitForm(@ModelAttribute("formData") AuthenticationRequest formData, Model model) {
+        String jwt;
         // handle form submission
+
         String password = formData.getPassword();
         String email = formData.getEmail();
         // do something with the data
@@ -36,7 +39,10 @@ public class ModController {
         }
         else
         {
+            AuthenticationResponse response = authenticationService.authenticate(formData);
             //return authenticationService.authenticate(request).toString();
+            jwt = response.getJwtToken();
+            model.addAttribute("jwt",jwt);
             return "ok";
         }
     }
@@ -50,7 +56,7 @@ public class ModController {
         user.setPassword(passwordEncoder.encode(password));
         user.setFirtAttempt(false);
         userRepo.save(user);
-        return "ok";
+        return "ok2";
     }
 
 
