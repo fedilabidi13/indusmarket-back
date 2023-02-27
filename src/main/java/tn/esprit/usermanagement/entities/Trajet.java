@@ -1,5 +1,6 @@
 package tn.esprit.usermanagement.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,9 +27,10 @@ public class Trajet implements Serializable {
     private Integer dureeEstimee;
     private String statut;
 
+    @JsonIgnore
     @ManyToOne
     private User livreur;
-
+    @JsonIgnore
     @ManyToOne
     private Delivery deliveryss;
 }

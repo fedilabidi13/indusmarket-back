@@ -1,5 +1,6 @@
 package tn.esprit.usermanagement.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,11 +17,14 @@ public class Orders implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    @JsonIgnore
     @ManyToOne
     private User user;
     private float amount=0;
+    @JsonIgnore
     @OneToOne(mappedBy = "ordre")
     private Invoice invoice;
+    @JsonIgnore
     @ManyToOne
     private Delivery deliveryS;
 }

@@ -1,5 +1,6 @@
 package tn.esprit.usermanagement.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import tn.esprit.usermanagement.enumerations.DeliveryStatus;
@@ -34,15 +35,16 @@ public class Delivery implements Serializable {
     @Column(nullable = false)
     private String destinataire;
 
-
+    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy="deliveryS")
     private List<Orders> Orders;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "id")
     private User livreur;
 
-
+    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy="commande")
     private List<Evaluation> evaluations;
 }
