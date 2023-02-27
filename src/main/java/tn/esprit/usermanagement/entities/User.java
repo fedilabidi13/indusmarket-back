@@ -64,7 +64,6 @@ public class User implements UserDetails {
     //todo Picture
     //todo more attributes (shops products address phone number )
 
-
     // Specefic Forum Attributes
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL)
