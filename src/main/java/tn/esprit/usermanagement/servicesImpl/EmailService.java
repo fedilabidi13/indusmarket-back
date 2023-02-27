@@ -23,6 +23,7 @@ public class EmailService implements EmailSender {
     @Async
     public void send(String to, String email) {
         try {
+
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper =
                     new MimeMessageHelper(mimeMessage, "utf-8");
