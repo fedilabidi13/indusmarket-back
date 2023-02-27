@@ -1,4 +1,4 @@
-package tn.esprit.usermanagement.entities;
+package tn.esprit.usermanagement.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

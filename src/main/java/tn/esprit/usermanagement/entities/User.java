@@ -1,6 +1,7 @@
 package tn.esprit.usermanagement.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,10 +37,50 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     private List<JwtToken> jwtTokens;
 
+    // Delivery attributes
+    private Integer phoneNumber;
+    private String secteur;
+    @Column(name = "max_poids")
+    private int maxPoids;
+    @Column(name = "nombres_des_commandes ")
+    private int nbrCommande;
+    private String listeColis;
+    private String listeClient ;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy="livreur")
+    private List<Delivery> deliveries;
 
+    // Shopping cart and order
+    @OneToOne
+    private ShoppingCart shoppingCart;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<Orders> ordersList;
+
+    // Shop
+    @OneToMany(cascade = CascadeType.ALL,mappedBy = "user")
+    private List<Shop> shops;
+    @OneToMany(mappedBy = "user1")
+    private List<Rating> rates;
     //todo Picture
     //todo more attributes (shops products address phone number )
 
+    // Specefic Forum Attributes
+    @JsonIgnore
+    @OneToMany(cascade = CascadeType.ALL)
+    List<Post> posts;
+    @JsonIgnore
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
+    List<React> postReacts;
+
+    @JsonIgnore
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
+    List<PostComment> postComments;
+    @JsonIgnore
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
+    List<CommentLike> commentLikes;
+    @JsonIgnore
+    @OneToMany(cascade = CascadeType.ALL)
+    List<Advertising> advertising;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));
