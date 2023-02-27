@@ -63,7 +63,7 @@ public class User implements UserDetails {
     private List<Rating> rates;
     //todo Picture
     //todo more attributes (shops products address phone number )
-//gggg
+
     // Specefic Forum Attributes
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL)
