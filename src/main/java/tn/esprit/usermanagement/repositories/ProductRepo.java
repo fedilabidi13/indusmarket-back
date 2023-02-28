@@ -22,6 +22,7 @@ public interface ProductRepo extends JpaRepository<Product,Integer>, JpaSpecific
     public List<Product> SortProductByCategory(String category);
     Product findByReference(String ref);
     List<Product> findByPriceBetween(float minPrice, float maxPrice);
+    // List<Product> findByPriceOrQuantityOrReferenceOrNameOrDescriptionOrBrand(Float x,String w,String c,String z,String a,String b);
 
 
 

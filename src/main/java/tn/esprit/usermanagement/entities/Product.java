@@ -48,6 +48,10 @@ public class Product implements Serializable {
 
     @ManyToOne
     private Shop shop;
+    ///Association Oussama
+    @JsonIgnore
+    @ManyToMany(cascade = CascadeType.ALL, mappedBy="products")
+    private List<Claims> claims;
 
 
 }

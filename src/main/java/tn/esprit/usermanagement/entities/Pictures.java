@@ -21,4 +21,6 @@ public class Pictures implements Serializable {
     @Column(columnDefinition = "LONGBLOB")
     @Lob
     private byte[] data;
+    private String contentType;
+
 }

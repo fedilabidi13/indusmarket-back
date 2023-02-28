@@ -32,7 +32,7 @@ public class Event implements Serializable {
     private LocalDateTime endDate;
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL)
-    private List<Media> pictures;
+    private List<Pictures> pictures;
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy="event")
     private List<Ticket> tickets;
