@@ -44,7 +44,7 @@ public class Product implements Serializable {
 
 
     @OneToMany(cascade = CascadeType.ALL)
-    private List<Media> pictures;
+    private List<Pictures> pictures;
 
     @ManyToOne
     private Shop shop;
