@@ -20,6 +20,9 @@ public class Shop implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idShop")
+
+
+
     private Integer idShop;
     private String name;
     private String mail;

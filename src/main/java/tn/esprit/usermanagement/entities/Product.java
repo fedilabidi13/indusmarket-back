@@ -48,6 +48,8 @@ public class Product implements Serializable {
 
     @ManyToOne
     private Shop shop;
-
+    @JsonIgnore
+    @ManyToMany
+    private List<Orders> orders;
 
 }

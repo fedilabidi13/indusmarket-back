@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Entity
 @Table
@@ -27,4 +28,7 @@ public class Orders implements Serializable {
     @JsonIgnore
     @ManyToOne
     private Delivery deliveryS;
+    @JsonIgnore
+    @ManyToMany
+    private List<Shop> shops;
 }
