@@ -7,12 +7,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import tn.esprit.usermanagement.entities.*;
-import tn.esprit.usermanagement.repositories.PicturesRepo;
-import tn.esprit.usermanagement.repositories.ProductRepo;
-import tn.esprit.usermanagement.repositories.ShopRepo;
-import tn.esprit.usermanagement.repositories.UserRepo;
+import tn.esprit.usermanagement.repositories.*;
 import tn.esprit.usermanagement.services.ShopServices;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,6 +24,7 @@ public class ShopServicesImpl implements ShopServices {
     ProductRepo productRepo;
     AddressService addressService;
     AuthenticationService authenticationService;
+        private final AddressRepo addressRepo;
 
         @Override
         public List<Shop> ShowAllShops() {
@@ -62,14 +61,35 @@ public class ShopServicesImpl implements ShopServices {
 
 
     @Override
-    public Shop editShop(Shop s)  {
-        return shopRepo.save(s);
+    public Shop editShop(Shop s) throws IOException {
+        int idUsr =  authenticationService.currentlyAuthenticatedUser().getId();
+        User usr =  userRepo.findById2(idUsr);
+        Shop s1 = shopRepo.findById2(s.getIdShop());
+        if(usr.getShops().contains(s1)){
+
+        Shop oldShop = shopRepo.getReferenceById(s.getIdShop());
+        Address oldAddress = oldShop.getAddress();
+        //Integer id = oldAddress.getId();
+        Address newAdress = addressService.AddAddress(s.getAdresse());
+        oldAddress.setReal_Address(newAdress.getReal_Address());
+        oldAddress.setLongitude(newAdress.getLongitude());
+        oldAddress.setLatitude(newAdress.getLatitude());
+        addressRepo.save(oldAddress);
+        addressRepo.delete(newAdress);
+        s.setAddress(oldAddress);
+        s.setUser(usr);
+        return shopRepo.save(s);}
+        else{
+            throw new IllegalStateException("You aren't the owner of this shop");}
+
     }
 
     @Override
-    public Shop deleteShop(int idUser, int idShop) {
-        User usr = userRepo.findById(idUser).get();
-        Shop s = shopRepo.findById(idShop).orElse(null);
+    public Shop deleteShop(int idShop) {
+      Integer idUser = authenticationService.currentlyAuthenticatedUser().getId();
+
+        User usr = userRepo.findById2(idUser);
+        Shop s = shopRepo.findById2(idShop);
         if(s==null) {
             throw new IllegalStateException("This shop does not exist");
         }

@@ -12,10 +12,9 @@ import java.util.List;
 @Repository
 public interface RateRepository extends JpaRepository<Rating, Integer> {
 
-    //List<Rating> findByShopId(Integer shopId);
 
     @Query("SELECT AVG(r.value) FROM Rating r WHERE r.shop.idShop = ?1")
-    Double getAverageRatingForShop(@Param("idShop") Integer shopId);
+    Double getAverageRatingForShop( Integer shopId);
     @Query("select r from Rating r where r.shop.idShop=?1 ")
-    List<Rating> findByShopId(@Param("idShop") Integer shopId);
+    List<Rating> findByShopId(Integer shopId);
 }

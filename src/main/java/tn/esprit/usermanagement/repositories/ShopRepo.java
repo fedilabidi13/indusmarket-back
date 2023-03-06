@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import tn.esprit.usermanagement.entities.Product;
 import tn.esprit.usermanagement.entities.Shop;
+import tn.esprit.usermanagement.entities.User;
 
 import java.util.List;
 
@@ -18,4 +19,7 @@ public interface ShopRepo extends JpaRepository<Shop,Integer> {
     public List<Product> GenerateCatalog(int idShop);
     @Query("select s from Shop s ")
     public List<Shop> ShowAllShops();
+    @Query("SELECT s FROM Shop s WHERE s.idShop = ?1")
+    Shop findById2(int shopId);
+
 }

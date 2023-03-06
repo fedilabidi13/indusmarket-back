@@ -2,9 +2,7 @@ package tn.esprit.usermanagement.controllers;
 
 
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import tn.esprit.usermanagement.entities.Product;
@@ -15,6 +13,7 @@ import tn.esprit.usermanagement.repositories.UserRepo;
 import tn.esprit.usermanagement.services.ShopServices;
 import tn.esprit.usermanagement.servicesImpl.AuthenticationService;
 
+import java.io.IOException;
 import java.util.List;
 @RestController
 @AllArgsConstructor
@@ -40,12 +39,16 @@ public class ShopController {
 
 
     @PostMapping("/editShop")
-        public Shop editShop(@RequestBody Shop s){
-       return shopServices.editShop(s);
-    }
-    @DeleteMapping( "/deleteShop/{idUser}/{idShop}")
-    public Shop deleteShop(@PathVariable("idUser") int idUser,@PathVariable("idShop") int idShop){
-        return shopServices.deleteShop(idUser,idShop);
+        public Shop editShop(@ModelAttribute Shop s) throws IOException {
+      return shopServices.editShop(s);}
+
+
+
+
+    @DeleteMapping( "/deleteShop/{idShop}")
+    public Shop deleteShop(@PathVariable("idShop") int idShop){
+
+        return shopServices.deleteShop(idShop);
     }
     @GetMapping( "/ShowAllShopsByUser")
     public List<Shop> ShowAllShopsByUser(){
