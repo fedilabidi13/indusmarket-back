@@ -1,14 +1,12 @@
 package tn.esprit.usermanagement.servicesImpl;
 
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import tn.esprit.usermanagement.entities.Pictures;
-import tn.esprit.usermanagement.entities.Product;
-import tn.esprit.usermanagement.entities.Shop;
-import tn.esprit.usermanagement.entities.User;
+import tn.esprit.usermanagement.entities.*;
 import tn.esprit.usermanagement.repositories.PicturesRepo;
 import tn.esprit.usermanagement.repositories.ProductRepo;
 import tn.esprit.usermanagement.repositories.ShopRepo;
@@ -27,6 +25,7 @@ public class ShopServicesImpl implements ShopServices {
     PicturesRepo picturesRepo;
     ProductRepo productRepo;
     AddressService addressService;
+    AuthenticationService authenticationService;
 
         @Override
         public List<Shop> ShowAllShops() {
@@ -84,7 +83,8 @@ public class ShopServicesImpl implements ShopServices {
     }
 
         @Override
-        public List<Shop> ShowAllShopsByUser(int idUser) {
+        public List<Shop> ShowAllShopsByUser(Integer idUser) {
+
             return shopRepo.ShowAllShops(idUser);
         }
         @Override
@@ -116,6 +116,34 @@ public class ShopServicesImpl implements ShopServices {
                 List<Product> products = shop.getProducts();
                 return ResponseEntity.ok(products);
         }
+        public double generateReportForShop(Integer shopId) {
 
+            // Récupérer les informations de magasin
+            Shop shop = shopRepo.findById(shopId).orElseThrow(() -> new EntityNotFoundException("Shop not found"));
+            shop.setName(shop.getName());
+            shop.setMail(shop.getMail());
+            shop.setPhoneNumber(shop.getPhoneNumber());
+
+            // Récupérer tous les produits pour le magasin spécifié
+            List<Product> products = shop.getProducts();
+            System.out.println(shop);
+
+            // Ajouter les informations de chaque produit au rapport
+            double sumrevenu = 0.0;
+            for (Product product : products) {
+                for (Orders order : product.getOrders()) {
+                    if(product.getDiscount()== null){
+                        sumrevenu = sumrevenu + product.getPrice();
+                    }
+                    else{
+                        sumrevenu = sumrevenu + product.getPriceAfterDiscount();
+
+                    }
+                }
+
+            }
+
+            return sumrevenu;
+        }
 
     }

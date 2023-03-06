@@ -13,6 +13,7 @@ import tn.esprit.usermanagement.repositories.ProductRepo;
 import tn.esprit.usermanagement.repositories.ShopRepo;
 import tn.esprit.usermanagement.repositories.UserRepo;
 import tn.esprit.usermanagement.services.ShopServices;
+import tn.esprit.usermanagement.servicesImpl.AuthenticationService;
 
 import java.util.List;
 @RestController
@@ -27,12 +28,13 @@ public class ShopController {
     UserRepo userRepo;
 
     ShopRepo shopRepo;
+    AuthenticationService authenticationService;
 
 
 
-    @PostMapping( "/addShopAndAffectToUser/{idUsr}")
-    public Shop addShopAndAffectToUser(@ModelAttribute Shop s, @PathVariable("idUsr") int idUsr, @RequestParam("file") List<MultipartFile> files) throws Exception{
-
+    @PostMapping( "/addShopAndAffectToUser")
+    public Shop addShopAndAffectToUser(@ModelAttribute Shop s, @RequestParam("file") List<MultipartFile> files) throws Exception{
+        Integer idUsr = authenticationService.currentlyAuthenticatedUser().getId();
         return shopServices.addShopAndAffectToUser(s, idUsr, s.getAdresse(), files);
     }
 
@@ -45,8 +47,9 @@ public class ShopController {
     public Shop deleteShop(@PathVariable("idUser") int idUser,@PathVariable("idShop") int idShop){
         return shopServices.deleteShop(idUser,idShop);
     }
-    @GetMapping( "/ShowAllShopsByUser/{idUser}")
-    public List<Shop> ShowAllShopsByUser(@PathVariable("idUser") int idUser){
+    @GetMapping( "/ShowAllShopsByUser")
+    public List<Shop> ShowAllShopsByUser(){
+        Integer idUser = authenticationService.currentlyAuthenticatedUser().getId();
         return shopServices.ShowAllShopsByUser(idUser);
     }
     @GetMapping("/GenerateCatalog/{idShop}")
@@ -64,6 +67,10 @@ public class ShopController {
         return shopServices.getAllProductsOfShop(shopId);
     }
 
+    @GetMapping("/generateReportForShop/{shopId}")
+    public double generateReportForShop(@PathVariable ("shopId") Integer shopId) {
+        return shopServices.generateReportForShop(shopId);
+    }
 
 
 

@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tn.esprit.usermanagement.entities.Rating;
 import tn.esprit.usermanagement.repositories.ShopRepo;
+import tn.esprit.usermanagement.servicesImpl.AuthenticationService;
 import tn.esprit.usermanagement.servicesImpl.RateService;
 
 import java.util.List;
@@ -19,9 +20,12 @@ public class RatingController {
     private RateService rateService;
     @Autowired
     private ShopRepo shopRepo;
-    @PostMapping("/rates/{shopId}/{userId}")
-    public Rating createRate(@PathVariable("shopId") Integer shopId , @RequestBody Rating ra, @PathVariable("userId") Integer userId) {
-        return rateService.createRate(ra,shopId,userId);
+    @Autowired
+    AuthenticationService authenticationService;
+    @PostMapping("/rates/{shopId}")
+    public Rating createRate(@PathVariable("shopId") Integer shopId , @RequestBody Rating ra) {
+        Integer idUsr = authenticationService.currentlyAuthenticatedUser().getId();
+        return rateService.createRate(ra,shopId,idUsr);
 
     }
     @GetMapping("/getAllRatesForShop")

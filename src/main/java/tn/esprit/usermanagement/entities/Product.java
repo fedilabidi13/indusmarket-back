@@ -53,5 +53,10 @@ public class Product implements Serializable {
     @ManyToMany(cascade = CascadeType.ALL, mappedBy="products")
     private List<Claims> claims;
 
+    ////Houssem Association
+    @JsonIgnore
+    @ManyToMany
+    private List<Orders> orders;
+
 
 }
