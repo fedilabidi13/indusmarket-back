@@ -3,8 +3,10 @@ package tn.esprit.usermanagement.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @Entity
 @Table
@@ -17,10 +19,16 @@ public class Orders implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    private LocalDateTime creationDate;
+    private String InvoiceRef;
+
+
     @JsonIgnore
     @ManyToOne
     private User user;
-    private float amount=0;
+    private float amount;
+
+
     @JsonIgnore
     @OneToOne(mappedBy = "ordre")
     private Invoice invoice;

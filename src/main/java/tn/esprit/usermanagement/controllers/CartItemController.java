@@ -11,10 +11,20 @@ import tn.esprit.usermanagement.services.ICartItemService;
 @AllArgsConstructor
 public class CartItemController {
     private ICartItemService cartItemService;
+
     @PostMapping("/add")
-    @ResponseBody
-    public CartItem dfghjkl(@RequestParam Integer product, @RequestParam Integer qte, @RequestParam Integer id)
+
+    public CartItem addAndAssignToCart(@RequestParam Integer idproduct, @RequestParam Integer qte, @RequestParam Integer idUser)
     {
-        return cartItemService.addAndAssignToCart(product,qte,id);
+        return cartItemService.addAndAssignToCart(idproduct,qte,idUser);
     }
-}
+
+    @PutMapping("/updateCartItemQuantity")
+    public void updateCartItemQuantity( @RequestParam ("cartItemId") Integer cartItemId, @RequestParam ("counterValue")Integer counterValue){
+         cartItemService.updateCartItemQuantity(cartItemId ,counterValue);
+    }
+
+@DeleteMapping("/deleteCartItemAndRemoveFromCart")
+    public void deleteCartItemAndRemoveFromShoppingCart( @RequestParam Integer idCartItem){
+        cartItemService.deleteCartItemAndRemoveFromShoppingCart(idCartItem);
+    }}

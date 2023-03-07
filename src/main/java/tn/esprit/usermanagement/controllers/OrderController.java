@@ -14,15 +14,28 @@ import java.util.List;
 
 public class OrderController {
     private IOrderService orderService;
-    @PostMapping("/add")
-    private Orders dfghnj(@RequestParam Integer id)
-    {
-        return orderService.create(id);
-    }
+//    @PostMapping("/add")
+//    private Orders addOrder(@RequestParam Integer id)
+//    {
+//        return orderService.create(id);
+//    }
 
-    @GetMapping("/load-items")
-    public List<CartItem> dfgbn(@RequestParam Integer id)
+
+
+//    @GetMapping("/load-items")
+//    public List<CartItem> selectOrder (@RequestParam Integer id)
+//    {
+//        return orderService.loadItems(id);
+//    }
+
+
+    @GetMapping("/createOrder")
+    public List<CartItem> createOrder (@RequestParam Integer id)
     {
-        return orderService.loadItems(id);
+        return orderService.createOrder(id);
     }
+  @DeleteMapping("/deleteOrder")
+    public void deleteOrder( @RequestParam Integer orderId){
+         orderService.deleteOrder(orderId);
+  }
 }

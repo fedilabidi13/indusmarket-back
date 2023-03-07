@@ -6,12 +6,20 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import tn.esprit.usermanagement.entities.Invoice;
+import tn.esprit.usermanagement.entities.ShoppingCart;
+import tn.esprit.usermanagement.repositories.InvoiceRepo;
+import tn.esprit.usermanagement.services.IInvoiceService;
 import tn.esprit.usermanagement.services.IOrderService;
 
 @Controller
 
 public class CheckoutController {
+
+    private IInvoiceService invoiceService;
     @Autowired
     private IOrderService orderService;
     @Value("${STRIPE_PUBLIC_KEY}")
@@ -19,12 +27,20 @@ public class CheckoutController {
     @GetMapping("/checkout")
     public String checkout (Model model, @RequestParam(required = true) String orderId)
     {
+
         Integer amountint = Integer.valueOf((int) (orderService.calculerAmount(Integer.valueOf(orderId))*100));
         model.addAttribute("amount",amountint);
         model.addAttribute("stripePublicKey",stripePublicKey);
         model.addAttribute("currency","USD");
         model.addAttribute("orderId",orderId);
+
         return "checkout";
     }
 
+    @PostMapping("/CreateInvoice")
+
+    public Invoice createInvoice (@PathVariable("idOrder") Integer idOrder)
+    {
+        return invoiceService.createInvoice(idOrder);
+    }
 }
