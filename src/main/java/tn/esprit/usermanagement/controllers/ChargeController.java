@@ -27,6 +27,7 @@ public class ChargeController {
         model.addAttribute("chargeId", charge.getId());
         model.addAttribute("balance_transaction", charge.getBalanceTransaction());
         return "result";
+
     }
 
     @ExceptionHandler(StripeException.class)
