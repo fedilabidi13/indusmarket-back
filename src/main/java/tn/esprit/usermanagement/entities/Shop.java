@@ -31,13 +31,14 @@ public class Shop implements Serializable {
     private List<Product> products;
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL)
-    private List<Media> picturesList;
+    private List<Pictures> picturesList;
     @JsonIgnore
     @ManyToOne
     User user;
     @JsonIgnore
     @OneToOne
     private Address address;
+
 
 
 

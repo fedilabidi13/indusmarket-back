@@ -44,10 +44,19 @@ public class Product implements Serializable {
 
 
     @OneToMany(cascade = CascadeType.ALL)
-    private List<Media> pictures;
+    private List<Pictures> pictures;
 
     @ManyToOne
     private Shop shop;
+    ///Association Oussama
+    @JsonIgnore
+    @ManyToMany(cascade = CascadeType.ALL, mappedBy="products")
+    private List<Claims> claims;
+
+    ////Houssem Association
+    @JsonIgnore
+    @ManyToMany
+    private List<Orders> orders;
 
 
 }
