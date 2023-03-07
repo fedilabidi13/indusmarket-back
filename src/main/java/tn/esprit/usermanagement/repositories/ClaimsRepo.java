@@ -12,7 +12,6 @@ public interface ClaimsRepo extends JpaRepository<Claims,Integer> {
 
     List<Claims> findByTypeClaim(TypeClaim typeClaim);
     List<Claims> findByUser(int UserId);
-    List<Claims> findByProductsIsLike(int ProductId);
     @Query("select c from Claims c where c.statusClaims=?1 AND  c.CreatedAt<?2 ")
     List<Claims> findByStatusClaimsAndCreatedAtIsBefore(StatusClaims statusClaims, LocalDateTime limite);
     @Query("select c from Claims c where c.statusClaims=?1 AND  c.ConsultAt<?2 ")

@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.Base64;
 
 @RestController
+@RequestMapping("/tickets")
 public class TicketController {
     @Autowired
     TicketServiceImpl ticketService;

@@ -1,13 +1,13 @@
 <form action='/charge' method='POST' id='checkout-form'>
   <input type='hidden' th:value='${amount}' name='amount' />
-  <label>Price:<span th:text='${amount/100}' /></label>
+  <label>Price:<span th:text='${amount}' /></label>
   <label><span th:text='${currency}' /></label>
   <!-- NOTE: data-key/data-amount/data-currency will be rendered by Thymeleaf -->
   <script
           src='https://checkout.stripe.com/checkout.js'
           class='stripe-button'
           th:attr='data-key=${stripePublicKey},
-         data-amount=${amount/100},
+         data-amount=${amount*100},
          data-currency=${currency}'
           data-name='Baeldung'
           data-description='Spring course checkout'

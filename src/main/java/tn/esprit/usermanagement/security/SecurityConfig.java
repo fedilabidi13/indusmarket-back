@@ -32,7 +32,7 @@ public class SecurityConfig{
                 .csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/v1/auth/**","/facebook/**","/checkout/**","/charge/**")
+                .requestMatchers("/api/v1/auth/**","/facebook/**","/checkout/**","/charge/**","/checkoutEvent/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated()

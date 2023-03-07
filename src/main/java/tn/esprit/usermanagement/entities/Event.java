@@ -30,6 +30,7 @@ public class Event implements Serializable {
     private LocalDateTime startDate;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime endDate;
+    private String adresse;
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL)
     private List<Pictures> pictures;
@@ -39,6 +40,8 @@ public class Event implements Serializable {
     @JsonIgnore
     @ManyToOne
     User user;
+    private long price;
+    @JsonIgnore
     @OneToOne
     private Address address;
 }

@@ -12,4 +12,6 @@ public interface EventRepo extends JpaRepository<Event,Integer> {
     List<Event> findByEndDateIsBefore(LocalDateTime limite);
     @Query("select e from Event e order by e.startDate asc ")
     List<Event> OrderByStartDate();
+    List<Event> findAllByUserId(Integer userId);
+
 }

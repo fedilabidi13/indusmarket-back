@@ -13,13 +13,15 @@ public interface ClaimsService {
     public List<Claims> ShowAllClaims();
     public List<Claims> ShowClaimsByType(TypeClaim typeClaim);
     public List<Claims> ShowClaimsByUser(int UserId);
-    public List<Claims> ShowClaimsByProduct(int ProductId);
+    public List<Claims> ShowClaimsByOrder(int orderId);
     public Claims AddClaimsWithPicturesAndAssignToUser(Integer userId, Claims claim,List<MultipartFile> files) throws IOException;
-   public Claims AddClaimsToProductsWithPicturesAndAssignToUser(List<Integer> productIds ,Integer userId, Claims claim, List<MultipartFile> files) throws IOException;
+   public String AddClaimsToOrderWithPicturesAndAssignToUser(Integer orderId ,Integer userId, Claims claim, List<MultipartFile> files,TypeClaim typeClaim) throws IOException;
+    public Claims AddClaimsToPostWithPicturesAndAssignToUser(Integer postId, Integer userId, Claims claim, List<MultipartFile> files) throws IOException;
    public void UpdatePendingClaims();
-   public void UpdateClaim(Integer ClaimId, StatusClaims status);
+    public void Claimtreatment(Integer ClaimId,StatusClaims status);
     public void DeleteRejectedClaims();
-    public String UpdateClaims(List<Integer> productIds,Claims claims, List<MultipartFile> files) throws IOException;
+    public String UpdateClaims(Integer orderId,Claims claims, List<MultipartFile> files) throws IOException;
+
 
 
 

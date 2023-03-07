@@ -51,4 +51,9 @@ public class Post implements Serializable {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "post")
     List<Media> medias;
+
+    //Association Oussama
+    @JsonIgnore
+    @OneToMany(cascade = CascadeType.PERSIST, mappedBy="post")
+    private List<Claims> claims;
 }

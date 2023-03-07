@@ -17,6 +17,7 @@ import tn.esprit.usermanagement.enumerations.TypeClaim;
 import tn.esprit.usermanagement.repositories.ClaimsRepo;
 import tn.esprit.usermanagement.repositories.PicturesRepo;
 import tn.esprit.usermanagement.servicesImpl.ClaimsServiceImpl;
+import tn.esprit.usermanagement.servicesImpl.EmailService;
 import tn.esprit.usermanagement.servicesImpl.PicturesServiceImpl;
 
 import java.io.IOException;
@@ -34,6 +35,7 @@ public class ClaimsController {
 
     @Autowired
     PicturesRepo picturesRepo;
+
 
     @GetMapping("/AllClaims")
     public List<Claims> ShowAllClaims() {
@@ -55,24 +57,29 @@ public class ClaimsController {
         return claimsService.ShowClaimsByType(typeClaim);
     }
 
-    @PostMapping("/addClaimWithProductAndPictureAndAssignToUser/{userId}")
-    public Claims AddClaimsToProductsWithPicturesAndAssignToUser(@RequestParam("productIds") List<Integer> productIds, @PathVariable("userId") Integer userId, Claims claim, @RequestParam("file") List<MultipartFile> files) throws IOException {
-        return claimsService.AddClaimsToProductsWithPicturesAndAssignToUser(productIds, userId, claim, files);
+    @PostMapping("/AddClaimsToOrderWithPicturesAndAssignToUser/{userId}/{typeClaim}")
+    public String AddClaimsToOrderWithPicturesAndAssignToUser(@RequestParam("orderId") Integer orderId, @PathVariable("userId") Integer userId,@PathVariable("typeClaim")TypeClaim typeClaim,@ModelAttribute Claims claim, @RequestParam("file") List<MultipartFile> files) throws IOException {
+        return claimsService.AddClaimsToOrderWithPicturesAndAssignToUser(orderId, userId, claim, files,typeClaim);
+    }
+    @PostMapping("/AddClaimsToPostWithPicturesAndAssignToUser/{userId}")
+    public Claims AddClaimsToPostWithPostAndAssignToUser(@RequestParam("postId") Integer postId,@PathVariable("userId") Integer userId, @ModelAttribute Claims claim, @RequestParam("file") List<MultipartFile> files) throws IOException{
+        return claimsService.AddClaimsToPostWithPicturesAndAssignToUser(postId,userId,claim,files);
     }
 
-    @GetMapping("/ClaimsForProduct/{ProductId}")
-    public List<Claims> ShowClaimsByProduct(@PathVariable("ProductId") int ProductId) {
-        return claimsService.ShowClaimsByProduct(ProductId);
+    @GetMapping("/ClaimsForProduct/{orderId}")
+    public List<Claims> ShowClaimsByProduct(@PathVariable("orderId") int orderId) {
+        return claimsService.ShowClaimsByOrder(orderId);
     }
 
-    @PutMapping("/UpdateClaim/{ClaimId}/{status}")
-    public void UpdateClaim(@PathVariable("ClaimId") Integer ClaimId, @PathVariable("status") StatusClaims status) {
-        claimsService.UpdateClaim(ClaimId, status);
+    @PutMapping("/Claimtreatment/{ClaimId}/{status}")
+    public void Claimtreatment(@PathVariable("ClaimId") Integer ClaimId, @PathVariable("status") StatusClaims status) {
+        claimsService.Claimtreatment(ClaimId, status);
     }
 @PutMapping("/updateClaim")
-public String UpdateClaims(@RequestParam(value = "productIds",required = false) List<Integer> productIds,@ModelAttribute Claims claims, @RequestParam(value = "files",required = false) List<MultipartFile> files) throws IOException {
-        return claimsService.UpdateClaims(productIds,claims, files);
+public String UpdateClaims(@RequestParam(value = "orderId",required = false) Integer orderId,@ModelAttribute Claims claims, @RequestParam(value = "files",required = false) List<MultipartFile> files) throws IOException {
+        return claimsService.UpdateClaims(orderId,claims, files);
 }
+
 
     @GetMapping("/pictures/{id}")
     public ResponseEntity<List<ByteArrayResource>> getPictures(@PathVariable Integer id) {
@@ -92,17 +99,6 @@ public String UpdateClaims(@RequestParam(value = "productIds",required = false) 
                 .headers(headers)
                 .body(resources);
     }
-    /*@GetMapping("/load")
-    public String affichage() throws IOException {
-        byte[] imageData = picturesRepo.getById(123).getData();
-        String encodedString = Base64
-                .getEncoder()
-                .encodeToString(imageData);
-        String res = "<img src=\"data:image/png;base64, ";
-        res+=encodedString;
-        res+="\" alt=\"Red dot\" />";
-        return res;
 
-    }*/
 }
 

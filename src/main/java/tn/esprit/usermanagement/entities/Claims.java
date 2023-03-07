@@ -38,9 +38,12 @@ public class Claims implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
     @JsonIgnore
-    @ManyToMany
-    private List<Product> products;
+    @ManyToOne
+    private Orders order;
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL)
     private List<Pictures> pictures;
+    @JsonIgnore
+    @ManyToOne
+    private Post post;
 }

@@ -23,49 +23,32 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequestMapping("/events")
 public class EventController {
 @Autowired
 EventServiceImpl eventService;
 
-
+@GetMapping("/showEvents")
+public List<Event> ShowEvents(){
+    return eventService.ShowEvents();
+}
+    @GetMapping("/showEvents/{userId}")
+    public List<Event> ShowEvents(@PathVariable("userId") Integer userId){
+        return eventService.ShowEventbyUser(userId);
+    }
 @PostMapping("/AddEventWithPictureAndAssignToUser/{userId}")
 public Event AddEventWithPictureAndAssignToUser(@PathVariable("userId") Integer userId, @ModelAttribute Event event, @RequestParam("files") List<MultipartFile> files) throws IOException{
-    return eventService.AddEventWithPictureAndAssignToUser(userId,event,files);
+    return eventService.AddEventWithPictureAndAssignToUser(userId,event.getAdresse(),event,files);
 }
 @GetMapping("/ShowByStartDate")
 public List<Event> ShowEventOrderByStartDate(){
     return eventService.ShowEventOrderByStartDate();
 
 }
+@PutMapping("/UpdateEvent")
+public String UpdateEvent(Event event, List<MultipartFile> files) throws IOException{
+    return eventService.updateEvent(event,files);
+    }
 
-
-    /*@GetMapping("/files/{id}")
-    public ResponseEntity<Resource> getFile(@PathVariable Integer id) throws IOException {
-        Pictures fileEntity = picturesService.getPictureById(id).orElse(null);
-        String filetype = fileEntity.getContentType().substring(5);
-        if (fileEntity == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-
-        Resource resource = new ByteArrayResource(fileEntity.getData());
-
-        // Detect the content type of the file using Tika
-        Tika tika = new Tika();
-        // String contentType = tika.detect(fileEntity.getData());
-        String contentType = fileEntity.getContentType();
-
-        // If the content type cannot be detected, fall back to the content type stored in the database
-        if (contentType == null || contentType.equals("application/octet-stream")) {
-            contentType = fileEntity.getContentType();
-        }
-
-        if (contentType == null) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Content type not detected or set in database.");
-        }
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_TYPE, contentType)
-                .body(resource);
-    }*/
 }
 

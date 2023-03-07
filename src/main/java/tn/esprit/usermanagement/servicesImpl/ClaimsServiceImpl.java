@@ -5,13 +5,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.multipart.MultipartFile;
-import tn.esprit.usermanagement.entities.Claims;
-import tn.esprit.usermanagement.entities.Pictures;
-import tn.esprit.usermanagement.entities.Product;
-import tn.esprit.usermanagement.entities.User;
+import tn.esprit.usermanagement.entities.*;
 import tn.esprit.usermanagement.enumerations.StatusClaims;
 import tn.esprit.usermanagement.enumerations.TypeClaim;
 import tn.esprit.usermanagement.repositories.*;
@@ -31,12 +27,21 @@ public class ClaimsServiceImpl implements ClaimsService {
     @Autowired
     ClaimsRepo claimsRepo;
     @Autowired
-    ProductRepo productRepo;
+    OrderRepo orderRepo;
     @Autowired
     UserRepo userRepo;
     @Autowired
     PicturesRepo picturesRepo;
-
+    @Autowired
+    PostRepo postRepo;
+    @Autowired
+    ShoppingCartImpl shoppingCart;
+    @Autowired
+    CartItemImpl cartItem;
+    @Autowired
+    OrderImpl order;
+    @Autowired
+    EmailService emailService;
     @Override
     public Claims addClaims(Claims claims) {
         return claimsRepo.save(claims);
@@ -62,9 +67,9 @@ public class ClaimsServiceImpl implements ClaimsService {
     }
 
     @Override
-    public List<Claims> ShowClaimsByProduct(int ProductId) {
-Product product = productRepo.findById(ProductId).get();
-return product.getClaims();
+    public List<Claims> ShowClaimsByOrder(int orderId) {
+        Orders orders = orderRepo.findById(orderId).get();
+return orders.getClaims();
     }
 
 
@@ -75,6 +80,7 @@ return product.getClaims();
         claim.setConsultAt(null);
         claim.setStatusClaims(StatusClaims.Pending);
         claim.setUser(user);
+        claim.setTypeClaim(TypeClaim.Other);
         Claims savedClaim = claimsRepo.save(claim);
         List<Pictures> picturesList = new ArrayList<>();
         for (MultipartFile file : files) {
@@ -83,23 +89,55 @@ return product.getClaims();
             if (data.length > 500) { // check if the file is too large
                 data = Arrays.copyOfRange(data, 0, 500); // truncate the data
             }
-
+            picture.setContentType(file.getContentType());
             picture.setData(data);
             picturesList.add(picture);
         }
         picturesRepo.saveAll(picturesList);
         savedClaim.setPictures(picturesList);
-        return claimsRepo.save(savedClaim);    }
+        return claimsRepo.save(savedClaim);  }
 
     @Override
-    public Claims AddClaimsToProductsWithPicturesAndAssignToUser(List<Integer> productIds, Integer userId, Claims claim, List<MultipartFile> files) throws IOException {
+    public String AddClaimsToOrderWithPicturesAndAssignToUser(Integer orderId, Integer userId, Claims claim, List<MultipartFile> files,TypeClaim typeClaim) throws IOException {
+        if (typeClaim==TypeClaim.Post||typeClaim==TypeClaim.Other){
+            return "Type Claim must me Product or Delivery";
+        }
+        User user = userRepo.findById(userId).get();
+        claim.setUser(user);
+        claim.setCreatedAt(LocalDateTime.now());
+        claim.setConsultAt(null);
+        claim.setTypeClaim(typeClaim);
+        claim.setStatusClaims(StatusClaims.Pending);
+        Orders orders = orderRepo.findById(orderId).get();
+        claim.setOrder(orders);
+        Claims savedClaim = claimsRepo.save(claim);
+        List<Pictures> picturesList = new ArrayList<>();
+        for (MultipartFile file : files) {
+            Pictures picture = new Pictures();
+            byte[] data = file.getBytes();
+            if (data.length > 500) { // check if the file is too large
+                data = Arrays.copyOfRange(data, 0, 500); // truncate the data
+            }
+            picture.setContentType(file.getContentType());
+            picture.setData(data);
+            picturesList.add(picture);
+        }
+        picturesRepo.saveAll(picturesList);
+        savedClaim.setPictures(picturesList);
+         claimsRepo.save(savedClaim);
+         return " Your claim saved succefully";
+    }
+
+    @Override
+    public Claims AddClaimsToPostWithPicturesAndAssignToUser(Integer postId, Integer userId, Claims claim, List<MultipartFile> files) throws IOException {
         User user = userRepo.findById(userId).get();
         claim.setUser(user);
         claim.setCreatedAt(LocalDateTime.now());
         claim.setConsultAt(null);
         claim.setStatusClaims(StatusClaims.Pending);
-        List<Product> productsList = productRepo.findAllById(productIds);
-        claim.setProducts(productsList);
+        Post post = postRepo.findById(postId).get();
+        claim.setPost(post);
+        claim.setTypeClaim(TypeClaim.Post);
         Claims savedClaim = claimsRepo.save(claim);
         List<Pictures> picturesList = new ArrayList<>();
         for (MultipartFile file : files) {
@@ -116,6 +154,7 @@ return product.getClaims();
         savedClaim.setPictures(picturesList);
         return claimsRepo.save(savedClaim);
     }
+
     @Scheduled(fixedRate = 10000) // runs every second
     @Override
     public void UpdatePendingClaims() {
@@ -128,25 +167,49 @@ return product.getClaims();
     }
 
     @Override
-    public void UpdateClaim(Integer ClaimId,StatusClaims status) {
+    public void Claimtreatment(Integer ClaimId,StatusClaims status) {
         Claims claims=claimsRepo.findById(ClaimId).get();
-        claims.setStatusClaims(status);
+        String Email = claims.getUser().getEmail();
         claims.setConsultAt(LocalDateTime.now());
+        if (status==StatusClaims.Resolved){
+            claims.setStatusClaims(status);
+            claimsRepo.save(claims);
+            if (claims.getTypeClaim()==TypeClaim.Post){
+                Post post = claims.getPost();
+                postRepo.delete(post);
+            } else if (claims.getTypeClaim()==TypeClaim.Order) {
+                Orders orders = claims.getOrder();
+                Orders orders1 = new Orders();
+                orders1.setDeliveryS(orders.getDeliveryS());
+                orders1.setUser(orders.getUser());
+                orders1.setAmount(orders.getAmount());
+                orders1.setDeliveryS(orders.getDeliveryS());
+                orders1.setPayed(true);
+                orderRepo.save(orders1);
+            } else if (claims.getTypeClaim()==TypeClaim.DELIVERY) {
+                Orders orders = claims.getOrder();
+                String mail = orders.getDeliveryS().getLivreur().getEmail();
+             emailService.send(mail,"there is a claim about your service :  "+claims.getDescription());
+            }
+            emailService.send(Email,"your claim was resolved ");
+            claimsRepo.save(claims);
+        }
+        else {
+            claims.setStatusClaims(status);
+            emailService.send(Email,"your claim was rejected ");
+        }
         claimsRepo.save(claims);
-
     }
+
     @Scheduled(fixedRate = 10000) // runs every second
     @Override
     public void DeleteRejectedClaims() {
-        LocalDateTime limite = LocalDateTime.now().minusMonths(12);
-        List<Claims> RejetedClaims = claimsRepo.findByStatusClaimsAndConsultAtIsBefore (StatusClaims.Rejected, limite);
-        for (Claims claims : RejetedClaims) {
-            claimsRepo.delete(claims);
-        }
+        claimsRepo.deleteAll(claimsRepo.findByStatusClaimsAndConsultAtIsBefore (StatusClaims.Rejected, LocalDateTime.now().minusMonths(12)));
+
     }
     @Transactional
     @Override
-    public String UpdateClaims(List<Integer> productIds, Claims claims, List<MultipartFile> files) throws IOException {
+    public String UpdateClaims(Integer orderId, Claims claims, List<MultipartFile> files) throws IOException {
         Optional<Claims> optionalClaims = claimsRepo.findById(claims.getIdClaims());
         if (optionalClaims.isPresent()) {
             Claims existingClaims = optionalClaims.get();
@@ -181,10 +244,10 @@ return product.getClaims();
                 if (claims.getTypeClaim() == null) {
                     claims.setTypeClaim(existingClaims.getTypeClaim());
                 }
-                if (productIds == null) {
-                    claims.setProducts(existingClaims.getProducts());
+                if (orderId == null) {
+                    claims.setOrder(existingClaims.getOrder());
                 } else {
-                    claims.setProducts(productRepo.findAllById(productIds));
+                    claims.setOrder(orderRepo.findById(orderId).get());
                 }
                 claims.setCreatedAt(existingClaims.getCreatedAt());
                 claims.setUser(existingClaims.getUser());

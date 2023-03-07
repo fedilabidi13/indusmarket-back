@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Entity
 @Table
@@ -21,10 +22,15 @@ public class Orders implements Serializable {
     @ManyToOne
     private User user;
     private float amount=0;
+
+    private boolean Payed=false;
     @JsonIgnore
     @OneToOne(mappedBy = "ordre")
     private Invoice invoice;
     @JsonIgnore
     @ManyToOne
     private Delivery deliveryS;
+    @JsonIgnore
+    @OneToMany(cascade = CascadeType.ALL, mappedBy="order")
+    private List<Claims> claims;
 }
