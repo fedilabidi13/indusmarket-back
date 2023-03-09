@@ -10,8 +10,10 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import tn.esprit.usermanagement.enumerations.BanType;
 import tn.esprit.usermanagement.enumerations.Role;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -29,11 +31,15 @@ public class User implements UserDetails {
     private String lastName;
     private String email;
     private String password;
-    private Boolean enabled= null;
+    private Boolean enabled= false;
     private Boolean firtAttempt = true;
+    private Boolean emailVerif;
+    private Boolean phoneNumberVerif;
     @Enumerated(EnumType.STRING)
     private Role role;
-
+    @Enumerated(EnumType.STRING)
+    private BanType banType;
+    private LocalDateTime bannedAt;
     @OneToMany(mappedBy = "user")
     private List<JwtToken> jwtTokens;
 
@@ -63,7 +69,6 @@ public class User implements UserDetails {
     private List<Rating> rates;
     //todo Picture
     //todo more attributes (shops products address phone number )
-
     // Specefic Forum Attributes
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL)

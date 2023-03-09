@@ -9,4 +9,8 @@ public interface AdminService {
     String addMod(String email);
     String banUser(String email);
     List<User> getUsers (Role role);
+    String suspendUser(String email);
+    String unbanUser(String email);
+    String automaticUnbanUser();
+    String banIpUser(String email);
 }

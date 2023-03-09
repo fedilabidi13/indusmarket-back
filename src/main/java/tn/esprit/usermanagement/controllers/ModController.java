@@ -39,10 +39,10 @@ public class ModController {
         }
         else
         {
-            AuthenticationResponse response = authenticationService.authenticate(formData);
+            String response = authenticationService.authenticate(formData);
             //return authenticationService.authenticate(request).toString();
-            jwt = response.getJwtToken();
-            model.addAttribute("jwt",jwt);
+           // jwt = response.getJwtToken();
+            model.addAttribute("jwt",response);
             return "ok";
         }
     }

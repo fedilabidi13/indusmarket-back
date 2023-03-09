@@ -12,6 +12,7 @@ import tn.esprit.usermanagement.dto.AuthenticationRequest;
 import tn.esprit.usermanagement.dto.AuthenticationResponse;
 import tn.esprit.usermanagement.dto.RegistrationRequest;
 import tn.esprit.usermanagement.entities.*;
+import tn.esprit.usermanagement.enumerations.BanType;
 import tn.esprit.usermanagement.enumerations.Role;
 import tn.esprit.usermanagement.enumerations.TokenType;
 import tn.esprit.usermanagement.repositories.JwtTokenRepo;
@@ -24,6 +25,8 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
+    private final TwilioService twilioService;
+    private final PhoneTokenService phoneTokenService;
     private final ConfirmationTokenService tokenService;
     private final UserRepo userRepo;
     private final UserService userService;
@@ -32,20 +35,35 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final EmailSender emailSender;
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+    private final EmailValidator emailValidator;
+    public String authenticate(AuthenticationRequest request) {
+        var user = userRepo.findByEmail(request.getEmail()).orElse(null);
+        if ((user.getEnabled()==false)&&(user.getBanType().equals(BanType.LOCK)))
+        {
+            return "account is locked. Verification is needed! ";
+        }
+        if ((user.getEnabled()==false)&&(user.getBanType().equals(BanType.PERMA)))
+        {
+            return "account is perma Banned! ";
+        }
+        if ((user.getEnabled()==false)&&(user.getBanType().equals(BanType.SUSPENSION)))
+        {
+            return "account is suspended for 7 days! ";
+        }
+        if ((user.getEnabled()==false)&&(user.getBanType().equals(BanType.IP)))
+        {
+            return "account is locked due to location change. Verification is needed! ";
+        }
+
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 request.getEmail(),
                 request.getPassword()
         ));
-        var user = userRepo.findByEmail(request.getEmail()).orElseThrow(
-                () -> new UsernameNotFoundException("User not found")
-        );
+
         var jwtTokenString = jwtService.generateJwtToken(user);
         revokeAllUserTokens(user);
         saveJwtToken(user, jwtTokenString);
-        return AuthenticationResponse.builder()
-                .jwtToken(jwtTokenString)
-                .build();
+        return jwtTokenString;
     }
 
     private void saveJwtToken(User user, String jwtTokenString) {
@@ -60,29 +78,73 @@ public class AuthenticationService {
     }
 
     public User register(RegistrationRequest request) {
-        // todo validate email
-        // todo refuse same mail registration
+
+        User user2 = userRepo.findByEmail2(request.getEmail());
+        if (user2!= null)
+        {
+            return null;
+        }
+
         var user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.USER)
+                .banType(BanType.LOCK)
+                .phoneNumber(request.getPhoneNumber())
+                .enabled(false)
                 .build();
         userRepo.save(user);
         String token = UUID.randomUUID().toString();
+        String phoneCode= twilioService.generateCode();
+        PhoneToken phoneToken = new PhoneToken(phoneCode, LocalDateTime.now(),
+                LocalDateTime.now().plusMinutes(15),
+                user);
         ConfirmationToken confirmationToken = new ConfirmationToken(token, LocalDateTime.now(),
                 LocalDateTime.now().plusMinutes(15),
                 user);
         tokenService.saveConfirmationToken(confirmationToken);
+        phoneTokenService.saveConfirmationToken(phoneToken);
         String link = "http://localhost:8085/api/v1/auth/confirm?token="+token;
         emailSender.send(request.getEmail(),buildEmail(request.getFirstName(),link));
         var jwtTokenString = jwtService.generateJwtToken(user);
+        twilioService.sendCode(String.valueOf(user.getPhoneNumber()),phoneCode);
+
         //saveJwtToken(user,jwtTokenString);
         return user;
     }
     @Transactional
-    public String confirmToken(String token) {
+    public String confirmPhoneToken(String token)
+    {
+        PhoneToken phoneToken = phoneTokenService
+                .getToken(token)
+                .orElse(null);
+        if (phoneToken==null)
+        {
+            return "token not found";
+        }
+
+        if (phoneToken.getConfirmedAt() != null) {
+            return "phone already confirmed";
+        }
+
+        LocalDateTime expiredAt = phoneToken.getExpiresAt();
+
+        if (expiredAt.isBefore(LocalDateTime.now())) {
+            return "phone token expired";
+        }
+
+        phoneTokenService.setConfirmedAt(token);
+
+        User user = phoneToken.getUser();
+        user.setPhoneNumberVerif(true);
+        userRepo.save(user);
+
+        return "Phone confirmed";
+    }
+    @Transactional
+    public String confirmEmailToken(String token) {
         ConfirmationToken confirmationToken = tokenService
                 .getToken(token)
                 .orElseThrow(() ->
@@ -99,9 +161,14 @@ public class AuthenticationService {
         }
 
         tokenService.setConfirmedAt(token);
-        userService.enableAppUser(
-                confirmationToken.getUser().getEmail());
-        return "confirmed";
+        //userService.enableAppUser(
+          //      confirmationToken.getUser().getEmail());
+        User user = confirmationToken.getUser();
+        user.setEmailVerif(true);
+        user.setBanType(BanType.NONE);
+        userRepo.save(user);
+        userService.enableAppUser(confirmationToken.getUser().getEmail());
+        return "Email confirmed ";
     }
     public void revokeAllUserTokens(User user) {
         var validUserTokens = jwtTokenRepo.findAllValidTokenByUser(user.getId());
@@ -184,6 +251,7 @@ public class AuthenticationService {
     }
     public User currentlyAuthenticatedUser()
     {
+        //todo improve function
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepo.findByEmail(email).get();
     }
