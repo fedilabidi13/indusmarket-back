@@ -39,7 +39,7 @@ public class Shop implements Serializable {
     @OneToOne
     private Address address;
 
-
+    //
 
 
 }

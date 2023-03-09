@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
+import tn.esprit.usermanagement.enumerations.Role;
 
 @Configuration
 @EnableWebSecurity
@@ -34,6 +35,8 @@ public class SecurityConfig{
                 .authorizeHttpRequests()
                 .requestMatchers("/api/v1/auth/**","/facebook/**","/checkout/**","/charge/**","/checkoutEvent/**")
                 .permitAll()
+                .requestMatchers("/api/admin/**").hasRole(Role.ADMIN.name())
+                .requestMatchers("/api/mod/**").hasRole(Role.MOD.name())
                 .anyRequest()
                 .authenticated()
                 .and()
@@ -46,7 +49,6 @@ public class SecurityConfig{
                 .logoutUrl("/api/v1/auth/logout")
                 .addLogoutHandler(logoutHandler)
                 .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext())
-
         ;
 
 
