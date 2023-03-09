@@ -41,7 +41,6 @@ public class AuthenticationController {
     @PostMapping("/authenticate")
     public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequest request)
     {
-        System.err.println("le resultat estr sfslosf: "+authenticationService.authenticate(request));
         return ResponseEntity.ok(authenticationService.authenticate(request));
     }
 

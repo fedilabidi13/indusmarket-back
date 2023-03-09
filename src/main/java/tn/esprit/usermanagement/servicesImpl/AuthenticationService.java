@@ -38,6 +38,10 @@ public class AuthenticationService {
     private final EmailValidator emailValidator;
     public String authenticate(AuthenticationRequest request) {
         var user = userRepo.findByEmail(request.getEmail()).orElse(null);
+        if (user == null )
+        {
+            return "there is no account associated with such email! ";
+        }
         if ((user.getEnabled()==false)&&(user.getBanType().equals(BanType.LOCK)))
         {
             return "account is locked. Verification is needed! ";
