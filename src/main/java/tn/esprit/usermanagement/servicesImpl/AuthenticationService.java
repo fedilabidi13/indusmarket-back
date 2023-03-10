@@ -1,6 +1,7 @@
 package tn.esprit.usermanagement.servicesImpl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,6 +25,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthenticationService {
     private final TwilioService twilioService;
     private final PhoneTokenService phoneTokenService;
@@ -59,14 +61,22 @@ public class AuthenticationService {
             return "account is locked due to location change. Verification is needed! ";
         }
 
+
+
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 request.getEmail(),
                 request.getPassword()
         ));
 
-        var jwtTokenString = jwtService.generateJwtToken(user);
+
+        var jwtTokenString = "";
+        jwtTokenString=jwtService.generateJwtToken(user);
         revokeAllUserTokens(user);
         saveJwtToken(user, jwtTokenString);
+        if (passwordEncoder.encode(request.getPassword()).equals(user.getPassword()))
+        {
+            return "invalid credentials";
+        }
         return jwtTokenString;
     }
 
@@ -98,15 +108,16 @@ public class AuthenticationService {
                 .banType(BanType.LOCK)
                 .phoneNumber(request.getPhoneNumber())
                 .enabled(false)
+                .twoFactorsAuth(false)
                 .build();
         userRepo.save(user);
         String token = UUID.randomUUID().toString();
         String phoneCode= twilioService.generateCode();
         PhoneToken phoneToken = new PhoneToken(phoneCode, LocalDateTime.now(),
-                LocalDateTime.now().plusMinutes(15),
+                LocalDateTime.now().plusMinutes(1),
                 user);
         ConfirmationToken confirmationToken = new ConfirmationToken(token, LocalDateTime.now(),
-                LocalDateTime.now().plusMinutes(15),
+                LocalDateTime.now().plusMinutes(1),
                 user);
         tokenService.saveConfirmationToken(confirmationToken);
         phoneTokenService.saveConfirmationToken(phoneToken);
@@ -136,7 +147,13 @@ public class AuthenticationService {
         LocalDateTime expiredAt = phoneToken.getExpiresAt();
 
         if (expiredAt.isBefore(LocalDateTime.now())) {
-            return "phone token expired";
+            String phoneCode= twilioService.generateCode();
+            PhoneToken confirmationToken2 = new PhoneToken(phoneCode, LocalDateTime.now(),
+                    LocalDateTime.now().plusMinutes(1),
+                    phoneToken.getUser());
+            phoneTokenService.saveConfirmationToken(confirmationToken2);
+            twilioService.sendCode(String.valueOf(phoneToken.getUser().getPhoneNumber()),phoneCode);
+            return "phone token expired. A new one is sent!";
         }
 
         phoneTokenService.setConfirmedAt(token);
@@ -150,18 +167,27 @@ public class AuthenticationService {
     @Transactional
     public String confirmEmailToken(String token) {
         ConfirmationToken confirmationToken = tokenService
-                .getToken(token)
-                .orElseThrow(() ->
-                        new IllegalStateException("token not found"));
+                .getToken(token).get();
+        if (confirmationToken == null)
+        {
+            return "token not found";
+        }
 
         if (confirmationToken.getConfirmedAt() != null) {
-            throw new IllegalStateException("email already confirmed");
+            return ("email already confirmed");
         }
 
         LocalDateTime expiredAt = confirmationToken.getExpiresAt();
-
         if (expiredAt.isBefore(LocalDateTime.now())) {
-            throw new IllegalStateException("token expired");
+            String token2 = UUID.randomUUID().toString();
+
+            ConfirmationToken confirmationToken2 = new ConfirmationToken(token2, LocalDateTime.now(),
+                    LocalDateTime.now().plusMinutes(1),
+                    confirmationToken.getUser());
+            tokenService.saveConfirmationToken(confirmationToken2);
+            String link = "http://localhost:8085/api/v1/auth/confirm?token="+token2;
+            emailSender.send(confirmationToken.getUser().getEmail(),buildEmail(confirmationToken.getUser().getFirstName(),link));
+            return "email expired a new Email is sent!";
         }
 
         tokenService.setConfirmedAt(token);
@@ -259,4 +285,13 @@ public class AuthenticationService {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepo.findByEmail(email).get();
     }
+    public String enable2FA()
+    {
+        User user = currentlyAuthenticatedUser();
+        user.setTwoFactorsAuth(true);
+        userRepo.save(user);
+        return "Two Factors Auth enabled! ";
+    }
+    // todo post 15 min verification phone +email
+    // todo reset password
 }
