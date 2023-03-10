@@ -3,10 +3,7 @@ package tn.esprit.usermanagement.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -77,31 +74,18 @@ public class User implements UserDetails {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     List<React> postReacts;
 
-    @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
-    List<PostComment> postComments;
-    @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
-    List<CommentLike> commentLikes;
+
+
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL)
     List<Advertising> advertising;
-
-    ////Association Oussama
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy="user")
     private List<Claims> claims;
-    @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL, mappedBy="user")
-    private List<Ticket> tickets;
-    @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL, mappedBy="user")
-    private List<Event> events;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));
     }
-
     @Override
     public String getPassword() {
         return password;

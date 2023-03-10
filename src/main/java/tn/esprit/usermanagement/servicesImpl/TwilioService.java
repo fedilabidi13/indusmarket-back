@@ -24,7 +24,6 @@ public class TwilioService {
                         "Verification code: "+telToken)
                 .create();
 
-
     }
     public String generateCode() {
         // It will generate 6 digit random Number.

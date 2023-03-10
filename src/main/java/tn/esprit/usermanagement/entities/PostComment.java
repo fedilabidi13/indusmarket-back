@@ -3,11 +3,13 @@ package tn.esprit.usermanagement.entities;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -25,10 +27,11 @@ public class PostComment implements Serializable{
     private Integer id;
     String commentBody;
 
-    Date commentedAt;
+    LocalDateTime commentedAt;
 
 
     @ManyToOne
+            @JsonIgnore
     User user; // The user who wants to comment
 
     @JsonIgnore
@@ -36,16 +39,15 @@ public class PostComment implements Serializable{
     Post post; // The post to comment
 
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "postCo")
-    List<PostComment> postComments; //Reflexive association : A comment can have multiple replies
-    @JsonIgnore
     @ManyToOne
-    PostComment postCo;
-
-
     @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "postComment")
-    List<CommentLike> commentLikes;
+    PostComment postComment;
+
+
+
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<Pictures> pictures;
+
 
 }
 
