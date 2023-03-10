@@ -69,8 +69,7 @@ public class ClaimsServiceImpl implements ClaimsService {
     @Override
     public List<Claims> ShowClaimsByOrder(int orderId) {
         Orders orders = orderRepo.findById(orderId).get();
-return orders.getClaims();
-    }
+return new ArrayList<>();    }
 
 
     @Override
@@ -182,9 +181,9 @@ return orders.getClaims();
                 Orders orders1 = new Orders();
                 orders1.setDeliveryS(orders.getDeliveryS());
                 orders1.setUser(orders.getUser());
-                orders1.setAmount(orders.getAmount());
+                orders1.setTotalAmount(orders.getTotalAmount());
                 orders1.setDeliveryS(orders.getDeliveryS());
-                orders1.setPayed(true);
+                orders1.setPaid(true);
                 orderRepo.save(orders1);
             } else if (claims.getTypeClaim()==TypeClaim.DELIVERY) {
                 Orders orders = claims.getOrder();
