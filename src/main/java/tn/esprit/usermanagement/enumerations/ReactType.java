@@ -7,5 +7,6 @@ public enum ReactType {
     SAD,
     ANGRY,
     WOW,
-    LAUGH
+    LAUGH,
+    ANY
 }

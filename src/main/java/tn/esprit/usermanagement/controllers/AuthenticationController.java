@@ -53,5 +53,4 @@ public class AuthenticationController {
     {
         return authenticationService.confirmPhoneToken(token);
     }
-
 }

@@ -5,6 +5,6 @@ import org.springframework.stereotype.Repository;
 import tn.esprit.usermanagement.entities.Advertising;
 
 @Repository
-public interface AdvertisingRepo extends JpaRepository<Advertising, String>{
+public interface AdvertisingRepo extends JpaRepository<Advertising, Integer>{
 
 }

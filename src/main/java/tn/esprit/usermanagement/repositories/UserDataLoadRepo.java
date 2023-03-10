@@ -2,9 +2,9 @@ package tn.esprit.usermanagement.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import tn.esprit.usermanagement.entities.CommentLike;
+import tn.esprit.usermanagement.entities.UserDataLoad;
 
 @Repository
-public interface CommentLikeRepo extends JpaRepository<CommentLike, Integer>{
+public interface UserDataLoadRepo extends JpaRepository<UserDataLoad,Integer>{
 
 }

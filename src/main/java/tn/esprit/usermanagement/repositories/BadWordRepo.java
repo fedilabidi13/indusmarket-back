@@ -5,6 +5,6 @@ import org.springframework.stereotype.Repository;
 import tn.esprit.usermanagement.entities.BadWord;
 
 @Repository
-public interface BadWordRepo extends JpaRepository<BadWord, String>{
+public interface BadWordRepo extends JpaRepository<BadWord, Integer>{
 
 }

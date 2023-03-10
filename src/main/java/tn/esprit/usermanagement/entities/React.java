@@ -1,14 +1,18 @@
 package tn.esprit.usermanagement.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.attoparser.dom.Comment;
 import tn.esprit.usermanagement.enumerations.ReactType;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -26,11 +30,20 @@ public class React implements Serializable {
     private ReactType type;
 
     @ManyToOne
+            @JsonBackReference
     User user; // The user who clicked Like
 
-    @JsonIgnore
+@JsonBackReference
     @ManyToOne
-    Post post; // The post to like
+    Post post; // The post to react
+
+    @JsonBackReference
+    @ManyToOne
+    PostComment comment; // The post to react
+
+
+
+
 
 
 }

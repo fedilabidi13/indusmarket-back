@@ -3,6 +3,7 @@ package tn.esprit.usermanagement.entities;
 
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -44,8 +45,7 @@ public class Advertising implements Serializable {
     @ManyToOne
     CategoryAdve categoryadv;
 
-    @Temporal(TemporalType.DATE)
-    Date StartDate;
+    LocalDateTime StartDate;
 
     @Temporal(TemporalType.DATE)
     Date EndDate;
@@ -64,4 +64,6 @@ public class Advertising implements Serializable {
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "advertising")
     List<Media> medias;
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<Pictures> pictures;
 }

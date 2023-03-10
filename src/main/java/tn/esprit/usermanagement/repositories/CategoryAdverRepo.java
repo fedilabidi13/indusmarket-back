@@ -5,6 +5,6 @@ import org.springframework.stereotype.Repository;
 import tn.esprit.usermanagement.entities.CategoryAdve;
 
 @Repository
-public interface CategoryAdverRepo extends JpaRepository<CategoryAdve, String>{
+public interface CategoryAdverRepo extends JpaRepository<CategoryAdve, Integer>{
 	
 }
