@@ -24,7 +24,7 @@ public class Shop implements Serializable {
     private String name;
     private String mail;
     private Integer phoneNumber;
-
+    private boolean isValidated;
     private String adresse;
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL,mappedBy = "shop")
@@ -38,6 +38,7 @@ public class Shop implements Serializable {
     @JsonIgnore
     @OneToOne
     private Address address;
+    private float somme =0;
 
     //
 

@@ -31,7 +31,7 @@ public class OrderImpl implements IOrderService {
    public Orders createOrder(Integer idUser) {
 
         Orders order = new Orders();
-        //order.setCreationDate(LocalDateTime.now());
+        order.setCreationDate(LocalDateTime.now());
         order.setUser(userRepo.getReferenceById(idUser));
         order.setPaid(false);
         order.setSecondCartItemList(new ArrayList<>());
@@ -69,7 +69,7 @@ public class OrderImpl implements IOrderService {
 
         Orders order = orderRepo.findById(orderId).get();
 
-        LocalDateTime creationTime = LocalDateTime.now();
+        LocalDateTime creationTime = order.getCreationDate();
         LocalDateTime currentTime = LocalDateTime.now();
         long hoursSinceCreation = ChronoUnit.HOURS.between(creationTime, currentTime);
 

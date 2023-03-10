@@ -34,9 +34,6 @@ public class AddressService {
         a.setLongitude(result.getResults().get(0).getGeometry().getGeocodeLocation().getLongitude());
         a.setLatitude(result.getResults().get(0).getGeometry().getGeocodeLocation().getLatitude());
         a.setReal_Address(result.getResults().get(0).getFormattedAddress());
-
-        addressRepo.save(a);
-
         return a;
     }
 }
