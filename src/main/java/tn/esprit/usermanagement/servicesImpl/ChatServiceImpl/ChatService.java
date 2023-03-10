@@ -1,9 +1,8 @@
-package tn.esprit.usermanagement.servicesImpl;
+package tn.esprit.usermanagement.servicesImpl.ChatServiceImpl;
 
-import io.swagger.models.auth.In;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import tn.esprit.usermanagement.entities.Chatroom;
+import tn.esprit.usermanagement.entities.ChatEntities.Chatroom;
 import tn.esprit.usermanagement.entities.User;
 import tn.esprit.usermanagement.repositories.ChatroomRepo;
 import tn.esprit.usermanagement.repositories.MessageRepository;

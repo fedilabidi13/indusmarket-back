@@ -1,18 +1,16 @@
-package tn.esprit.usermanagement.entities;
+package tn.esprit.usermanagement.entities.ForumEntities;
 
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.attoparser.dom.Comment;
+import tn.esprit.usermanagement.entities.ForumEntities.Post;
+import tn.esprit.usermanagement.entities.PostComment;
+import tn.esprit.usermanagement.entities.User;
 import tn.esprit.usermanagement.enumerations.ReactType;
 
 import java.io.Serializable;
-import java.util.Date;
-import java.util.List;
 
 @Getter
 @Setter
@@ -35,7 +33,7 @@ public class React implements Serializable {
 
 @JsonBackReference
     @ManyToOne
-    Post post; // The post to react
+Post post; // The post to react
 
     @JsonBackReference
     @ManyToOne

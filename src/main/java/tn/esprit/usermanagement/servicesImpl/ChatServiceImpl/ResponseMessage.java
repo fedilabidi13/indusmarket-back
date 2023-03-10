@@ -1,4 +1,4 @@
-package tn.esprit.usermanagement.servicesImpl;
+package tn.esprit.usermanagement.servicesImpl.ChatServiceImpl;
 
 public class ResponseMessage {
     private String content;

@@ -1,12 +1,12 @@
-package tn.esprit.usermanagement.controllers;
+package tn.esprit.usermanagement.controllers.ChatController;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import tn.esprit.usermanagement.entities.Chatroom;
+import tn.esprit.usermanagement.entities.ChatEntities.Chatroom;
 import tn.esprit.usermanagement.entities.User;
 import tn.esprit.usermanagement.repositories.ChatroomRepo;
 import tn.esprit.usermanagement.repositories.UserRepo;
-import tn.esprit.usermanagement.servicesImpl.ChatService;
+import tn.esprit.usermanagement.servicesImpl.ChatServiceImpl.ChatService;
 
 import java.util.List;
 
