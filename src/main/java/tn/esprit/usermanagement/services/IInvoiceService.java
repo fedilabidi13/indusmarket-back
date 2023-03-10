@@ -1,7 +1,9 @@
 package tn.esprit.usermanagement.services;
-
 import tn.esprit.usermanagement.entities.Invoice;
+import java.io.IOException;
 
 public interface IInvoiceService {
-    public Invoice createInvoice (Integer idOrder);
+     Invoice createInvoice (Integer idOrder);
+
+     void AddPDFInvoice ( Integer orderId) throws IOException ;
 }

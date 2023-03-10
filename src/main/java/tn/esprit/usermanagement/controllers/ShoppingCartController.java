@@ -25,6 +25,13 @@ public class ShoppingCartController {
     {
         return shoppingCartService.loadCartItem(id);
     }
-//    @GetMapping("/recommendations/{userId}")
+    @DeleteMapping("/deleteShoppingCart")
+    void deleteShoppingCart (@RequestParam Integer idShoppingCart) {
+          shoppingCartService.deleteShoppingCart(idShoppingCart);
+    }
+
+
+
+    //    @GetMapping("/recommendations/{userId}")
 //    public List<Product> getRecommendations(@PathVariable Integer userId){ return shoppingCartService.getRecommendationsForUser(userId);}
 }

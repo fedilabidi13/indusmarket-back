@@ -35,6 +35,4 @@ public class ChargeController {
         model.addAttribute("error", ex.getMessage());
         return "result";
     }
-
-
 }

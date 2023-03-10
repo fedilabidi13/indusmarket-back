@@ -10,6 +10,10 @@ public interface IShoppingCartService {
     ShoppingCart create (Integer idUser);
     List<CartItem> loadCartItem(Integer idUser);
 
-   // public List<Product> getRecommendationsForUser(Integer userId);
+      void deleteShoppingCart ( Integer idShoppingCart);
+
+
+        // public List<Product> getRecommendationsForUser(Integer userId);
+
 
 }

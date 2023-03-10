@@ -13,6 +13,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @ToString
+
 public class CartItem implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,4 +23,5 @@ public class CartItem implements Serializable {
     private Product product;
     @ManyToOne
     private ShoppingCart shoppingCart;
+
 }

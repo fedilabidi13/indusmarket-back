@@ -1,6 +1,7 @@
 package tn.esprit.usermanagement.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,8 +21,6 @@ public class Invoice implements Serializable {
     private Integer id;
     private LocalDateTime creationDate;
     private String InvoiceRef;
-
-
     @OneToOne
     private Orders ordre;
 }

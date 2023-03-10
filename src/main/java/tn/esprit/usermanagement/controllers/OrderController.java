@@ -4,8 +4,10 @@ import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import tn.esprit.usermanagement.entities.CartItem;
 import tn.esprit.usermanagement.entities.Orders;
+import tn.esprit.usermanagement.services.IInvoiceService;
 import tn.esprit.usermanagement.services.IOrderService;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -30,12 +32,20 @@ public class OrderController {
 
 
     @GetMapping("/createOrder")
-    public List<CartItem> createOrder (@RequestParam Integer id)
+    public Orders createOrder (@RequestParam Integer id)
     {
         return orderService.createOrder(id);
     }
+
   @DeleteMapping("/deleteOrder")
     public void deleteOrder( @RequestParam Integer orderId){
-         orderService.deleteOrder(orderId);
+
+        orderService.deleteOrder(orderId);
   }
+
+
+
+
+
+
 }
