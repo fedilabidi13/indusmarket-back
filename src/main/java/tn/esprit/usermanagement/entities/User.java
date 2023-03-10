@@ -32,6 +32,8 @@ public class User implements UserDetails {
     private Boolean firtAttempt = true;
     private Boolean emailVerif;
     private Boolean phoneNumberVerif;
+    private Integer phoneNumber;
+    private Boolean twoFactorsAuth;
     @Enumerated(EnumType.STRING)
     private Role role;
     @Enumerated(EnumType.STRING)
@@ -41,7 +43,6 @@ public class User implements UserDetails {
     private List<JwtToken> jwtTokens;
 
     // Delivery attributes
-    private Integer phoneNumber;
     private String secteur;
     @Column(name = "max_poids")
     private int maxPoids;
