@@ -1,12 +1,9 @@
 package tn.esprit.usermanagement.servicesImpl;
 
 import tn.esprit.usermanagement.entities.CartItem;
-import tn.esprit.usermanagement.entities.Product;
 import tn.esprit.usermanagement.entities.ShoppingCart;
 import tn.esprit.usermanagement.entities.User;
-import tn.esprit.usermanagement.enumerations.Category;
-import tn.esprit.usermanagement.repositories.CartItemRepo;
-import tn.esprit.usermanagement.repositories.ProductRepo;
+
 import tn.esprit.usermanagement.services.IShoppingCartService;
 import tn.esprit.usermanagement.repositories.ShoppingCartRepo;
 import tn.esprit.usermanagement.repositories.UserRepo;
@@ -15,9 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -25,10 +19,10 @@ import java.util.stream.Collectors;
 public class ShoppingCartImpl implements IShoppingCartService {
     private UserRepo userRepo;
     private ShoppingCartRepo shoppingCartRepo;
-    private final ProductRepo productRepo;
 
 
-//****** this fonction is not used because the shopping cart will be create with the first product choice ***/
+    /******************************** Create shoppingCartNotUse ****************************/
+
     @Override
     public ShoppingCart create(Integer idUser) {
         User user = userRepo.getReferenceById(idUser);
@@ -49,9 +43,21 @@ public class ShoppingCartImpl implements IShoppingCartService {
 
     }
 
-    // tester la fonction
-/*
+
+    //********************************** Delete a shoppingCart ******************************** //
+
+
     @Override
+    public  void deleteShoppingCart ( Integer idShoppingCart){
+        ShoppingCart shoppingCart = shoppingCartRepo.getReferenceById(idShoppingCart);
+        shoppingCartRepo.delete(shoppingCart);
+    }
+
+
+
+
+
+   /* @Override
     public List<Product> getRecommendationsForUser(Integer userId) {
 
         User user = userRepo.getReferenceById(userId);
@@ -70,12 +76,5 @@ public class ShoppingCartImpl implements IShoppingCartService {
         return recommendedProducts;
     }
 */
-
-
-
-
-
-
-
 
 }

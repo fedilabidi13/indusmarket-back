@@ -7,5 +7,7 @@ public interface ICartItemService {
     void updateCartItemQuantity(Integer cartItemId,Integer counterValue);
      void deleteCartItemAndRemoveFromShoppingCart(Integer idCartItem);
 
+     CartItem AfficherCartItem (Integer idCartItem);
+
 
     }

@@ -24,7 +24,16 @@ public class CartItemController {
          cartItemService.updateCartItemQuantity(cartItemId ,counterValue);
     }
 
-@DeleteMapping("/deleteCartItemAndRemoveFromCart")
+    @DeleteMapping("/deleteCartItemAndRemoveFromCart")
     public void deleteCartItemAndRemoveFromShoppingCart( @RequestParam Integer idCartItem){
         cartItemService.deleteCartItemAndRemoveFromShoppingCart(idCartItem);
-    }}
+    }
+
+
+    @GetMapping("/AfficherCartItem")
+    CartItem AfficherCartItem ( @RequestParam  ("idCartItem") Integer idCartItem){
+      return  cartItemService.AfficherCartItem(idCartItem);
+    }
+
+
+}
