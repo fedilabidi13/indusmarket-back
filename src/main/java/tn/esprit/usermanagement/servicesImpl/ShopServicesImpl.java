@@ -1,7 +1,6 @@
 package tn.esprit.usermanagement.servicesImpl;
 
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -11,6 +10,7 @@ import tn.esprit.usermanagement.repositories.*;
 import tn.esprit.usermanagement.services.ShopServices;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,6 +25,7 @@ public class ShopServicesImpl implements ShopServices {
     AddressService addressService;
     AuthenticationService authenticationService;
         private final AddressRepo addressRepo;
+        private final ShoppingCartRepo shoppingCartRepo;
 
         @Override
         public List<Shop> ShowAllShops() {
@@ -32,13 +33,9 @@ public class ShopServicesImpl implements ShopServices {
         }
 
         @Override
-    public Shop addShopAndAffectToUser(Shop s, int idUsr,String address, List<MultipartFile> files) throws Exception {
-        User u = userRepo.findById(idUsr).get();
-
-
-            Shop shop = shopRepo.save(s);
-            shop.setUser(u);
-            shop.setAddress(addressService.AddAddress(address));
+        public Shop addShopAndAffectToUser(Shop s, List<MultipartFile> files) throws Exception {
+            s.setUser(authenticationService.currentlyAuthenticatedUser());
+            s.setAddress(addressRepo.save(addressService.AddAddress(s.getAdresse())));
             List<Pictures> picturesList = new ArrayList<>();
             for (MultipartFile file : files) {
                 Pictures picture = new Pictures();
@@ -50,11 +47,11 @@ public class ShopServicesImpl implements ShopServices {
                 picturesList.add(picture);
             }
             picturesRepo.saveAll(picturesList);
+            s.setValidated(false);
+            s.setPicturesList(picturesList);
+            shopRepo.save(s);
 
-            shop.setPicturesList(picturesList);
-            shopRepo.save(shop);
-
-        return shop;
+        return s;
     }
 
 
@@ -62,22 +59,10 @@ public class ShopServicesImpl implements ShopServices {
 
     @Override
     public Shop editShop(Shop s) throws IOException {
-        int idUsr =  authenticationService.currentlyAuthenticatedUser().getId();
-        User usr =  userRepo.findById2(idUsr);
-        Shop s1 = shopRepo.findById2(s.getIdShop());
-        if(usr.getShops().contains(s1)){
-
-        Shop oldShop = shopRepo.getReferenceById(s.getIdShop());
-        Address oldAddress = oldShop.getAddress();
-        //Integer id = oldAddress.getId();
-        Address newAdress = addressService.AddAddress(s.getAdresse());
-        oldAddress.setReal_Address(newAdress.getReal_Address());
-        oldAddress.setLongitude(newAdress.getLongitude());
-        oldAddress.setLatitude(newAdress.getLatitude());
-        addressRepo.save(oldAddress);
-        addressRepo.delete(newAdress);
-        s.setAddress(oldAddress);
-        s.setUser(usr);
+        if(shopRepo.getReferenceById(s.getIdShop()).getUser().getId()== authenticationService.currentlyAuthenticatedUser().getId()){
+           Address newAdresse = addressService.AddAddress(s.getAdresse());
+           newAdresse.setId(shopRepo.getReferenceById(s.getIdShop()).getAddress().getId());
+           s.setAddress(addressRepo.save(newAdresse));
         return shopRepo.save(s);}
         else{
             throw new IllegalStateException("You aren't the owner of this shop");}
@@ -87,24 +72,19 @@ public class ShopServicesImpl implements ShopServices {
     @Override
     public Shop deleteShop(int idShop) {
       Integer idUser = authenticationService.currentlyAuthenticatedUser().getId();
-
-        User usr = userRepo.findById2(idUser);
-        Shop s = shopRepo.findById2(idShop);
+        Shop s = shopRepo.findById(idShop).get();
         if(s==null) {
             throw new IllegalStateException("This shop does not exist");
         }
-        if(usr.getShops().contains(s)==false) {
+        if(idUser!=s.getUser().getId()) {
             throw new IllegalStateException("You aren't the owner of this shop");
         }
-        usr.getShops().remove(s);
         shopRepo.delete(s);
         return s ;
-
     }
 
         @Override
         public List<Shop> ShowAllShopsByUser(Integer idUser) {
-
             return shopRepo.ShowAllShops(idUser);
         }
         @Override
@@ -118,11 +98,9 @@ public class ShopServicesImpl implements ShopServices {
                     .orElseThrow(() -> new IllegalStateException("Shop not found with id " + shopId));
             Product product = productRepo.findById(productId)
                     .orElseThrow(() -> new IllegalStateException("Product not found with id " + productId));
-
             if (!shop.getProducts().contains(product)) {
                 return ResponseEntity.badRequest().body("Product " + productId + " is not associated with Shop " + shopId);
             }
-
             shop.getProducts().remove(product);
             shopRepo.save(shop);
             return ResponseEntity.ok("Product " + productId + " removed from Shop " + shopId);
@@ -130,40 +108,27 @@ public class ShopServicesImpl implements ShopServices {
 
         @Override
         public ResponseEntity<List<Product>> getAllProductsOfShop(Integer shopId) {
-
                 Shop shop = shopRepo.findById(shopId)
                         .orElseThrow(() -> new IllegalStateException("Shop not found with id " + shopId));
                 List<Product> products = shop.getProducts();
                 return ResponseEntity.ok(products);
         }
-        public double generateReportForShop(Integer shopId) {
-
-            // Récupérer les informations de magasin
-            Shop shop = shopRepo.findById(shopId).orElseThrow(() -> new EntityNotFoundException("Shop not found"));
-            shop.setName(shop.getName());
-            shop.setMail(shop.getMail());
-            shop.setPhoneNumber(shop.getPhoneNumber());
-
-            // Récupérer tous les produits pour le magasin spécifié
-            List<Product> products = shop.getProducts();
-            System.out.println(shop);
-
-            // Ajouter les informations de chaque produit au rapport
-            double sumrevenu = 0.0;
-            for (Product product : products) {
-                for (Orders order : product.getOrders()) {
-                    if(product.getDiscount()== null){
-                        sumrevenu = sumrevenu + product.getPrice();
-                    }
-                    else{
-                        sumrevenu = sumrevenu + product.getPriceAfterDiscount();
-
-                    }
+        public Shop generateReportForShop(Integer shopId, LocalDateTime debut, LocalDateTime fin) {
+            float somme = 0;
+          if ( debut.compareTo(fin)>0){
+              throw new IllegalStateException("Start Date Must Be Before End Date");
+          }
+            Shop shop = shopRepo.getReferenceById(shopId);
+            for (Product product: shop.getProducts())
+            {
+                if ( (product.getSoldAt().isAfter(debut)) && (product.getSoldAt().isBefore(fin)) )
+                {
+                    somme += (product.getStock().getInitialQuantity()- product.getStock().getCurrentQuantity())*product.getPrice();
                 }
-
             }
+            shop.setSomme(somme);
+            return shopRepo.save(shop);
 
-            return sumrevenu;
         }
 
     }

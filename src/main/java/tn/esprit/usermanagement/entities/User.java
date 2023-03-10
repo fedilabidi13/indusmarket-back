@@ -7,6 +7,8 @@ import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import tn.esprit.usermanagement.entities.ForumEntities.Post;
+import tn.esprit.usermanagement.entities.ForumEntities.React;
 import tn.esprit.usermanagement.enumerations.BanType;
 import tn.esprit.usermanagement.enumerations.Role;
 
@@ -32,6 +34,8 @@ public class User implements UserDetails {
     private Boolean firtAttempt = true;
     private Boolean emailVerif;
     private Boolean phoneNumberVerif;
+    private Integer phoneNumber;
+    private Boolean twoFactorsAuth;
     @Enumerated(EnumType.STRING)
     private Role role;
     @Enumerated(EnumType.STRING)
@@ -41,7 +45,6 @@ public class User implements UserDetails {
     private List<JwtToken> jwtTokens;
 
     // Delivery attributes
-    private Integer phoneNumber;
     private String secteur;
     @Column(name = "max_poids")
     private int maxPoids;

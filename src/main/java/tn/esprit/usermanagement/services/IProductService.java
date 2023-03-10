@@ -8,8 +8,8 @@ import java.util.List;
 
 public interface IProductService {
     Product ajouter(Product product);
-    public Product addProductToShop(Product product, Integer shopId, List<MultipartFile> files) throws Exception;
-    public Product editProduct(Product product);
+    public Product addProductToShop(Product product,Integer quantity, Integer shopId, List<MultipartFile> files) throws Exception;
+    public Product editProduct(Product product,int id);
     public void deleteProduct( int idProduct);
     public List<Product> ShowAllProductsWithoutDiscount();
     public List<Product> ShowAllProductsWithDiscount();

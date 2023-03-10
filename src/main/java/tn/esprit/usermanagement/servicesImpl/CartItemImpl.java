@@ -28,7 +28,7 @@ public class CartItemImpl implements ICartItemService {
         Product product = productRepo.getReferenceById(idProduct);
 
 
-        if (product.getQuantity() > 0 && product.getQuantity()>=qte ) {
+        if (product.getStock().getCurrentQuantity() > 0 && product.getStock().getCurrentQuantity()>=qte ) {
             if (user.getShoppingCart() == null) {
                 ShoppingCart newShoppingcart = new ShoppingCart();
                 user.setShoppingCart(newShoppingcart);
@@ -62,7 +62,7 @@ public class CartItemImpl implements ICartItemService {
         CartItem theCart = cartItemRepo.getReferenceById(cartItemId);
         int currentQuantity = theCart.getQuantity();
 
-        if (theCart.getProduct().getQuantity() > 0 && currentQuantity >= 1) {
+        if (theCart.getProduct().getStock().getCurrentQuantity() > 0 && currentQuantity >= 1) {
             if (counterValue == 1 || counterValue == -1) {
                 int newQuantity = currentQuantity + counterValue;
                 theCart.setQuantity(newQuantity);
