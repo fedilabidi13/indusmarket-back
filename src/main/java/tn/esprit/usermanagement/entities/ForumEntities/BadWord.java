@@ -1,4 +1,4 @@
-package tn.esprit.usermanagement.entities;
+package tn.esprit.usermanagement.entities.ForumEntities;
 
 
 import jakarta.persistence.Entity;

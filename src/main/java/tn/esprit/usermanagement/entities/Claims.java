@@ -6,12 +6,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import tn.esprit.usermanagement.entities.ForumEntities.Post;
 import tn.esprit.usermanagement.enumerations.StatusClaims;
 import tn.esprit.usermanagement.enumerations.TypeClaim;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 @Entity

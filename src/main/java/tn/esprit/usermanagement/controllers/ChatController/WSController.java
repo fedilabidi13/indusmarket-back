@@ -1,12 +1,12 @@
-package tn.esprit.usermanagement.controllers;
+package tn.esprit.usermanagement.controllers.ChatController;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import tn.esprit.usermanagement.entities.ChatMessage;
-import tn.esprit.usermanagement.servicesImpl.WSService;
+import tn.esprit.usermanagement.entities.ChatEntities.ChatMessage;
+import tn.esprit.usermanagement.servicesImpl.ChatServiceImpl.WSService;
 
 @RestController
 public class WSController {

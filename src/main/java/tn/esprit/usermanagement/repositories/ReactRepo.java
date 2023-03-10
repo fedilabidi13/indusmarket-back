@@ -1,17 +1,13 @@
 package tn.esprit.usermanagement.repositories;
-import org.attoparser.dom.Comment;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import tn.esprit.usermanagement.entities.Post;
+import tn.esprit.usermanagement.entities.ForumEntities.Post;
 import tn.esprit.usermanagement.entities.PostComment;
-import tn.esprit.usermanagement.entities.React;
+import tn.esprit.usermanagement.entities.ForumEntities.React;
 import tn.esprit.usermanagement.entities.User;
 import tn.esprit.usermanagement.enumerations.ReactType;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface ReactRepo extends JpaRepository<React, Integer>{
@@ -24,10 +20,14 @@ public interface ReactRepo extends JpaRepository<React, Integer>{
     //List<React> findByPostIdAndUserIdAndType(Integer postId, Integer userId, ReactType type);
     List<React> findByUser(User user);
     React findByPostAndUser( Post post, User user);
+    List<React> findByPostIdAndUser(Integer postId, Integer userId);
+
     React findByCommentAndUser(PostComment comment, User user);
 
     Integer countByUser(User user);
 
     Integer countByPostIdAndType(Integer postId, ReactType type);
+    List<React> findByComment(PostComment comment);
+    List<React> findAllByCommentIdAndUser(Integer commentId, Integer userId);
 
 }

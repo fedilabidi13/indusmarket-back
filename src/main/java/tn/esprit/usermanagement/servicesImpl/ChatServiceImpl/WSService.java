@@ -1,9 +1,9 @@
-package tn.esprit.usermanagement.servicesImpl;
+package tn.esprit.usermanagement.servicesImpl.ChatServiceImpl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
-import tn.esprit.usermanagement.entities.ChatMessage;
+import tn.esprit.usermanagement.entities.ChatEntities.ChatMessage;
 
 @Service
 public class WSService {

@@ -1,10 +1,11 @@
-package tn.esprit.usermanagement.entities;
+package tn.esprit.usermanagement.entities.ChatEntities;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import tn.esprit.usermanagement.entities.ChatEntities.Chatroom;
 
 import java.io.Serializable;
 @Getter
