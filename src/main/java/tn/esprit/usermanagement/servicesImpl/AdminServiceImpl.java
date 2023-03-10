@@ -32,9 +32,9 @@ public class AdminServiceImpl implements AdminService {
         mod.setPassword(passwordEncoder.encode(password));
         mod.setEnabled(true);
         userRepo.save(mod);
-        String token = jwtService.generateJwtToken(mod);
-        token += " | "+mod.getEmail()+" | "+ password;
-        return token;
+        //String token = jwtService.generateJwtToken(mod);
+        String result = " Mod account : "+mod.getEmail()+" | "+ password;
+        return result;
     }
 
     @Override

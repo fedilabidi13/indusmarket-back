@@ -40,6 +40,7 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private BanType banType;
     private LocalDateTime bannedAt;
+    private Boolean twoFactorsAuth;
     @OneToMany(mappedBy = "user")
     private List<JwtToken> jwtTokens;
 
@@ -77,15 +78,7 @@ public class User implements UserDetails {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     List<React> postReacts;
 
-    @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
-    List<PostComment> postComments;
-    @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
-    List<CommentLike> commentLikes;
-    @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL)
-    List<Advertising> advertising;
+
 
     ////Association Oussama
     @JsonIgnore
