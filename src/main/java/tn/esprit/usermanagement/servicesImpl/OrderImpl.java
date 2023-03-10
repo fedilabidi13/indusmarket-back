@@ -2,6 +2,8 @@ package tn.esprit.usermanagement.servicesImpl;
 
 import tn.esprit.usermanagement.entities.CartItem;
 import tn.esprit.usermanagement.entities.Orders;
+import tn.esprit.usermanagement.entities.Product;
+import tn.esprit.usermanagement.repositories.ProductRepo;
 import tn.esprit.usermanagement.repositories.ShoppingCartRepo;
 import tn.esprit.usermanagement.services.IOrderService;
 import tn.esprit.usermanagement.repositories.OrderRepo;
@@ -17,6 +19,8 @@ import java.util.List;
 @AllArgsConstructor
 public class OrderImpl implements IOrderService {
     private OrderRepo orderRepo;
+
+    private ProductRepo productRepo;
     private final UserRepo userRepo;
 
     private ShoppingCartRepo shoppingCartRepo;
@@ -24,43 +28,39 @@ public class OrderImpl implements IOrderService {
     //************************************** order Creation ************************************//
 
     @Override
-   public List<CartItem> createOrder(Integer idUser) {
+   public Orders createOrder(Integer idUser) {
 
         Orders order = new Orders();
         order.setCreationDate(LocalDateTime.now());
         order.setUser(userRepo.getReferenceById(idUser));
-        orderRepo.save(order);
+        order.setPaid(false);
+        order.setSecondCartItemList(new ArrayList<>());
 
-        List<CartItem> newCartItemList = new ArrayList<>(orderRepo.getReferenceById(idUser).getUser().getShoppingCart().getCartItemList());
-        orderRepo.save(order);
-        shoppingCartRepo.save(orderRepo.getReferenceById(idUser).getUser().getShoppingCart());
+        float amount =0;
+        for (CartItem cartItem: order.getUser().getShoppingCart().getCartItemList())
+        {
+            order.getSecondCartItemList().add(cartItem);
+            if (cartItem.getProduct().getPriceAfterDiscount()==0){
+                amount+= cartItem.getProduct().getPrice()* cartItem.getQuantity();
+            }
+            else  { amount+= cartItem.getProduct().getPriceAfterDiscount()* cartItem.getQuantity(); }
+        }
+        order.setTotalAmount(amount);
 
-        float payment= calculerAmount(order.getId());
-        order.setAmount(payment);
-        orderRepo.getReferenceById(idUser).getUser().getShoppingCart().getCartItemList().clear();
-        shoppingCartRepo.save(orderRepo.getReferenceById(idUser).getUser().getShoppingCart());
+        return  orderRepo.save(order);
 
 
-        return newCartItemList;
+    }
+
+    @Override
+    public Orders updateOrder(Integer idOrder) {
+        // todo update Order
+        return null;
     }
 
     //************************************* Calcule amount ***************************************//
 
-    @Override
-    public float calculerAmount(Integer idOrder) {
 
-        float amount = 0;
-        List<CartItem> list = orderRepo.getReferenceById(idOrder).getUser().getShoppingCart().getCartItemList();
-
-        for (CartItem item : list)
-        {
-            if (item.getProduct().getPriceAfterDiscount()==0){
-                amount+= item.getProduct().getPrice()* item.getQuantity();
-            }
-            else  { amount+= item.getProduct().getPriceAfterDiscount()* item.getQuantity(); }
-        }
-
-        return amount; }
 
     //**************************************** delete order ********************************//
 
@@ -79,6 +79,10 @@ public class OrderImpl implements IOrderService {
         else {
         orderRepo.delete(order); }
     }
+
+
+
+
 
 
 }

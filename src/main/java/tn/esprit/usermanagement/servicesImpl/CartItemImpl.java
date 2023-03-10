@@ -82,6 +82,16 @@ public class CartItemImpl implements ICartItemService {
             shoppingCartRepo.save(shoppingCart);
 
         }
+
+        @Override
+        public CartItem AfficherCartItem (Integer idCartItem){
+
+        CartItem cartItem = cartItemRepo.getReferenceById(idCartItem);
+
+         cartItem.getProduct();
+
+         return  cartItem;
+    }
     }
 
 

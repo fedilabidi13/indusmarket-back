@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -23,6 +24,8 @@ public class ShoppingCart implements Serializable {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "shoppingCart")
     @JsonIgnore
     private List<CartItem> cartItemList;
+
+
 
 
     public void removeCartItem(CartItem item) {

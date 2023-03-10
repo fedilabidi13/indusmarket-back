@@ -9,11 +9,12 @@ public interface IOrderService {
   //  Orders create(Integer idUser);
     //List<CartItem> loadItems(Integer idOrder);
 
-    List<CartItem> createOrder(Integer idOrder);
+    Orders createOrder(Integer idOrder);
 
-
-    float calculerAmount(Integer idOrder);
+    Orders updateOrder(Integer idOrder);
 
      void deleteOrder(Integer orderId);
+
+
 
 }
