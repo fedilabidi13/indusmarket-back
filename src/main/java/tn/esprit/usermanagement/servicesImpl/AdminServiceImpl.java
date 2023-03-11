@@ -63,6 +63,7 @@ public class AdminServiceImpl implements AdminService {
         user.setEnabled(false);
         user.setBanType(BanType.SUSPENSION);
         user.setBannedAt(LocalDateTime.now());
+        user.setBanNumber(user.getBanNumber()+1);
         userRepo.save(user);
         return "user suspended for 7 days";
     }

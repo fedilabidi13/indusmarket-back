@@ -26,6 +26,9 @@ public class Event implements Serializable {
     private String title;
 
     private String description;
+    private String currency;
+    private String method;
+    private String intent;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime startDate;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -40,7 +43,7 @@ public class Event implements Serializable {
     @JsonIgnore
     @ManyToOne
     User user;
-    private long price;
+    private double price;
     @JsonIgnore
     @OneToOne
     private Address address;

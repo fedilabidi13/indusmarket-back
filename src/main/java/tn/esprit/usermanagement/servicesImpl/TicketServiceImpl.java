@@ -57,9 +57,11 @@ public class TicketServiceImpl implements TicketService {
 
     @Autowired
     PicturesRepo picturesRepo;
+    @Autowired
+    AuthenticationService authenticationService;
     @Override
-    public Ticket AddTicketForEventAndAssignToUser(Ticket ticket, Integer userId, Integer eventId) throws IOException, WriterException {
-        User user = userRepo.findById(userId).orElse(null);
+    public Ticket AddTicketForEventAndAssignToUser(Ticket ticket,Integer eventId) throws IOException, WriterException {
+        User user = userRepo.findById(authenticationService.currentlyAuthenticatedUser().getId()).get();
         Event event = eventRepo.findById(eventId).orElse(null);
         Ticket savedTicket = ticketRepo.save(ticket);
         savedTicket.setUser(user);
@@ -88,7 +90,7 @@ public class TicketServiceImpl implements TicketService {
         // Add the Pictures object to the list of QR codes in the Ticket object
         List<Pictures> Qrcodes = new ArrayList<>();
         Qrcodes.add(picture);
-        savedTicket.setQrCodeList(Qrcodes);
+        savedTicket.setFiles(Qrcodes);
 
         // Create a new PDF document
         ByteArrayOutputStream pdfOutputStream = new ByteArrayOutputStream();

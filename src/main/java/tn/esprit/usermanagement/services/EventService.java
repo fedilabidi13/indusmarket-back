@@ -8,12 +8,12 @@ import java.io.IOException;
 import java.util.List;
 
 public interface EventService {
-    public Event AddEventWithPictureAndAssignToUser(Integer userId,String address, Event event, List<MultipartFile> files) throws IOException;
+    public Event AddEventWithPictureAndAssignToUser(String address, Event event, List<MultipartFile> files) throws IOException;
     public void DeleteEndEvent();
     public List<Event> ShowEventOrderByStartDate();
     public String updateEvent(Event event, List<MultipartFile> files) throws IOException;
     public List<Event> ShowEvents();
-    public List<Event> ShowEventbyUser(Integer UserId);
-
+    public List<Event> ShowEventbyUser();
+    public void DeleteEvent(Integer eventId);
     }
 

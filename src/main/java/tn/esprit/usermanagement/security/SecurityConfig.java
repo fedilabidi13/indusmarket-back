@@ -33,7 +33,7 @@ public class SecurityConfig{
                 .csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/v1/auth/**","/facebook/**","/checkout/**","/charge/**","/checkoutEvent/**")
+                .requestMatchers("/api/v1/auth/**","/facebook/**","/checkout/**","/charge/**","/checkoutEvent/**","pay/success","pay/cancel","/pay/**","/")
                 .permitAll()
                 .requestMatchers("/api/admin/**").hasRole(Role.ADMIN.name())
                 .requestMatchers("/api/mod/**").hasRole(Role.MOD.name())

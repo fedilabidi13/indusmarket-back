@@ -54,6 +54,4 @@ public class Product implements Serializable {
     @JsonIgnore
     @ManyToMany
     private List<Orders> orders;
-
-
 }

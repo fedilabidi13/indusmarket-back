@@ -12,13 +12,12 @@ import tn.esprit.usermanagement.repositories.PicturesRepo;
 import tn.esprit.usermanagement.repositories.UserRepo;
 import tn.esprit.usermanagement.services.EventService;
 import java.io.IOException;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
+
 @Service
 public class EventServiceImpl implements EventService {
 
@@ -30,6 +29,8 @@ public class EventServiceImpl implements EventService {
     PicturesRepo picturesRepo;
     @Autowired
     AddressService addressService;
+    @Autowired
+    AuthenticationService authenticationService;
 
     @Override
     public List<Event> ShowEvents() {
@@ -37,13 +38,20 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<Event> ShowEventbyUser(Integer UserId) {
-        return eventRepo.findAllByUserId(UserId);
+    public List<Event> ShowEventbyUser() {
+        return eventRepo.findAllByUserId(authenticationService.currentlyAuthenticatedUser().getId());
     }
 
     @Override
-    public Event AddEventWithPictureAndAssignToUser(Integer userId,String address, Event event, List<MultipartFile> files) throws IOException {
-        User user = userRepo.findById(userId).get();
+    public void DeleteEvent(Integer eventId) {
+        if (eventRepo.findById(eventId).get().getTickets().isEmpty()){
+            eventRepo.delete(eventRepo.findById(eventId).get());
+        }
+    }
+
+    @Override
+    public Event AddEventWithPictureAndAssignToUser(String address, Event event, List<MultipartFile> files) throws IOException {
+        User user = authenticationService.currentlyAuthenticatedUser();
         event.setUser(user);
         event.setAddress(addressService.AddAddress(address));
         Event savedEvent = eventRepo.save(event);
@@ -60,91 +68,48 @@ public class EventServiceImpl implements EventService {
         }
         picturesRepo.saveAll(picturesList);
         savedEvent.setPictures(picturesList);
-        long Nbrdays = ChronoUnit.DAYS.between(savedEvent.getStartDate().toLocalDate(), savedEvent.getEndDate().toLocalDate());
+        double Nbrdays = ChronoUnit.DAYS.between(savedEvent.getStartDate().toLocalDate(), savedEvent.getEndDate().toLocalDate());
         savedEvent.setPrice(Nbrdays*200);
         return eventRepo.save(savedEvent);
     }
 @Override
 public String updateEvent(Event event, List<MultipartFile> files) throws IOException {
     // Find the event by ID
-    Optional<Event> optionalEvent = eventRepo.findById(event.getId());
-    if (!optionalEvent.isPresent()) {
-        return "Event not found !";
-    }
-    Event existingEvent = optionalEvent.get();
-
-    // Check if the current date is within 5 days of the start date
-    LocalDateTime now = LocalDateTime.now();
-    Duration duration = Duration.between(now, existingEvent.getStartDate());
-    if (duration.toDays() <= 5) {
-        return "There is no time to update the Event!";
-    }
-
-    // Set the new start date after or the same as the old start date
-    LocalDateTime newStartDate = event.getStartDate();
-    if (event.getStartDate() == null) {
-        event.setStartDate(existingEvent.getStartDate());
-    } else if (event.getStartDate().isBefore(existingEvent.getStartDate())) {
-        return "New start date must be after or the same as the existing start date!";
-    } else {
-        event.setStartDate(event.getStartDate());
-    }
-
-    if (files == null || files.isEmpty()) {
-        event.setPictures(existingEvent.getPictures());
-    } else {
-        List<Pictures> picturesList = new ArrayList<>();
-        for (MultipartFile file : files) {
-            Pictures picture = new Pictures();
-            byte[] data = file.getBytes();
-            if (data.length > 500) {
-                data = Arrays.copyOfRange(data, 0, 500);
+    Event optionalEvent = eventRepo.findById(event.getId()).get();
+    if (optionalEvent.getTickets().isEmpty()) {
+        event.setStartDate(optionalEvent.getStartDate());
+        event.setEndDate(optionalEvent.getEndDate());
+        if (files == null || files.isEmpty()) {
+            event.setPictures(optionalEvent.getPictures());
+        } else {
+            List<Pictures> picturesList = new ArrayList<>();
+            for (MultipartFile file : files) {
+                Pictures picture = new Pictures();
+                byte[] data = file.getBytes();
+                if (data.length > 500) {
+                    data = Arrays.copyOfRange(data, 0, 500);
+                }
+                picture.setData(data);
+                picture.setContentType(file.getContentType());
+                picturesList.add(picture);
             }
-            picture.setData(data);
-            picture.setContentType(file.getContentType());
-            picturesList.add(picture);
+            List<Pictures> existingPictures = optionalEvent.getPictures();
+            for (Pictures picture : existingPictures) {
+                picturesRepo.delete(picture);
+            }
+            picturesRepo.saveAll(picturesList);
+            event.setPictures(picturesList);
         }
-        List<Pictures> existingPictures = existingEvent.getPictures();
-        for (Pictures picture : existingPictures) {
-            picturesRepo.delete(picture);
-        }
-        picturesRepo.saveAll(picturesList);
-        event.setPictures(picturesList);
-    }
-    if (event.getTitle() == null) {
-        event.setTitle(existingEvent.getTitle());
-    }
-    if (event.getDescription() == null) {
-        event.setDescription(existingEvent.getDescription());
-    }
-    if (event.getEndDate() == null) {
-        event.setEndDate(existingEvent.getEndDate());
-    } else {
-        LocalDateTime newEndDate = event.getEndDate();
-        if (newEndDate.isBefore(event.getStartDate())) {
-            return "End date should be after the start date of the event!";
-        }
-        event.setEndDate(newEndDate);
-    }
-    if (event.getAdresse()==null){
-        event.setAdresse(existingEvent.getAdresse());
-    }
-    else {
         String NewAddresse = event.getAdresse();
         event.setAddress(addressService.AddAddress(NewAddresse));
-
-
+        event.setUser(optionalEvent.getUser());
+        eventRepo.save(event);
+        return "Event updated successfully";
+    }
+    return "you cant update this event now";
     }
 
-    event.setTickets(existingEvent.getTickets());
-    event.setUser(existingEvent.getUser());
-    event.setPrice(existingEvent.getPrice());
-    event.setAddress(existingEvent.getAddress());
 
-    eventRepo.save(event);
-
-    return "Event updated successfully";
-}
 
 
 
@@ -158,11 +123,11 @@ public String updateEvent(Event event, List<MultipartFile> files) throws IOExcep
             eventRepo.delete(event);
         }
     }
-
     @Override
     public List<Event> ShowEventOrderByStartDate() {
         return eventRepo.OrderByStartDate();
 
 
     }
+
 }

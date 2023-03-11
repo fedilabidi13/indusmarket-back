@@ -36,6 +36,6 @@ public class Ticket implements Serializable {
     private Event event;
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL)
-    private List<Pictures> QrCodeList;
+    private List<Pictures> files;
 
 }

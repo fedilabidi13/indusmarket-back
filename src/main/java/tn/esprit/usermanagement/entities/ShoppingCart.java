@@ -19,18 +19,11 @@ public class ShoppingCart implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
-
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "shoppingCart")
     @JsonIgnore
     private List<CartItem> cartItemList;
-
-
-
-
     public void removeCartItem(CartItem item) {
         this.cartItemList.remove(item);
         item.setShoppingCart(null);
     }
-
 }
