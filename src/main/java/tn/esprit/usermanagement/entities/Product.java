@@ -14,7 +14,6 @@ import lombok.Setter;
 import tn.esprit.usermanagement.enumerations.Category;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -31,18 +30,15 @@ public class Product implements Serializable {
     private Integer idProduct;
     private String reference;
     private String name;
-
+    private Integer quantity;
     private float price;
     private String description;
     private Integer discount;
     private float PriceAfterDiscount;
     private String brand;
     private String status;
-    private boolean isValidated;
     @Enumerated(EnumType.STRING)
     private Category category;
-    @ManyToOne
-    private Stock stock;
     @Lob
     private byte[] BarcodeImage;
 
@@ -58,12 +54,4 @@ public class Product implements Serializable {
     @JsonIgnore
     @ManyToMany
     private List<Orders> orders;
-    private LocalDateTime soldAt;
-
-    /*public int howManySold(){
-        return this.initialQuantity - this.quantity;
-    }
-
-
-     */
 }

@@ -43,7 +43,6 @@ public class User implements UserDetails {
     private LocalDateTime bannedAt;
     @OneToMany(mappedBy = "user")
     private List<JwtToken> jwtTokens;
-
     // Delivery attributes
     private String secteur;
     @Column(name = "max_poids")
@@ -52,6 +51,7 @@ public class User implements UserDetails {
     private int nbrCommande;
     private String listeColis;
     private String listeClient ;
+    private int BanNumber;
     @OneToMany(cascade = CascadeType.ALL, mappedBy="livreur")
     private List<Delivery> deliveries;
 

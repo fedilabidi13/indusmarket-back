@@ -25,12 +25,9 @@ public class Orders implements Serializable {
     private LocalDateTime creationDate;
     private  float totalAmount;
     private boolean paid;
-
  @OneToMany
  @JsonIgnore
  private List<CartItem> secondCartItemList;
-
-
     @JsonIgnore
     @ManyToOne
     private User user;
@@ -41,4 +38,7 @@ public class Orders implements Serializable {
     @JsonIgnore
     @ManyToOne
     private Delivery deliveryS;
+    @JsonIgnore
+    @OneToMany
+    private List<Claims> claims;
 }
