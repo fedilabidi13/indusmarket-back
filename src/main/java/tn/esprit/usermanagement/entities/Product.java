@@ -14,6 +14,7 @@ import lombok.Setter;
 import tn.esprit.usermanagement.enumerations.Category;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -48,7 +49,10 @@ public class Product implements Serializable {
 
     @ManyToOne
     private Shop shop;
-
+    @ManyToOne
+    private Stock stock;
+    private Boolean validated;
+    private LocalDateTime soldAt;
 
     ////Houssem Association
     @JsonIgnore
