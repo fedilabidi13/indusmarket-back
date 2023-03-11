@@ -10,7 +10,7 @@ import tn.esprit.usermanagement.servicesImpl.ChatServiceImpl.WSService;
 
 @RestController
 public class WSController {
-
+/*
     @Autowired
     private WSService service;
 
@@ -24,5 +24,7 @@ public class WSController {
                                    @RequestBody final ChatMessage message) {
         service.notifyUser(id, message.getText());
     }
+
+ */
 }
 

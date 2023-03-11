@@ -7,6 +7,7 @@ import tn.esprit.usermanagement.entities.ChatEntities.ChatMessage;
 
 @Service
 public class WSService {
+    /*
     private final SimpMessagingTemplate messagingTemplate;
     private final NotificationService notificationService;
 
@@ -31,5 +32,7 @@ public class WSService {
         notificationService.sendPrivateNotification(id);
         messagingTemplate.convertAndSendToUser(id, "/chat/private-messages", c);
     }
+
+     */
 
 }

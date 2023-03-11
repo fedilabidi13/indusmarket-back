@@ -17,6 +17,7 @@ import java.util.List;
 
 public class ProductController {
     private IProductService productService;
+   /*
     @PostMapping("/add")
     @ResponseBody
     public Product dfghjk(@RequestBody Product product)
@@ -24,42 +25,44 @@ public class ProductController {
         return productService.ajouter(product);
     }
 
-    @PostMapping(path = "/AddProductAndAssignToShop/{ShopId}")
-    public Product addProductToShop(@ModelAttribute Product p,@PathVariable("ShopId") int ShopId,@RequestParam("file") List<MultipartFile> files) throws Exception {
-        return productService.addProductToShop(p,ShopId,files);
+    */
+
+    @PostMapping(path = "/add")
+    public Product addProductToShop(@ModelAttribute Product p,@RequestParam int quantity,@RequestParam int ShopId,@RequestParam("file") List<MultipartFile> files) throws Exception {
+        return productService.addProductToShop(p,quantity,ShopId,files);
 
 
     }
-    @PostMapping(path ="/editProduct" )
-    public Product editProduct(@RequestBody Product product){
-        return productService.editProduct(product);
+    @PostMapping(path ="/update" )
+    public Product editProduct(@RequestBody Product product,@RequestParam int id){
+        return productService.editProduct(product,id);
     }
-    @DeleteMapping(path = "/deleteProduct/{idProduct}")
-    public void deleteProduct(@PathVariable("idProduct") int idProduct){
+    @DeleteMapping(path = "/delete")
+    public void deleteProduct(@RequestParam int idProduct){
         productService.deleteProduct(idProduct);
     }
-    @GetMapping(path ="/ShowAllProductsWithoutDiscount" )
+    @GetMapping(path ="/findByNoDiscount" )
     public List<Product> ShowAllProductsWithoutDiscount(){
         return productService.ShowAllProductsWithoutDiscount();
     }
-    @GetMapping(path ="/ShowAllProductsWithDiscount" )
+    @GetMapping(path ="/findByDiscount" )
     public List<Product> ShowAllProductsWithDiscount(){
         return productService.ShowAllProductsWithDiscount();
     }
-    @PostMapping(path = "/ApplicateDiscount/{Discount}/{idProd}")
-    public Product ApplicateDiscount(@PathVariable("Discount") int Discount,@PathVariable("idProd") int idProd){
+    @PostMapping(path = "/addDiscount")
+    public Product ApplicateDiscount(@RequestParam int Discount,@RequestParam int idProd){
         return productService.ApplicateDiscount(Discount,idProd);
     }
-    @GetMapping(path ="/ShowAllProducts" )
+    @GetMapping(path ="/findAll" )
     public List<Product> ShowAllProducts(){
         return productService.ShowAllProducts();
     }
-    @GetMapping(path = "/SortProductByCategory/{cat}")
-    public List<Product> SortProductByCategory(@PathVariable("cat") String category){
+    @GetMapping(path = "/sortByCategory")
+    public List<Product> SortProductByCategory(@RequestParam String category){
         return productService.SortProductByCategory(category);
     }
 
-    @GetMapping("/search")
+    @GetMapping("/find")
     public ResponseEntity<List<Product>> searchProducts(
             @RequestParam(required = false) String reference,
             @RequestParam(required = false) String name,
@@ -77,7 +80,7 @@ public class ProductController {
         }
     }
 
-    @GetMapping("/PriceBetween")
+    @GetMapping("/findByMaxAndMinPrice")
     public List<Product> getProductsByPriceRange(
             @RequestParam("min") float minPrice,
             @RequestParam("max") float maxPrice) {

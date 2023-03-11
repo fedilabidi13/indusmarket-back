@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.util.List;
 @RestController
 @AllArgsConstructor
-@RequestMapping("/Shop")
+@RequestMapping("/shop")
 public class ShopController {
 
     ShopServices shopServices;
@@ -31,51 +31,52 @@ public class ShopController {
 
 
 
-    @PostMapping( "/addShopAndAffectToUser")
+
+    @PostMapping( "/add")
     public Shop addShopAndAffectToUser(@ModelAttribute Shop s, @RequestParam("file") List<MultipartFile> files) throws Exception{
         Integer idUsr = authenticationService.currentlyAuthenticatedUser().getId();
-        return shopServices.addShopAndAffectToUser(s, idUsr, s.getAdresse(), files);
+        return shopServices.addShopAndAffectToUser(s, files);
     }
 
 
-    @PostMapping("/editShop")
+    @PostMapping("/update")
         public Shop editShop(@ModelAttribute Shop s) throws IOException {
       return shopServices.editShop(s);}
 
 
 
 
-    @DeleteMapping( "/deleteShop/{idShop}")
-    public Shop deleteShop(@PathVariable("idShop") int idShop){
+    @DeleteMapping( "/delete")
+    public Shop deleteShop(@RequestParam int idShop){
 
         return shopServices.deleteShop(idShop);
     }
-    @GetMapping( "/ShowAllShopsByUser")
+    @GetMapping( "/findByUser")
     public List<Shop> ShowAllShopsByUser(){
         Integer idUser = authenticationService.currentlyAuthenticatedUser().getId();
         return shopServices.ShowAllShopsByUser(idUser);
     }
-    @GetMapping("/GenerateCatalog/{idShop}")
-    public List<Product> GenerateCatalog(@PathVariable ("idShop") int idShop){
+    @GetMapping("/createCatalog")
+    public List<Product> GenerateCatalog(@RequestParam int idShop){
         return shopServices.GenerateCatalog(idShop);
     }
-    @GetMapping("/ShowAllShops" )
+    @GetMapping("/findAll" )
     public List<Shop> ShowAllShops(){return shopServices.ShowAllShops();}
-     @DeleteMapping("/removeProductFromShop/{shopId}/{productId}")
-     public ResponseEntity<String> removeProductFromShop(@PathVariable("shopId") int shopId, @PathVariable("productId") int productId) {
+     @DeleteMapping("/removeProduct")
+     public ResponseEntity<String> removeProductFromShop(@RequestParam int shopId, @RequestParam int productId) {
         return shopServices.removeProductFromShop(shopId,productId);
      }
-    @GetMapping("/getAllProductsOfShop/{shopId}")
-    public ResponseEntity<List<Product>> getAllProductsOfShop(@PathVariable int shopId) {
+    @GetMapping("/findAllProducts")
+    public ResponseEntity<List<Product>> getAllProductsOfShop(@RequestParam int shopId) {
         return shopServices.getAllProductsOfShop(shopId);
     }
-
-    @GetMapping("/generateReportForShop/{shopId}")
-    public double generateReportForShop(@PathVariable ("shopId") Integer shopId) {
+/*
+    @GetMapping("/createReport")
+    public double generateReportForShop(@RequestParam Integer shopId, @RequestParam) {
         return shopServices.generateReportForShop(shopId);
     }
 
-
+*/
 
 
 }

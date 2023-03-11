@@ -13,6 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/chat")
 public class ChatController {
+    /*
 
     @Autowired
     ChatService cs ;
@@ -28,11 +29,11 @@ public class ChatController {
         return cs.findchat(Idsender, idreciver);
     }
 
-	/*@PostMapping("/send/{idreciver}")
+	@PostMapping("/send/{idreciver}")
 	@ResponseBody
 	public void send(@RequestBody Message m,@PathVariable("idreciver") Long idreciver) {
 	 cs.sendmessage(m, idreciver);
-	}*/
+	}
 
     @PostMapping("/getc/{idreciver}")
     @ResponseBody
@@ -52,10 +53,12 @@ public class ChatController {
         return cr.findAll();
     }
 
-    /*@PostMapping("/color/{id}")
+    @PostMapping("/color/{id}")
     @ResponseBody
     public void color(@PathVariable("id") Long id ,@RequestBody String c) {
         cs.changecolor(id, c);
-    }*/
+    }
 
+
+     */
 }
