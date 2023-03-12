@@ -61,6 +61,24 @@ public class AuthenticationService {
             return "account is locked due to location change. Verification is needed! ";
         }
 
+        if (user.getTwoFactorsAuth()==true)
+        {
+
+            String token = UUID.randomUUID().toString();
+            String phoneCode= twilioService.generateCode();
+            PhoneToken phoneToken = new PhoneToken(phoneCode, LocalDateTime.now(),
+                    LocalDateTime.now().plusMinutes(1),
+                    user);
+            ConfirmationToken confirmationToken = new ConfirmationToken(token, LocalDateTime.now(),
+                    LocalDateTime.now().plusMinutes(1),
+                    user);
+            tokenService.saveConfirmationToken(confirmationToken);
+            phoneTokenService.saveConfirmationToken(phoneToken);
+            String link = "http://localhost:8085/api/v1/auth/confirm?token="+token;
+            emailSender.send(request.getEmail(),token);
+            return "2fa required. Email and phone verification codes were sent.";
+        }
+
 
 
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
@@ -73,10 +91,6 @@ public class AuthenticationService {
         jwtTokenString=jwtService.generateJwtToken(user);
         revokeAllUserTokens(user);
         saveJwtToken(user, jwtTokenString);
-        if (passwordEncoder.encode(request.getPassword()).equals(user.getPassword()))
-        {
-            return "invalid credentials";
-        }
         return jwtTokenString;
     }
 
@@ -200,6 +214,68 @@ public class AuthenticationService {
         userService.enableAppUser(confirmationToken.getUser().getEmail());
         return "Email confirmed ";
     }
+    @Transactional
+    public String login2fa(String mailToken,String phoneCode)
+    {
+        Boolean phoneConfirmed = false;
+        Boolean emailConfirmed = true;
+        ConfirmationToken confirmationToken = tokenService
+                .getToken(mailToken).get();
+        if (confirmationToken == null)
+        {
+            return "invalid email token";
+        }
+
+
+
+        LocalDateTime expiredAt = confirmationToken.getExpiresAt();
+        if (expiredAt.isBefore(LocalDateTime.now())) {
+            String token2 = UUID.randomUUID().toString();
+
+            ConfirmationToken confirmationToken2 = new ConfirmationToken(token2, LocalDateTime.now(),
+                    LocalDateTime.now().plusMinutes(1),
+                    confirmationToken.getUser());
+            tokenService.saveConfirmationToken(confirmationToken2);
+            //String link = "http://localhost:8085/api/v1/auth/confirm?token="+token2;
+            emailSender.send(confirmationToken.getUser().getEmail(),token2);
+            return "email expired a new Email is sent!";
+        }
+
+        tokenService.setConfirmedAt(mailToken);
+        emailConfirmed= true;
+        PhoneToken phoneToken = phoneTokenService
+                .getToken(phoneCode)
+                .orElse(null);
+        if (phoneToken==null)
+        {
+            return "phone token not found";
+        }
+
+
+
+        LocalDateTime phoneexpiredAt = phoneToken.getExpiresAt();
+
+        if (phoneexpiredAt.isBefore(LocalDateTime.now())) {
+            String code= twilioService.generateCode();
+            PhoneToken confirmationToken2 = new PhoneToken(code, LocalDateTime.now(),
+                    LocalDateTime.now().plusMinutes(1),
+                    phoneToken.getUser());
+            phoneTokenService.saveConfirmationToken(confirmationToken2);
+            twilioService.sendCode(String.valueOf(phoneToken.getUser().getPhoneNumber()),code);
+            return "phone token expired. A new one is sent!";
+        }
+
+        phoneTokenService.setConfirmedAt(phoneCode);
+
+        User user = phoneToken.getUser();
+
+        var jwtTokenString = "";
+        jwtTokenString=jwtService.generateJwtToken(user);
+        revokeAllUserTokens(user);
+        saveJwtToken(user, jwtTokenString);
+        return jwtTokenString;
+
+    }
     public void revokeAllUserTokens(User user) {
         var validUserTokens = jwtTokenRepo.findAllValidTokenByUser(user.getId());
         if (validUserTokens.isEmpty())
@@ -292,6 +368,5 @@ public class AuthenticationService {
         userRepo.save(user);
         return "Two Factors Auth enabled! ";
     }
-    // todo post 15 min verification phone +email
     // todo reset password
 }

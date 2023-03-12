@@ -29,7 +29,6 @@ public class AdminController {
     @GetMapping("/findByRole")
     public List<User> getuserss(@RequestParam String role)
     {
-    //todo convert string to Enum type role
         Role enumrole = Role.valueOf(role);
         return adminService.getUsers(enumrole);
     }

@@ -13,4 +13,5 @@ public interface AdminService {
     String unbanUser(String email);
     String automaticUnbanUser();
     String banIpUser(String email);
+    String approveProduct(Integer id);
 }

@@ -53,4 +53,14 @@ public class AuthenticationController {
     {
         return authenticationService.confirmPhoneToken(token);
     }
+    @PostMapping("/enable2fa")
+    public String enabletwofactorsauth()
+    {
+        return authenticationService.enable2FA();
+    }
+    @PostMapping("/authenticate2fa")
+    public ResponseEntity<?> login2fa(@RequestParam String mail,@RequestParam String phone)
+    {
+        return ResponseEntity.ok(authenticationService.login2fa(mail,phone));
+    }
 }

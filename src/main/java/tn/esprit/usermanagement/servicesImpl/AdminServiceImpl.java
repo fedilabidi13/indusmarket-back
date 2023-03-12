@@ -5,9 +5,11 @@ import lombok.AllArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import tn.esprit.usermanagement.entities.Product;
 import tn.esprit.usermanagement.entities.User;
 import tn.esprit.usermanagement.enumerations.BanType;
 import tn.esprit.usermanagement.enumerations.Role;
+import tn.esprit.usermanagement.repositories.ProductRepo;
 import tn.esprit.usermanagement.repositories.UserRepo;
 import tn.esprit.usermanagement.services.AdminService;
 
@@ -21,7 +23,9 @@ public class AdminServiceImpl implements AdminService {
     private PasswordGenerator passwordGenerator;
     private PasswordEncoder passwordEncoder;
     private JwtService jwtService;
+    private AuthenticationService authenticationService;
     private UserRepo userRepo;
+    private ProductRepo productRepo;
     @Override
     public String addMod(String email) {
         String password = passwordGenerator.generatePassword();
@@ -42,9 +46,9 @@ public class AdminServiceImpl implements AdminService {
         Optional<User> optuser = userRepo.findByEmail(email);
         User user = optuser.get();
         user.setEnabled(false);
-
         user.setBanType(BanType.PERMA);
         userRepo.save(user);
+        authenticationService.revokeAllUserTokens(user);
         return "account with Email: "+user.getEmail() +" is perma banned! ";
     }
 
@@ -65,8 +69,10 @@ public class AdminServiceImpl implements AdminService {
         user.setBannedAt(LocalDateTime.now());
         user.setBanNumber(user.getBanNumber()+1);
         userRepo.save(user);
+        authenticationService.revokeAllUserTokens(user);
         return "user suspended for 7 days";
     }
+
 
     @Override
     public String unbanUser(String email) {
@@ -114,6 +120,18 @@ public class AdminServiceImpl implements AdminService {
         user.setBannedAt(LocalDateTime.now());
         userRepo.save(user);
         return "account with email: "+user.getEmail()+" is locked due to location change. ";
+    }
+
+    @Override
+    public String approveProduct(Integer id) {
+        Product product = productRepo.getReferenceById(id);
+        if (product==null)
+        {
+            return "product not found!";
+        }
+        product.setValidated(true);
+        productRepo.save(product);
+        return "product approved! ";
     }
 
 
