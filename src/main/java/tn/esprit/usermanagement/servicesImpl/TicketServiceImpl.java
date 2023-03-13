@@ -50,14 +50,12 @@ import java.util.List;
 
 @Service
 public class TicketServiceImpl implements TicketService {
-
     @Autowired
     UserRepo userRepo;
     @Autowired
     TicketRepo ticketRepo;
     @Autowired
     EventRepo eventRepo;
-
     @Autowired
     PicturesRepo picturesRepo;
     @Autowired
@@ -67,14 +65,13 @@ public class TicketServiceImpl implements TicketService {
     @Override
     public Ticket AddTicketForEventAndAssignToUser(Ticket ticket,Integer eventId) throws IOException, WriterException {
         User user = userRepo.findById(authenticationService.currentlyAuthenticatedUser().getId()).get();
-        Event event = eventRepo.findById(eventId).orElse(null);
-        if (ticketRepo.findByUserAndEvent(user,event)!=null){
-            return ticketRepo.findByUserAndEvent(user,event);
+        if (ticketRepo.findByUserAndEvent(user,eventRepo.findById(eventId).get())!=null){
+            return ticketRepo.findByUserAndEvent(user,eventRepo.findById(eventId).get());
         }
         Ticket savedTicket = ticketRepo.save(ticket);
         savedTicket.setReference(refGenerator.generateTicketRef());
         savedTicket.setUser(user);
-        savedTicket.setEvent(event);
+        savedTicket.setEvent(eventRepo.findById(eventId).get());
         // Generate the QR code data
         String qrCodeText = savedTicket.getId().toString() + " "
                 + savedTicket.getDescreption() + " "
@@ -101,13 +98,13 @@ public class TicketServiceImpl implements TicketService {
         document.add(new Paragraph("\n")); // add a blank line
         document.add(new Paragraph("\n")); // add a blank line
         // Add a description to the PDF
-        Paragraph description = new Paragraph("This ticket is for " + event.getTitle());
+        Paragraph description = new Paragraph("This ticket is for " + eventRepo.findById(eventId).get().getTitle());
         description.setTextAlignment(TextAlignment.JUSTIFIED);
         document.add(description);
         document.add(new Paragraph("\n")); // add a blank line
         document.add(new Paragraph("\n")); // add a blank line
         // Add a description to the PDF
-        Paragraph description1 = new Paragraph( "which is taking place on " + event.getAdresse() + " at " + event.getStartDate() + ".");
+        Paragraph description1 = new Paragraph( "which is taking place on " + eventRepo.findById(eventId).get().getAdresse() + " at " + eventRepo.findById(eventId).get().getStartDate() + ".");
         description.setTextAlignment(TextAlignment.JUSTIFIED);
         document.add(description1);
         document.add(new Paragraph("\n")); // add a blank line

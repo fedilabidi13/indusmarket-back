@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @SpringBootApplication
-//@EnableScheduling
+@EnableScheduling
 public class UserManagementApplication {
 
 	public static void main(String[] args) {
