@@ -11,6 +11,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import tn.esprit.usermanagement.entities.ForumEntities.Post;
+import tn.esprit.usermanagement.entities.ForumEntities.PostComment;
 import tn.esprit.usermanagement.entities.ForumEntities.React;
 import tn.esprit.usermanagement.enumerations.BanType;
 import tn.esprit.usermanagement.enumerations.EtatLivreur;
