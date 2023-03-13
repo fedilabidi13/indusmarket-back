@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 
 public interface ClaimsService {
-    public Claims addClaims(Claims claims);
     public List<Claims> ShowAllClaims();
     public List<Claims> ShowClaimsByType(TypeClaim typeClaim);
     public List<Claims> ShowClaimsByUser();
@@ -21,7 +20,6 @@ public interface ClaimsService {
     public String AddDeliveryClaimsToOrderWithPicturesAndAssignToUser(Integer orderId, Claims claim, List<MultipartFile> files) throws IOException;
     public String AddClaimsToPostWithPicturesAndAssignToUser(Integer postId, Claims claim, List<MultipartFile> files) throws IOException;
     public void UpdatePendingClaims();
-   // public void claimTreatment(Integer ClaimId,StatusClaims status);
     public void DeleteRejectedClaims();
     public String updateDeliveryClaims(Integer orderId, Claims newClaims, List<MultipartFile> files) throws IOException;
     public String updatePostClaims(Integer postId, Claims newClaims, List<MultipartFile> files) throws IOException;

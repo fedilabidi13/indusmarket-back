@@ -26,7 +26,7 @@ public class Ticket implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
+    private String reference;
     private String descreption;
     @JsonIgnore
     @ManyToOne

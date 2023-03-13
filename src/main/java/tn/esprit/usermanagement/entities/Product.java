@@ -53,7 +53,6 @@ public class Product implements Serializable {
     private Stock stock;
     private Boolean validated;
     private LocalDateTime soldAt;
-
     ////Houssem Association
     @JsonIgnore
     @ManyToMany

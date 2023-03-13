@@ -1,5 +1,6 @@
 package tn.esprit.usermanagement.servicesImpl;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,11 +52,6 @@ public class ClaimsServiceImpl implements ClaimsService {
     @Autowired
     ClaimProductRefRepo claimProductRefRepo;
     @Override
-    public Claims addClaims(Claims claims) {
-        return claimsRepo.save(claims);
-    }
-
-    @Override
     public List<Claims> ShowAllClaims() {
         return claimsRepo.findAll();
     }
@@ -65,7 +61,6 @@ public class ClaimsServiceImpl implements ClaimsService {
 
         return claimsRepo.findByTypeClaim(typeClaim);
     }
-
     @Override
     public List<Claims> ShowClaimsByUser() {
     User user = authenticationService.currentlyAuthenticatedUser();
@@ -133,7 +128,6 @@ return orders.getClaims();
     }
     @Override
     public String AddOrdersClaimsToOrderWithPicturesAndAssignToUser(Integer orderId, Claims claim, List<MultipartFile> files) throws IOException {
-
         User user = authenticationService.currentlyAuthenticatedUser();
         claim.setUser(user);
         claim.setCreatedAt(LocalDateTime.now());
@@ -166,18 +160,53 @@ return orders.getClaims();
         claimsRepo.save(claim);
         return " Your claim"+claim.getIdClaims().toString()+" saved succefully";
     }
-
     @Override
     public String AddClaimsToPostWithPicturesAndAssignToUser(Integer postId, Claims claim, List<MultipartFile> files) throws IOException {
         User user = authenticationService.currentlyAuthenticatedUser();
+        Post post = postRepo.findById(postId).orElseThrow(() -> new EntityNotFoundException("Post not found"));
+        // Check if user already has a claim for this post
+        List<Claims> userClaims = claimsRepo.findByUserAndPost(user, post);
+        if (!userClaims.isEmpty()) {
+            Claims existingClaim = userClaims.get(0);
+            if (existingClaim.getStatusClaims() == StatusClaims.In_process||existingClaim.getStatusClaims() == StatusClaims.Rejected||existingClaim.getStatusClaims() == StatusClaims.Resolved) {
+                // Existing claim is pending, user cannot update it
+                return "Cannot update claim, it is pending";
+            } else {
+                // Existing claim is not pending, update it
+                existingClaim.setDescription(claim.getDescription());
+                // delete old pictures
+                List<Pictures> oldPictures = existingClaim.getPictures();
+                if (oldPictures != null) {
+                    picturesRepo.deleteAll(oldPictures);
+                }
+                // set new pictures
+                List<Pictures> newPictures = new ArrayList<>();
+                for (MultipartFile file : files) {
+                    Pictures picture = new Pictures();
+                    byte[] data = file.getBytes();
+                    if (data.length > 500) { // check if the file is too large
+                        data = Arrays.copyOfRange(data, 0, 500); // truncate the data
+                    }
+                    picture.setContentType(file.getContentType());
+                    picture.setData(data);
+                    newPictures.add(picture);
+                }
+                picturesRepo.saveAll(newPictures);
+                existingClaim.setPictures(newPictures);
+                Claims savedClaim = claimsRepo.save(existingClaim);
+                return "Updated existing claim";
+            }
+        }
+        // Create a new claim
         claim.setUser(user);
         claim.setCreatedAt(LocalDateTime.now());
         claim.setConsultAt(null);
         claim.setStatusClaims(StatusClaims.Pending);
-        Post post = postRepo.findById(postId).get();
         claim.setPost(post);
         claim.setTypeClaim(TypeClaim.Post);
         Claims savedClaim = claimsRepo.save(claim);
+
+        // save pictures
         List<Pictures> picturesList = new ArrayList<>();
         for (MultipartFile file : files) {
             Pictures picture = new Pictures();
@@ -191,10 +220,10 @@ return orders.getClaims();
         }
         picturesRepo.saveAll(picturesList);
         savedClaim.setPictures(picturesList);
-         claimsRepo.save(savedClaim);
-         return "saved";
-    }
+        claimsRepo.save(savedClaim);
 
+        return "Saved new claim";
+    }
     @Scheduled(fixedRate = 10000) // runs every second
     @Override
     public void UpdatePendingClaims() {
@@ -350,6 +379,11 @@ return orders.getClaims();
                 String productReference = claimProductRef.getProductRef();
                 Integer quantity = claimProductRef.getQuantity();
                 Product product = productRepo.findByReference(productReference);
+                CartItem cartItem1 = new CartItem();
+                cartItem1.setQuantity(quantity);
+                cartItem1.setProduct(product);
+                cartItemRepo.save(cartItem1);
+                cartItems.add(cartItem1);
                 if (product == null) {
                     throw new RuntimeException("Product not found");
                 }
@@ -377,6 +411,7 @@ return orders.getClaims();
             newOrder.setDeliveryS(claim.getOrder().getDeliveryS());
             newOrder.setUser(claim.getOrder().getUser());
             newOrder.setDilevryAdresse(claim.getOrder().getDilevryAdresse());
+            newOrder.setSecondCartItemList(cartItems);
             orderRepo.save(newOrder);
         } else if (status == StatusClaims.Rejected) {
             emailService.sendClaimEmail(claim.getUser().getEmail(), "Your claim was rejected");
@@ -448,86 +483,5 @@ return orders.getClaims();
         }
         claimsRepo.save(claims);
     }
-     /*
-    @Override
-    public void claimTreatment(Integer claimId, StatusClaims status) {
-        float amount=0;
-        Claims claims = claimsRepo.findById(claimId).orElseThrow();
-        String email = claims.getUser().getEmail();
-        claims.setConsultAt(LocalDateTime.now());
-        claims.setStatusClaims(status);
-        if (status == StatusClaims.Resolved) {
-            if (claims.getTypeClaim() == TypeClaim.Post) {
-                Post post = claims.getPost();
-                long numResolvedClaims = post.getClaims().stream()
-                        .filter(c -> c.getStatusClaims() == StatusClaims.Resolved)
-                        .count();
-                if (numResolvedClaims >= 50) {
-                    postRepo.delete(post);
-                } else {
-                    emailService.sendClaimEmail(email, "there is a claim about your post: " + post.getBody() + " so you should modify it!");
-                }
-                long numClaimedPosts = post.getUser().getPosts().stream()
-                        .filter(p -> p.getClaims() != null)
-                        .count();
-                if (numClaimedPosts >= 10) {
-                    adminService.suspendUser(post.getUser().getEmail());
-                }
-                if (post.getUser().getBanNumber()>=7){
-                    adminService.banUser(post.getUser().getEmail());
-                }
-            } else if (claims.getTypeClaim() == TypeClaim.Order) {
-                Orders orders = claims.getOrder();
-                List<CartItem> cartItemList = orders.getSecondCartItemList();
-                List<ClaimProductRef> claimProductRefs = claims.getClaimProductRefs();
-                List<CartItem> cartItemList1 = new ArrayList<>();
-                for (ClaimProductRef cp : claimProductRefs) {
-                    CartItem cartItem1 = cartItemRepo.findAllByProductReference(cp.getProductRef());
-                    cartItemList1.add(cartItem1);
-                   if (cartItemList.contains(cartItemList1)) {
-                       Product p = productRepo.findByReference(cp.getProductRef());
-                       Integer qt = cp.getQuantity();
-                       if (p.getPriceAfterDiscount() == 0) {
-                           amount += p.getPrice() * qt;
-                       } else {
-                           amount += p.getPriceAfterDiscount() * qt;
-                       }
-                       adminService.suspendUser(p.getShop().getUser().getEmail());
-                       if (p.getShop().getUser().getBanNumber() >= 5) {
-                           adminService.banUser(p.getShop().getUser().getEmail());
-                       }
-                   }
-                }
-                Orders newOrder = new Orders();
-                newOrder.setDeliveryS(orders.getDeliveryS());
-                newOrder.setPaid(true);
-                newOrder.setUser(orders.getUser());
-                newOrder.setCreationDate(LocalDateTime.now());
-                newOrder.setTotalAmount(amount);
-                newOrder.setDilevryAdresse(orders.getDilevryAdresse());
-                newOrder.setSecondCartItemList(cartItemList1);
-                orderRepo.save(newOrder);
-                try {
-                    invoiceService.AddPDFInvoice(newOrder.getId());
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-             else if (claims.getTypeClaim() == TypeClaim.DELIVERY) {
-                Orders orders = claims.getOrder();
-                adminService.suspendUser(orders.getDeliveryS().getLivreur().getEmail());
-                emailService.sendClaimEmail(orders.getDeliveryS().getLivreur().getEmail(), "there is a claim about your service: " + claims.getDescription()+"So you are banned for a week ");
-            if (orders.getDeliveryS().getLivreur().getBanNumber()>=7){
-                adminService.banUser(orders.getDeliveryS().getLivreur().getEmail());
-                emailService.sendClaimEmail(orders.getDeliveryS().getLivreur().getEmail(), "You are claimed 7 times So you are banned ");
-            }
-
-            }
-            emailService.sendClaimEmail(email, "your claim was resolved we will see what shoul as do about " + claims.getDescription());
-        } else {
-            emailService.sendClaimEmail(email, "your claim was rejected");
-        }
-        claimsRepo.save(claims);
-    }*/
 }
 
