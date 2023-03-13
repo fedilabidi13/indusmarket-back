@@ -33,7 +33,7 @@ public class SecurityConfig{
                 .csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/websocket/**","/api/v1/auth/**","/facebook/**","/checkout/**","/charge/**","/checkoutEvent/**","pay/success","pay/cancel","/pay/**")
+                .requestMatchers("/websocket/**","/api/v1/auth/**","/facebook/**","/checkout/**","/charge/**","/checkoutEvent/**","pay/success","pay/cancel","/pay/**","/")
                 .permitAll()
                 .requestMatchers("/api/admin/**").hasRole(Role.ADMIN.name())
                 .requestMatchers("/api/mod/**").hasRole(Role.MOD.name())
@@ -50,9 +50,6 @@ public class SecurityConfig{
                 .addLogoutHandler(logoutHandler)
                 .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext())
         ;
-
-
         return http.build();
     }
-
 }

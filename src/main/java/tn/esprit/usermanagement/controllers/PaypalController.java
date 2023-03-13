@@ -25,7 +25,6 @@ public class PaypalController {
     public String home() {
         return "home";
     }
-
     @PostMapping("/pay")
     public String payment(@ModelAttribute("order") Event event) {
         try {
@@ -37,14 +36,11 @@ public class PaypalController {
                     return "redirect:"+link.getHref();
                 }
             }
-
         } catch (PayPalRESTException e) {
-
             e.printStackTrace();
         }
         return "redirect:/";
     }
-
     @GetMapping(value = CANCEL_URL)
     public String cancelPay() {
         return "cancel";

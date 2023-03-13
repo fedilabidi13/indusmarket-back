@@ -1,6 +1,7 @@
 package tn.esprit.usermanagement.services;
 
 
+import com.google.zxing.WriterException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import tn.esprit.usermanagement.entities.Product;
@@ -22,5 +23,5 @@ public interface ShopServices {
     public List<Product> GenerateCatalog(int idShop);
     public ResponseEntity<String> removeProductFromShop( Integer shopId,  Integer productId);
     public ResponseEntity<List<Product>> getAllProductsOfShop( Integer shopId);
-    public Shop generateReportForShop(Integer shopId, LocalDateTime debut, LocalDateTime fin) ;
+    public Shop generateReportForShop(Integer shopId, LocalDateTime debut, LocalDateTime fin) throws IOException, WriterException;
 }

@@ -18,4 +18,16 @@ public class RefGenerator {
         }
         return ref;
     }
+    public String generateTicketRef()
+    {
+        String ref = "";
+        ref += "TICK@";
+        for (int i=0; i< 8;i++)
+        {
+            Random random = new Random();
+            ref += random.nextInt(9);
+        }
+        return ref;
+    }
+
 }

@@ -11,8 +11,9 @@ import java.io.IOException;
 public class TicketController {
     @Autowired
     TicketServiceImpl ticketService;
-    //http://localhost:8085/tickets/AddTicket/{eventId}
-    @PostMapping("/AddTicket/{eventId}")
+
+    //http://localhost:8085/tickets/addTicket/{eventId}
+    @PostMapping("/addTicket/{eventId}")
     public Ticket AddTicketForEventAndAssignToUser(@RequestBody Ticket ticket, @PathVariable("eventId") Integer eventId) throws IOException, WriterException {
         return ticketService.AddTicketForEventAndAssignToUser(ticket,eventId);
     }
