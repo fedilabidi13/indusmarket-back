@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
+
 public class Delivery implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,8 +34,10 @@ public class Delivery implements Serializable {
     private String ville;
     @Column(nullable = false)
     private String destinataire;
+    private Integer ClientDd;
 
-    @JsonIgnore
+
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy="deliveryS")
     private List<Orders> Orders;
 
@@ -45,6 +47,7 @@ public class Delivery implements Serializable {
     private User livreur;
 
     @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL, mappedBy="commande")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy="deliveryId")
     private List<Evaluation> evaluations;
+
 }

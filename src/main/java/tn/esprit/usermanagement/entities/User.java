@@ -3,13 +3,17 @@ package tn.esprit.usermanagement.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import tn.esprit.usermanagement.entities.ForumEntities.Post;
 import tn.esprit.usermanagement.entities.ForumEntities.React;
 import tn.esprit.usermanagement.enumerations.BanType;
+import tn.esprit.usermanagement.enumerations.EtatLivreur;
 import tn.esprit.usermanagement.enumerations.Role;
 
 import java.time.LocalDateTime;
@@ -17,7 +21,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
-@Table(name="_user")
+@Table(name = "_user")
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
@@ -30,20 +34,22 @@ public class User implements UserDetails {
     private String lastName;
     private String email;
     private String password;
-    private Boolean enabled= false;
+    private Double longitude;
+    private  Double latitude;
+    @Enumerated(EnumType.STRING)
+    private EtatLivreur etatLivreur;
+    private String Adresse;
+
+    private Boolean enabled= null;
     private Boolean firtAttempt = true;
-    private Boolean emailVerif;
-    private Boolean phoneNumberVerif;
-    private Integer phoneNumber;
-    private Boolean twoFactorsAuth;
     @Enumerated(EnumType.STRING)
     private Role role;
-    @Enumerated(EnumType.STRING)
-    private BanType banType;
-    private LocalDateTime bannedAt;
+@JsonIgnore
     @OneToMany(mappedBy = "user")
     private List<JwtToken> jwtTokens;
+
     // Delivery attributes
+    private Integer phoneNumber;
     private String secteur;
 
     private String country;
@@ -53,7 +59,6 @@ public class User implements UserDetails {
     private int nbrCommande;
     private String listeColis;
     private String listeClient ;
-    private int BanNumber;
     @OneToMany(cascade = CascadeType.ALL, mappedBy="livreur")
     private List<Delivery> deliveries;
 
@@ -71,6 +76,7 @@ public class User implements UserDetails {
     private List<Rating> rates;
     //todo Picture
     //todo more attributes (shops products address phone number )
+
     // Specefic Forum Attributes
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL)
@@ -79,18 +85,37 @@ public class User implements UserDetails {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     List<React> postReacts;
 
-
+    @JsonIgnore
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
+    List<PostComment> postComments;
 
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL)
     List<Advertising> advertising;
+
+    @Enumerated(EnumType.STRING)
+    private BanType banType;
+    private LocalDateTime bannedAt;
+    private Boolean twoFactorsAuth;
+    private Boolean phoneNumberVerif;
+    private Boolean emailVerif;
+    private Integer banNumber;
+
+    ////Association Oussama
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy="user")
     private List<Claims> claims;
+    @JsonIgnore
+    @OneToMany(cascade = CascadeType.ALL, mappedBy="user")
+    private List<Ticket> tickets;
+    @JsonIgnore
+    @OneToMany(cascade = CascadeType.ALL, mappedBy="user")
+    private List<Event> events;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));
     }
+
     @Override
     public String getPassword() {
         return password;
@@ -119,4 +144,5 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return enabled;
     }
+
 }

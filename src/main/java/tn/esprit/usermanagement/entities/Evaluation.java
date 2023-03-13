@@ -30,5 +30,5 @@ public class Evaluation implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "Dilevery_id", nullable = false)
-    private Delivery commande;
+    private Delivery deliveryId;
 }
