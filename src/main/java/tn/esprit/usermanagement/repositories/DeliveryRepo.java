@@ -34,7 +34,10 @@ public interface DeliveryRepo extends JpaRepository<Delivery,Integer> {
 
     @Query("select o.user from Orders o  where o.deliveryS.id=:idDelivery")
     public User findUserFromOrders(Integer idDelivery);
-   // @Query("select d.ClientDd from Delivery d whe")
+
+
+    @Query("select d.ClientDd from Delivery d where d.id=:iddelivery")
+    public Integer findClientDDfromDlivery(Integer iddelivery);
 
 
     @Query("SELECT u FROM Orders o INNER Join User u where o.deliveryS.id = : idDelivery and o.user.id = u.id ")

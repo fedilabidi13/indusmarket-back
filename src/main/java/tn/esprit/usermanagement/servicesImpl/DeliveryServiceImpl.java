@@ -125,55 +125,14 @@ public class DeliveryServiceImpl implements DeliveryServices {
             throw new RuntimeException("No delivery users available.");
         }
     }
-/*
-    // Cette méthode sélectionne tous les utilisateurs avec un rôle "DELIVERY" et un état de livreur "Disponible", à l'exception de ceux qui sont actuellement en train de livrer une commande (c'est-à-dire ceux qui ont un enregistrement dans la table Delivery avec un état "En Cours")
-    public void assignDelivery(Integer deliveryId, Integer deliveryUserId) throws Exception {
-        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(() -> new Exception("Delivery not found"));
-        User user = userRepo.findByIdAndRole(deliveryUserId, Role.DELIVERY);
-        if (!user.getEtatLivreur().equals(EtatLivreur.DISPONIBLE)) {
-            throw new Exception("Delivery user is not available");
-        }
-        delivery.setLivreur(user);
-        delivery.setStatus(DeliveryStatus.PENDING);
-        deliveryRepository.save(delivery);
-    }*/
 
-    /*
-        public boolean assignDriverr(Integer deliveryId) {
-            Delivery delivery = deliveryRepository.findById(deliveryId).orElse(null);
-            Orders delivery1 = deliveryRepository.findUserFromOrders(deliveryId);
-            if (delivery == null) {
-                throw new RuntimeException("Delivery not found");
-            }
-
-            List<User> availableDrivers = userRepo.findLivreurDisponible();
-            if (availableDrivers.isEmpty()) {
-                return false;
-            }
-
-           // Tri des livreurs disponibles par distance croissante par rapport à la position du client
-            GeoPoint clientLocation = new GeoPoint(delivery.getLatitude(), delivery.getLongitude());
-            availableDrivers.sort(Comparator.comparingDouble(driver ->
-                    graphHopper.calculateDistance(driver.getLatitude(), driver.getLongitude(), clientLocation.lat, clientLocation.lon)));
-
-            User closestDriver = availableDrivers.get(0);
-            delivery.setLivreur(closestDriver);
-            delivery.setStatus(DeliveryStatus.PENDING);
-            delivery.setClientDd(delivery1.getUser().getId());
-            deliveryRepository.save(delivery);
-
-            return true;
-        }*/
     public boolean assignDriverr(Integer deliveryId) {
         Delivery delivery = deliveryRepository.findById(deliveryId).orElse(null);
         User delivery1 = deliveryRepository.findUserFromOrders(deliveryId);
         if (delivery == null) {
             throw new RuntimeException("Delivery not found");
         }
-
-
         User availableDrivers = findNearestDelivery(delivery1);
-
 
         delivery.setLivreur(availableDrivers);
         delivery.setStatus(DeliveryStatus.PENDING);
@@ -198,20 +157,23 @@ public class DeliveryServiceImpl implements DeliveryServices {
             delivery.setVille(order.getDilevryAdresse());
             delivery.setClientDd(order.getUser().getId()); // Associer le client correspondant à la commande
             delivery.setOrders(Arrays.asList(order)); // Associer la commande correspondante à la livraison
+            order.setDeliveryS(delivery);
             deliveryRepository.save(delivery);
+
 
         }
     }
 
 
     public Delivery confirmDeliveryReceived(Integer deliveryId) {
+
         Delivery delivery = deliveryRepository.findDeliveryBySonId(deliveryId);
         User user = delivery.getLivreur();
 
         Integer idClien = delivery.getClientDd();
         User user1 = userRepo.findById2(idClien);
 
-        if (delivery == null) {
+        if (delivery != null) {
             throw new RuntimeException("La livraison avec l'ID " + deliveryId + " n'existe pas");
         }
 
@@ -219,12 +181,13 @@ public class DeliveryServiceImpl implements DeliveryServices {
         if (distance < 100) {
             delivery.setStatus(DeliveryStatus.DELIVERED);
             Delivery updatedDelivery = deliveryRepository.save(delivery);
+            return updatedDelivery;
         }
 
         // Confirmer la livraison comme reçue
 
+return delivery;
 
-        return delivery;
     }
 
     @Override
