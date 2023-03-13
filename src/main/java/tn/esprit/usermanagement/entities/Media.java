@@ -22,16 +22,9 @@ public class Media implements Serializable{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
     private String name;
-
     private String imagenUrl;
-
     private String codeImage;
-
-
-
-
     @JsonIgnore
     @ManyToOne
     Post post;

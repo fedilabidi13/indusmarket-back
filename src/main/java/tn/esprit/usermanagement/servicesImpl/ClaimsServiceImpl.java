@@ -73,7 +73,6 @@ public class ClaimsServiceImpl implements ClaimsService {
 return orders.getClaims();
     }
 
-
     @Override
     public Claims AddClaimsWithPicturesAndAssignToUser( Claims claim, List<MultipartFile> files) throws IOException {
         User user = authenticationService.currentlyAuthenticatedUser();
@@ -238,7 +237,6 @@ return orders.getClaims();
     @Override
     public void DeleteRejectedClaims() {
         claimsRepo.deleteAll(claimsRepo.findByStatusClaimsAndConsultAtIsBefore (StatusClaims.Rejected, LocalDateTime.now().minusMonths(12)));
-
     }
     @Transactional
     @Override
@@ -368,120 +366,139 @@ return orders.getClaims();
     }
 
     @Override
-    public void OrderClaimTreatment(Integer claimId, StatusClaims status) {
-        Claims claim = claimsRepo.findById(claimId).orElseThrow(() -> new RuntimeException("Claim not found"));
-        claim.setStatusClaims(status);
-        if (status == StatusClaims.Resolved && claim.getTypeClaim() == TypeClaim.Order) {
-            List<ClaimProductRef> claimProductRefs = claim.getClaimProductRefs();
-            float totalAmount = 0;
-            List<CartItem> cartItems = new ArrayList<>();
-            for (ClaimProductRef claimProductRef : claimProductRefs) {
-                String productReference = claimProductRef.getProductRef();
-                Integer quantity = claimProductRef.getQuantity();
-                Product product = productRepo.findByReference(productReference);
-                CartItem cartItem1 = new CartItem();
-                cartItem1.setQuantity(quantity);
-                cartItem1.setProduct(product);
-                cartItemRepo.save(cartItem1);
-                cartItems.add(cartItem1);
-                if (product == null) {
-                    throw new RuntimeException("Product not found");
-                }
-                float price = product.getPriceAfterDiscount() > 0 ? product.getPriceAfterDiscount() : product.getPrice();
-                totalAmount += price * quantity;
-                CartItem cartItem = cartItemRepo.findAllByProductReference(productReference);
-                if (cartItem == null) {
-                    throw new RuntimeException("Cart item not found");
-                }
-                cartItems.add(cartItem);
-                cartItemRepo.saveAll(cartItems);
-                Shop shop = product.getShop();
-                User shopUser = shop.getUser();
-                shopUser.setBanNumber(shopUser.getBanNumber() + 1);
-                if (shopUser.getBanNumber() >= 5) {
-                    adminService.banUser(shopUser.getEmail());
-                } else {
-                    adminService.suspendUser(shopUser.getEmail());
-                }
-            }
-            Orders newOrder = new Orders();
-            newOrder.setCreationDate(LocalDateTime.now());
-            newOrder.setPaid(true);
-            newOrder.setTotalAmount(totalAmount);
-            newOrder.setDeliveryS(claim.getOrder().getDeliveryS());
-            newOrder.setUser(claim.getOrder().getUser());
-            newOrder.setDilevryAdresse(claim.getOrder().getDilevryAdresse());
-            newOrder.setSecondCartItemList(cartItems);
-            orderRepo.save(newOrder);
-        } else if (status == StatusClaims.Rejected) {
-            emailService.sendClaimEmail(claim.getUser().getEmail(), "Your claim was rejected");
-        }
-        claimsRepo.save(claim);
-    }
-    @Override
-    public void PostClaimTreatment(Integer claimId, StatusClaims status) {
-        Claims claims = claimsRepo.findById(claimId).get();
-        claims.setStatusClaims(status);
-        if (status == StatusClaims.Resolved) {
-            if (claims.getTypeClaim() == TypeClaim.Post) {
-                Post post = claims.getPost();
-                long numResolvedClaims = post.getClaims().stream()
-                        .filter(c -> c.getStatusClaims() == StatusClaims.Resolved)
-                        .count();
-                if (numResolvedClaims >= 2) {
-                    postRepo.delete(post);
-                } else {
-                    emailService.sendClaimEmail(post.getUser().getEmail(), "there is a claim about your post: " + post.getBody() + " so you should modify it!");
-                }
-                long numClaimedPosts = post.getUser().getPosts().stream()
-                        .filter(p -> p.getClaims() != null)
-                        .count();
-                if (numClaimedPosts >= 2) {
-                    adminService.suspendUser(post.getUser().getEmail());
-                }
-                if (post.getUser().getBanNumber() >= 5) {
-                    adminService.banUser(post.getUser().getEmail());
-                }
-            }
+    public String OrderClaimTreatment(Integer claimId, StatusClaims status) {
+        if (claimsRepo.findById(claimId).get().getStatusClaims()==StatusClaims.Resolved||claimsRepo.findById(claimId).get().getStatusClaims()==StatusClaims.Rejected){
+            return "claims was treated before !";
+        } else if (claimsRepo.findById(claimId).get().getStatusClaims()==StatusClaims.Pending) {
+            return "You can't treat right now !";
         }
         else {
-            emailService.sendClaimEmail(claims.getUser().getEmail(), "your claim was rejected");
+            if (status == StatusClaims.Resolved && claimsRepo.findById(claimId).get().getTypeClaim() == TypeClaim.Order) {
+                List<ClaimProductRef> claimProductRefs = claimsRepo.findById(claimId).get().getClaimProductRefs();
+                float totalAmount = 0;
+                for (ClaimProductRef claimProductRef : claimProductRefs) {
+                    String productReference = claimProductRef.getProductRef();
+                    Integer quantity = claimProductRef.getQuantity();
+                    Product product = productRepo.findByReference(productReference);
+                    if (product == null) {
+                        throw new RuntimeException("Product not found");
+                    }
+                    float price = product.getPriceAfterDiscount() > 0 ? product.getPriceAfterDiscount() : product.getPrice();
+                    totalAmount += price * quantity;
+                    CartItem cartItem = cartItemRepo.findAllByProductReference(productReference);
+                    if (cartItem == null) {
+                        throw new RuntimeException("Cart item not found");
+                    }
+                    Shop shop = product.getShop();
+                    User shopUser = shop.getUser();
+                    shopUser.setBanNumber(shopUser.getBanNumber() + 1);
+                    if (shopUser.getBanNumber() >= 5) {
+                        adminService.banUser(shopUser.getEmail());
+                    } else {
+                        adminService.suspendUser(shopUser.getEmail());
+                    }
+                }
+                Orders newOrder = new Orders();
+                newOrder.setCreationDate(LocalDateTime.now());
+                newOrder.setPaid(true);
+                newOrder.setTotalAmount(totalAmount);
+                newOrder.setDeliveryS(claimsRepo.findById(claimId).get().getOrder().getDeliveryS());
+                newOrder.setUser(claimsRepo.findById(claimId).get().getOrder().getUser());
+                newOrder.setDilevryAdresse(claimsRepo.findById(claimId).get().getOrder().getDilevryAdresse());
+                orderRepo.save(newOrder);
+            } else if (status == StatusClaims.Rejected) {
+                emailService.sendClaimEmail(claimsRepo.findById(claimId).get().getUser().getEmail(), "Your claim was rejected");
+            }
+            claimsRepo.findById(claimId).get().setStatusClaims(status);
+            claimsRepo.findById(claimId).get().setConsultAt(LocalDateTime.now());
+            claimsRepo.save(claimsRepo.findById(claimId).get());
+            return "claims treated succefully !";
         }
-        claimsRepo.save(claims);
     }
     @Override
-    public void DeliviryClaimTreatment(Integer claimId, StatusClaims status) {
-        Claims claims = claimsRepo.findById(claimId).get();
-        claims.setStatusClaims(status);
-        if (status == StatusClaims.Resolved) {
-        if (claims.getTypeClaim() == TypeClaim.DELIVERY) {
-            Orders orders = claims.getOrder();
-            adminService.suspendUser(orders.getDeliveryS().getLivreur().getEmail());
-            emailService.sendClaimEmail(orders.getDeliveryS().getLivreur().getEmail(), "there is a claim about your service: " + claims.getDescription()+"So you are banned for a week ");
-            if (orders.getDeliveryS().getLivreur().getBanNumber()>=7){
-                adminService.banUser(orders.getDeliveryS().getLivreur().getEmail());
-                emailService.sendClaimEmail(orders.getDeliveryS().getLivreur().getEmail(), "You are claimed 7 times So you are banned ");
-            }
-        }
-        emailService.sendClaimEmail(claims.getUser().getEmail(), "your claim was resolved we will see what shoul as do about " + claims.getDescription());
+    public String PostClaimTreatment(Integer claimId, StatusClaims status) {
+        if (claimsRepo.findById(claimId).get().getStatusClaims()==StatusClaims.Resolved||claimsRepo.findById(claimId).get().getStatusClaims()==StatusClaims.Rejected){
+            return "claims was treated before !";
+        } else if (claimsRepo.findById(claimId).get().getStatusClaims()==StatusClaims.Pending) {
+            return "You can't treat right now !";
         }
         else {
-        emailService.sendClaimEmail(claims.getUser().getEmail(), "your claim was rejected");
+            if (status == StatusClaims.Resolved) {
+                if (claimsRepo.findById(claimId).get().getTypeClaim() == TypeClaim.Post) {
+                    long numResolvedClaims = claimsRepo.findById(claimId).get().getPost().getClaims().stream()
+                            .filter(c -> c.getStatusClaims() == StatusClaims.Resolved)
+                            .count();
+                    if (numResolvedClaims >= 2) {
+                        postRepo.delete(claimsRepo.findById(claimId).get().getPost());
+                    } else {
+                        emailService.sendClaimEmail(claimsRepo.findById(claimId).get().getPost().getUser().getEmail(), "there is a claim about your post: " + claimsRepo.findById(claimId).get().getPost().getBody() + " so you should modify it!");
+                    }
+                    long numClaimedPosts = claimsRepo.findById(claimId).get().getPost().getUser().getPosts().stream()
+                            .filter(p -> p.getClaims() != null)
+                            .count();
+                    if (numClaimedPosts >= 2) {
+                        adminService.suspendUser(claimsRepo.findById(claimId).get().getPost().getUser().getEmail());
+                    }
+                    if (claimsRepo.findById(claimId).get().getPost().getUser().getBanNumber() >= 5) {
+                        adminService.banUser(claimsRepo.findById(claimId).get().getPost().getUser().getEmail());
+                    }
+                }
+            } else {
+                emailService.sendClaimEmail(claimsRepo.findById(claimId).get().getUser().getEmail(), "your claim was rejected");
+            }
+            claimsRepo.findById(claimId).get().setStatusClaims(status);
+            claimsRepo.findById(claimId).get().setConsultAt(LocalDateTime.now());
+            claimsRepo.save(claimsRepo.findById(claimId).get());
+            return "claims treated succefully !";
         }
-        claimsRepo.save(claims);
     }
     @Override
-    public void OtherClaimTreatment(Integer claimId, StatusClaims status) {
-        Claims claims = claimsRepo.findById(claimId).get();
-        claims.setStatusClaims(status);
-        if (status == StatusClaims.Resolved) {
+    public String DeliviryClaimTreatment(Integer claimId, StatusClaims status) {
+        if (claimsRepo.findById(claimId).get().getStatusClaims()==StatusClaims.Resolved||claimsRepo.findById(claimId).get().getStatusClaims()==StatusClaims.Rejected){
+            return "claims was treated before !";
+        }else if (claimsRepo.findById(claimId).get().getStatusClaims()==StatusClaims.Pending) {
+            return "You can't treat right now !";
+        }
+        else {
+            if (status == StatusClaims.Resolved) {
+                if (claimsRepo.findById(claimId).get().getTypeClaim() == TypeClaim.DELIVERY) {
+                    adminService.suspendUser(claimsRepo.findById(claimId).get().getOrder().getDeliveryS().getLivreur().getEmail());
+                    emailService.sendClaimEmail(claimsRepo.findById(claimId).get().getOrder().getDeliveryS().getLivreur().getEmail(), "there is a claim about your service: " + claimsRepo.findById(claimId).get().getDescription() + "So you are banned for a week ");
+                    if (claimsRepo.findById(claimId).get().getOrder().getDeliveryS().getLivreur().getBanNumber() >= 7) {
+                        adminService.banUser(claimsRepo.findById(claimId).get().getOrder().getDeliveryS().getLivreur().getEmail());
+                        emailService.sendClaimEmail(claimsRepo.findById(claimId).get().getOrder().getDeliveryS().getLivreur().getEmail(), "You are claimed 7 times So you are banned ");
+                    }
+                }
+                emailService.sendClaimEmail(claimsRepo.findById(claimId).get().getUser().getEmail(), "your claim was resolved we will see what shoul as do about " + claimsRepo.findById(claimId).get().getDescription());
+            } else {
+                emailService.sendClaimEmail(claimsRepo.findById(claimId).get().getUser().getEmail(), "your claim was rejected");
+            }
+            claimsRepo.findById(claimId).get().setStatusClaims(status);
+            claimsRepo.findById(claimId).get().setStatusClaims(status);
+            claimsRepo.save(claimsRepo.findById(claimId).get());
+            return "claims treated succefully !";
+        }
+    }
+    @Override
+    public String OtherClaimTreatment(Integer claimId, StatusClaims status) {
+        if (claimsRepo.findById(claimId).get().getStatusClaims()==StatusClaims.Resolved||claimsRepo.findById(claimId).get().getStatusClaims()==StatusClaims.Rejected){
+            return "claims was treated before !";
+        } else if (claimsRepo.findById(claimId).get().getStatusClaims()==StatusClaims.Pending) {
+            return "You can't treat right now !";
+        }
+        else {
+        if (status == StatusClaims.Resolved || claimsRepo.findById(claimId).get().getTypeClaim()==TypeClaim.Other) {
 
-            emailService.sendClaimEmail(claims.getUser().getEmail(), "your claim was resolved we will see what shoul as do about " + claims.getDescription());
+            emailService.sendClaimEmail(claimsRepo.findById(claimId).get().getUser().getEmail(), "your claim was resolved we will see what shoul as do about " + claimsRepo.findById(claimId).get().getDescription());
         }
         else {
-            emailService.sendClaimEmail(claims.getUser().getEmail(), "your claim was rejected");
+            emailService.sendClaimEmail(claimsRepo.findById(claimId).get().getUser().getEmail(), "your claim was rejected");
         }
-        claimsRepo.save(claims);
+        claimsRepo.findById(claimId).get().setStatusClaims(status);
+        claimsRepo.findById(claimId).get().setConsultAt(LocalDateTime.now());
+        claimsRepo.save(claimsRepo.findById(claimId).get());
+        return "claims treated succefully !";
+        }
     }
 }
 

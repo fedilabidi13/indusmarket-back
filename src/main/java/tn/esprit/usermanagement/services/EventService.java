@@ -15,5 +15,7 @@ public interface EventService {
     public List<Event> ShowEvents();
     public List<Event> ShowEventbyUser();
     public void DeleteEvent(Integer eventId);
+    public void AcceptEvent(Integer eventId);
+    public void ModDeleteEvent(Integer eventId);
     }
 

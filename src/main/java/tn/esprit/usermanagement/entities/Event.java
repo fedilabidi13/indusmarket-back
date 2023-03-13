@@ -22,9 +22,7 @@ public class Event implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
     private String title;
-
     private String description;
     private String currency;
     private String method;
@@ -34,6 +32,7 @@ public class Event implements Serializable {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime endDate;
     private String adresse;
+    public boolean accepted=false;
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL)
     private List<Pictures> pictures;

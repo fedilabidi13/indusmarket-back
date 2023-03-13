@@ -1,6 +1,7 @@
 package tn.esprit.usermanagement.controllers;
 
 
+import com.google.zxing.WriterException;
 import lombok.AllArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,6 @@ import java.util.List;
 @AllArgsConstructor
 @RequestMapping("/shop")
 public class ShopController {
-
     ShopServices shopServices;
 
     ProductRepo productRepo;
@@ -76,13 +76,9 @@ public class ShopController {
     @GetMapping("/createReport")
     public Shop generateReportForShop(
             @RequestParam Integer shopId,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd ") LocalDateTime debut,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd ") LocalDateTime fin
-    ) {
+            @RequestBody  LocalDateTime debut,
+            @RequestBody LocalDateTime fin
+    ) throws IOException, WriterException {
         return shopServices.generateReportForShop(shopId,debut,fin);
     }
-
-
-
-
 }

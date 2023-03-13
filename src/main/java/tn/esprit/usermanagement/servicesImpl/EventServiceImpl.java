@@ -6,9 +6,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import tn.esprit.usermanagement.entities.Event;
 import tn.esprit.usermanagement.entities.Pictures;
+import tn.esprit.usermanagement.entities.Ticket;
 import tn.esprit.usermanagement.entities.User;
 import tn.esprit.usermanagement.repositories.EventRepo;
 import tn.esprit.usermanagement.repositories.PicturesRepo;
+import tn.esprit.usermanagement.repositories.TicketRepo;
 import tn.esprit.usermanagement.repositories.UserRepo;
 import tn.esprit.usermanagement.services.EventService;
 import java.io.IOException;
@@ -31,7 +33,10 @@ public class EventServiceImpl implements EventService {
     AddressService addressService;
     @Autowired
     AuthenticationService authenticationService;
-
+    @Autowired
+    TicketRepo ticketRepo;
+    @Autowired
+    EmailService emailService;
     @Override
     public List<Event> ShowEvents() {
         return eventRepo.findAll();
@@ -50,9 +55,24 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    public void AcceptEvent(Integer eventId) {
+        eventRepo.findById(eventId).get().setAccepted(true);
+    }
+
+    @Override
+    public void ModDeleteEvent(Integer eventId) {
+        if (!eventRepo.findById(eventId).get().getTickets().isEmpty()){
+            for (Ticket ticket : eventRepo.findById(eventId).get().getTickets()){
+                emailService.sendEventEmail(ticket.getUser().getEmail(),"The event : "+ eventRepo.findById(eventId).get().getTitle() + "was deleted.");
+                ticketRepo.delete(ticket);
+            }
+            eventRepo.delete(eventRepo.findById(eventId).get());
+        }
+        eventRepo.delete(eventRepo.findById(eventId).get());
+    }
+    @Override
     public Event AddEventWithPictureAndAssignToUser(String address, Event event, List<MultipartFile> files) throws IOException {
-        User user = authenticationService.currentlyAuthenticatedUser();
-        event.setUser(user);
+        event.setUser(authenticationService.currentlyAuthenticatedUser());
         event.setAddress(addressService.AddAddress(address));
         Event savedEvent = eventRepo.save(event);
         List<Pictures> picturesList = new ArrayList<>();
