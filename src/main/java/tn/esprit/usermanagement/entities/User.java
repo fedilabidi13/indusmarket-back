@@ -45,6 +45,8 @@ public class User implements UserDetails {
     private List<JwtToken> jwtTokens;
     // Delivery attributes
     private String secteur;
+
+    private String country;
     @Column(name = "max_poids")
     private int maxPoids;
     @Column(name = "nombres_des_commandes ")

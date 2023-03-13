@@ -1,5 +1,6 @@
 package tn.esprit.usermanagement.controllers;
 
+import com.maxmind.geoip2.exception.GeoIp2Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -25,8 +26,7 @@ public class AuthenticationController {
     private final UserRepo userRepo;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegistrationRequest request)
-    {
+    public ResponseEntity<?> register(@RequestBody RegistrationRequest request) throws IOException, GeoIp2Exception {
         if (authenticationService.register(request) == null)
         {
             return ResponseEntity.ok("email exists");
@@ -39,8 +39,7 @@ public class AuthenticationController {
 
     }
     @PostMapping("/authenticate")
-    public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequest request)
-    {
+    public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequest request) throws IOException, GeoIp2Exception {
         return ResponseEntity.ok(authenticationService.authenticate(request));
     }
 
@@ -74,5 +73,10 @@ public class AuthenticationController {
                                           @RequestParam String pass)
     {
         return ResponseEntity.ok(authenticationService.passwordResetConfirm(email, phone, pass));
+    }
+    @PostMapping("/confirmAddress")
+    public ResponseEntity<?> confirmAddress(@RequestParam String mail,
+                                            @RequestParam String phone) throws IOException, GeoIp2Exception {
+        return ResponseEntity.ok(authenticationService.verifyLocation(mail,phone));
     }
 }

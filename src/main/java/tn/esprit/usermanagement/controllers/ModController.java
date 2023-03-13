@@ -1,5 +1,6 @@
 package tn.esprit.usermanagement.controllers;
 
+import com.maxmind.geoip2.exception.GeoIp2Exception;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -11,6 +12,8 @@ import tn.esprit.usermanagement.entities.User;
 import tn.esprit.usermanagement.repositories.UserRepo;
 import tn.esprit.usermanagement.services.AdminService;
 import tn.esprit.usermanagement.servicesImpl.AuthenticationService;
+
+import java.io.IOException;
 
 @Controller
 @AllArgsConstructor
@@ -28,7 +31,7 @@ public class ModController {
     }
 
     @PostMapping("/api/v1/auth/mod/submit")
-    public String submitForm(@ModelAttribute("formData") AuthenticationRequest formData, Model model) {
+    public String submitForm(@ModelAttribute("formData") AuthenticationRequest formData, Model model) throws IOException, GeoIp2Exception {
         if (userRepo.findByEmail2(formData.getEmail()).getFirtAttempt())
         {
             return "verif";

@@ -1,5 +1,6 @@
 package tn.esprit.usermanagement.servicesImpl;
 
+import com.maxmind.geoip2.exception.GeoIp2Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,6 +21,7 @@ import tn.esprit.usermanagement.repositories.JwtTokenRepo;
 import tn.esprit.usermanagement.repositories.UserRepo;
 import tn.esprit.usermanagement.services.EmailSender;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -27,6 +29,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class AuthenticationService {
+    private final IpService ipService;
     private final TwilioService twilioService;
     private final PhoneTokenService phoneTokenService;
     private final ConfirmationTokenService tokenService;
@@ -38,7 +41,7 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final EmailSender emailSender;
     private final EmailValidator emailValidator;
-    public String authenticate(AuthenticationRequest request) {
+    public String authenticate(AuthenticationRequest request) throws IOException, GeoIp2Exception {
         var user = userRepo.findByEmail(request.getEmail()).orElse(null);
         if (user == null )
         {
@@ -60,6 +63,30 @@ public class AuthenticationService {
         {
             return "account is locked due to location change. Verification is needed! ";
         }
+        if (!(user.getCountry().equals(ipService.getCountry())))
+        {
+            log.error(ipService.getCountry());
+            log.error(user.getCountry());
+            user.setEnabled(false);
+            user.setBanType(BanType.IP);
+            userRepo.save(user);
+            String token = UUID.randomUUID().toString();
+            String phoneCode = twilioService.generateCode();
+            PhoneToken phoneToken = new PhoneToken(phoneCode, LocalDateTime.now(),
+                    LocalDateTime.now().plusMinutes(1),
+                    user);
+            ConfirmationToken confirmationToken = new ConfirmationToken(token, LocalDateTime.now(),
+                    LocalDateTime.now().plusMinutes(1),
+                    user);
+            tokenService.saveConfirmationToken(confirmationToken);
+            phoneTokenService.saveConfirmationToken(phoneToken);
+            String link = "http://localhost:8085/api/v1/auth/confirm?token="+token;
+            emailSender.send(request.getEmail(),buildEmail2(user,link));
+            var jwtTokenString = jwtService.generateJwtToken(user);
+            twilioService.sendCode(String.valueOf(user.getPhoneNumber()),phoneCode);
+
+            return "new Location detetected plz verify your account!";
+        }
 
         if (user.getTwoFactorsAuth()==true)
         {
@@ -78,6 +105,7 @@ public class AuthenticationService {
             emailSender.send(request.getEmail(),token);
             return "2fa required. Email and phone verification codes were sent.";
         }
+
 
 
 
@@ -105,7 +133,7 @@ public class AuthenticationService {
         jwtTokenRepo.save(jwtToken);
     }
 
-    public User register(RegistrationRequest request) {
+    public User register(RegistrationRequest request) throws IOException, GeoIp2Exception {
 
         User user2 = userRepo.findByEmail2(request.getEmail());
         if (user2!= null)
@@ -122,6 +150,7 @@ public class AuthenticationService {
                 .banType(BanType.LOCK)
                 .phoneNumber(request.getPhoneNumber())
                 .enabled(false)
+                .country(ipService.getCountry())
                 .twoFactorsAuth(false)
                 .build();
         userRepo.save(user);
@@ -241,6 +270,7 @@ public class AuthenticationService {
             return "email expired a new Email is sent!";
         }
 
+
         tokenService.setConfirmedAt(mailToken);
         emailConfirmed= true;
         PhoneToken phoneToken = phoneTokenService
@@ -274,6 +304,64 @@ public class AuthenticationService {
         revokeAllUserTokens(user);
         saveJwtToken(user, jwtTokenString);
         return jwtTokenString;
+
+    }
+    @Transactional
+    public String verifyLocation(String mailToken,String phoneCode) throws IOException, GeoIp2Exception {
+        ConfirmationToken confirmationToken = tokenService
+                .getToken(mailToken).get();
+        if (confirmationToken == null)
+        {
+            return "invalid email token";
+        }
+
+
+
+        LocalDateTime expiredAt = confirmationToken.getExpiresAt();
+        if (expiredAt.isBefore(LocalDateTime.now())) {
+            String token2 = UUID.randomUUID().toString();
+
+            ConfirmationToken confirmationToken2 = new ConfirmationToken(token2, LocalDateTime.now(),
+                    LocalDateTime.now().plusMinutes(1),
+                    confirmationToken.getUser());
+            tokenService.saveConfirmationToken(confirmationToken2);
+            //String link = "http://localhost:8085/api/v1/auth/confirm?token="+token2;
+            emailSender.send(confirmationToken.getUser().getEmail(),token2);
+            return "email expired a new Email is sent!";
+        }
+
+        tokenService.setConfirmedAt(mailToken);
+        PhoneToken phoneToken = phoneTokenService
+                .getToken(phoneCode)
+                .orElse(null);
+        if (phoneToken==null)
+        {
+            return "phone token not found";
+        }
+
+
+
+        LocalDateTime phoneexpiredAt = phoneToken.getExpiresAt();
+
+        if (phoneexpiredAt.isBefore(LocalDateTime.now())) {
+            String code= twilioService.generateCode();
+            PhoneToken confirmationToken2 = new PhoneToken(code, LocalDateTime.now(),
+                    LocalDateTime.now().plusMinutes(1),
+                    phoneToken.getUser());
+            phoneTokenService.saveConfirmationToken(confirmationToken2);
+            twilioService.sendCode(String.valueOf(phoneToken.getUser().getPhoneNumber()),code);
+            return "phone token expired. A new one is sent!";
+        }
+
+        phoneTokenService.setConfirmedAt(phoneCode);
+
+        User user = phoneToken.getUser();
+
+        user.setEnabled(true);
+        user.setBanType(BanType.NONE);
+        user.setCountry(ipService.getCountry());
+        userRepo.save(user);
+        return "location approved u can login now! ";
 
     }
     public void revokeAllUserTokens(User user) {

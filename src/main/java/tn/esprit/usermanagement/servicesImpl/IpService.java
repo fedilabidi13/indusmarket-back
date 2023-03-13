@@ -1,49 +1,46 @@
 package tn.esprit.usermanagement.servicesImpl;
 
-import com.maxmind.geoip.Country;
-import com.maxmind.geoip.Location;
-import lombok.AllArgsConstructor;
+import com.maxmind.geoip2.DatabaseReader;
+import com.maxmind.geoip2.exception.GeoIp2Exception;
+import com.maxmind.geoip2.model.CityResponse;
+import com.maxmind.geoip2.record.City;
+import com.maxmind.geoip2.record.Country;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.juli.logging.Log;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
-import java.net.Inet4Address;
+import java.io.InputStreamReader;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.util.Locale;
+import java.net.URL;
 
 
 @Slf4j
+@Service
 public class IpService {
-    /*
-     public static void main(String[] args) {
-        try (Socket socket = new Socket()) {
-            String ip = Inet4Address.getLocalHost().getHostAddress();
-            log.info(ip);
-            HttpClient client= new HttpGet("https://www.infobyip.com/ip-"+ip+".html";
-            try {
 
+     public String getCountry() throws IOException, GeoIp2Exception {
+         File database = new File("C:\\GeoLite2-City.mmdb");
 
-                log.info("Country is "+client.egetLocale().getCountry());
-            } catch (ClientProtocolException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+// This reader object should be reused across lookups as creation of it is
+// expensive.
+         DatabaseReader reader = new DatabaseReader.Builder(database).build();
+
+// If you want to use caching at the cost of a small (~2MB) memory overhead:
+// new DatabaseReader.Builder(file).withCache(new CHMCache()).build();
+         URL whatismyip = new URL("http://checkip.amazonaws.com");
+         BufferedReader in = new BufferedReader(new InputStreamReader(
+                 whatismyip.openStream()));
+
+         String ip = in.readLine();         InetAddress ipAddress = InetAddress.getByName(ip);
+
+         CityResponse response = reader.city(ipAddress);
+
+         Country country = response.getCountry();
+         return country.getIsoCode();
 
     }
 
-     */
+
 }
