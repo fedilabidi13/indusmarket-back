@@ -136,7 +136,7 @@ public class AuthenticationService {
         tokenService.saveConfirmationToken(confirmationToken);
         phoneTokenService.saveConfirmationToken(phoneToken);
         String link = "http://localhost:8085/api/v1/auth/confirm?token="+token;
-        emailSender.send(request.getEmail(),buildEmail(request.getFirstName(),link));
+        emailSender.send(request.getEmail(),buildEmail2(user,link));
         var jwtTokenString = jwtService.generateJwtToken(user);
         twilioService.sendCode(String.valueOf(user.getPhoneNumber()),phoneCode);
 
@@ -366,74 +366,149 @@ public class AuthenticationService {
         userRepo.save(user);
         return "password updated";
     }
+    private String buildEmail2(User user,String link)
+    {
+        return "<!DOCTYPE html>\n" +
+                "<html>\n" +
+                "  <head>\n" +
+                "    <meta charset=\"UTF-8\">\n" +
+                "    <title>Titre de l'email</title>\n" +
+                "    <style>\n" +
+                "      /* Styles pour l'arrière-plan uni */\n" +
+                "      body {\n" +
+                "        background-color: #F5F5F5;\n" +
+                "        margin: 0;\n" +
+                "        padding: 0;    \n" +
+                "\tfont-family: Arial, sans-serif;\n" +
+                "\n" +
+                "      }\n" +
+                "      /* Styles pour le conteneur principal */\n" +
+                "      .container {\n" +
+                "        max-width: 600px;\n" +
+                "        margin: 0 auto;\n" +
+                "        background-color: #FFFFFF;\n" +
+                "        padding: 20px;\n" +
+                "        height: 100vh;\n" +
+                "        display: flex;\n" +
+                "        flex-direction: column;\n" +
+                "        justify-content: center;\n" +
+                "      }\n" +
+                "      /* Styles pour le logo de l'entreprise */\n" +
+                "      .logo {\n" +
+                "        display: block;\n" +
+                "        margin: -20px auto 20px;\n" +
+                "        width: 100px;\n" +
+                "        height: auto;\n" +
+                "      }\n" +
+                "      /* Styles pour le corps du texte */\n" +
+                "      .text {\n" +
+                "        text-align: center;\n" +
+                "      }\n" +
+                "      /* Styles pour le bouton animé */\n" +
+                "      .button {\n" +
+                "        display: inline-block;\n" +
+                "        font-size: 16px;\n" +
+                "        font-weight: bold;\n" +
+                "        color: #3CAEA3;\n" +
+                "        background-color: transparent;\n" +
+                "        border-radius: 5px;\n" +
+                "        padding: 10px 20px;\n" +
+                "        border: 2px solid #3CAEA3;\n" +
+                "        text-decoration: none;\n" +
+                "        transition: all 0.5s ease;\n" +
+                "      }\n" +
+                "      .button:hover {\n" +
+                "        background-color: #3CAEA3;\n" +
+                "        color: #FFFFFF;\n" +
+                "      }\n" +
+                "    </style>\n" +
+                "  </head>\n" +
+                "  <body>\n" +
+                "    <div class=\"container\">\n" +
+                "      <img src=\"https://i.ibb.co/nkrBqck/334886508-513260607680644-3515218608247778867-n.png\" alt=\"indusmarket logo\" padding-left=\"60%\" height=\"70px\" width=\"130px\">\n" +
+                "<br>     \n" +
+                " <div class=\"text\">\n" +
+                "        <h1 style=\"color : #3CAEA3;\">Hi "+user.getFirstName()+" "+user.getLastName()+"</h1>\n" +
+                "        <h3>Thank you for registering to indusmarket. Please click on the below link to activate your account:</h3>\n" +
+                "<p style=\"color : red\">Link will expire in 15 minutes.</p>\n" +
+                "        <p><a href="+link+" class=\"button\">Verification Link</a></p>\n" +
+                "\n" +
+                "      </div>\n" +
+                "    </div>\n" +
+                "  </body>\n" +
+                "</html>\n";
+    }
 
     private String buildEmail(String name, String link) {
-        return "<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c\">\n" +
+        return "<!DOCTYPE html>\n" +
+                "<html>\n" +
+                "  <head>\n" +
+                "    <meta charset=\"UTF-8\">\n" +
+                "    <title>Titre de l'email</title>\n" +
+                "    <style>\n" +
+                "      /* Styles pour l'arrière-plan uni */\n" +
+                "      body {\n" +
+                "        background-color: #F5F5F5;\n" +
+                "        margin: 0;\n" +
+                "        padding: 0;\n" +
+                "\tfont-family: \"Helvetica Neue\", Helvetica, Arial, sans-serif;\n" +
                 "\n" +
-                "<span style=\"display:none;font-size:1px;color:#fff;max-height:0\"></span>\n" +
+                "      }\n" +
+                "      /* Styles pour le conteneur principal */\n" +
+                "      .container {\n" +
+                "        max-width: 600px;\n" +
+                "        margin: 0 auto;\n" +
+                "        background-color: #FFFFFF;\n" +
+                "        padding: 20px;\n" +
+                "        height: 100vh;\n" +
+                "        display: flex;\n" +
+                "        flex-direction: column;\n" +
+                "        justify-content: center;\n" +
+                "      }\n" +
+                "      /* Styles pour le logo de l'entreprise */\n" +
+                "      .logo {\n" +
+                "        display: block;\n" +
+                "        margin: -20px auto 20px;\n" +
+                "        width: 100px;\n" +
+                "        height: auto;\n" +
+                "      }\n" +
+                "      /* Styles pour le corps du texte */\n" +
+                "      .text {\n" +
+                "        text-align: center;\n" +
+                "      }\n" +
+                "      /* Styles pour le bouton animé */\n" +
+                "      .button {\n" +
+                "        display: inline-block;\n" +
+                "        font-size: 16px;\n" +
+                "        font-weight: bold;\n" +
+                "        color: #3CAEA3;\n" +
+                "        background-color: transparent;\n" +
+                "        border-radius: 5px;\n" +
+                "        padding: 10px 20px;\n" +
+                "        border: 2px solid #3CAEA3;\n" +
+                "        text-decoration: none;\n" +
+                "        transition: all 0.5s ease;\n" +
+                "      }\n" +
+                "      .button:hover {\n" +
+                "        background-color: #3CAEA3;\n" +
+                "        color: #FFFFFF;\n" +
+                "      }\n" +
+                "    </style>\n" +
+                "  </head>\n" +
+                "  <body>\n" +
+                "    <div class=\"container\">\n" +
+                "      <img src=\"https://i.ibb.co/nkrBqck/334886508-513260607680644-3515218608247778867-n.png\" alt=\"indusmarket logo\" padding-left=\"60%\" height=\"70px\" width=\"130px\">\n" +
+                "<br>     \n" +
+                " <div class=\"text\">\n" +
+                "        <h1 color=\"#3CAEA3\">Hi +user.getFirstName()+\" \"+user.getLastName()</h1>\n" +
+                "        <p>Thank you for registering to indusmarket. Please click on the below link to activate your account:</p>\n" +
+                "<p color=\"red\">Link will expire in 15 minutes.</p>\n" +
+                "        <p><a href=\"link\" class=\"button\">Verification Link</a></p>\n" +
                 "\n" +
-                "  <table role=\"presentation\" width=\"100%\" style=\"border-collapse:collapse;min-width:100%;width:100%!important\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n" +
-                "    <tbody><tr>\n" +
-                "      <td width=\"100%\" height=\"53\" bgcolor=\"#0b0c0c\">\n" +
-                "        \n" +
-                "        <table role=\"presentation\" width=\"100%\" style=\"border-collapse:collapse;max-width:580px\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" align=\"center\">\n" +
-                "          <tbody><tr>\n" +
-                "            <td width=\"70\" bgcolor=\"#0b0c0c\" valign=\"middle\">\n" +
-                "                <table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:collapse\">\n" +
-                "                  <tbody><tr>\n" +
-                "                    <td style=\"padding-left:10px\">\n" +
-                "                  \n" +
-                "                    </td>\n" +
-                "                    <td style=\"font-size:28px;line-height:1.315789474;Margin-top:4px;padding-left:10px\">\n" +
-                "                      <span style=\"font-family:Helvetica,Arial,sans-serif;font-weight:700;color:#ffffff;text-decoration:none;vertical-align:top;display:inline-block\">Confirm your email</span>\n" +
-                "                    </td>\n" +
-                "                  </tr>\n" +
-                "                </tbody></table>\n" +
-                "              </a>\n" +
-                "            </td>\n" +
-                "          </tr>\n" +
-                "        </tbody></table>\n" +
-                "        \n" +
-                "      </td>\n" +
-                "    </tr>\n" +
-                "  </tbody></table>\n" +
-                "  <table role=\"presentation\" class=\"m_-6186904992287805515content\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:collapse;max-width:580px;width:100%!important\" width=\"100%\">\n" +
-                "    <tbody><tr>\n" +
-                "      <td width=\"10\" height=\"10\" valign=\"middle\"></td>\n" +
-                "      <td>\n" +
-                "        \n" +
-                "                <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:collapse\">\n" +
-                "                  <tbody><tr>\n" +
-                "                    <td bgcolor=\"#1D70B8\" width=\"100%\" height=\"10\"></td>\n" +
-                "                  </tr>\n" +
-                "                </tbody></table>\n" +
-                "        \n" +
-                "      </td>\n" +
-                "      <td width=\"10\" valign=\"middle\" height=\"10\"></td>\n" +
-                "    </tr>\n" +
-                "  </tbody></table>\n" +
-                "\n" +
-                "\n" +
-                "\n" +
-                "  <table role=\"presentation\" class=\"m_-6186904992287805515content\" align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:collapse;max-width:580px;width:100%!important\" width=\"100%\">\n" +
-                "    <tbody><tr>\n" +
-                "      <td height=\"30\"><br></td>\n" +
-                "    </tr>\n" +
-                "    <tr>\n" +
-                "      <td width=\"10\" valign=\"middle\"><br></td>\n" +
-                "      <td style=\"font-family:Helvetica,Arial,sans-serif;font-size:19px;line-height:1.315789474;max-width:560px\">\n" +
-                "        \n" +
-                "            <p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\">Hi " + name + ",</p><p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"> Thank you for registering. Please click on the below link to activate your account: </p><blockquote style=\"Margin:0 0 20px 0;border-left:10px solid #b1b4b6;padding:15px 0 0.1px 15px;font-size:19px;line-height:25px\"><p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"> <a href=\"" + link + "\">Activate Now</a> </p></blockquote>\n Link will expire in 15 minutes. <p>See you soon</p>" +
-                "        \n" +
-                "      </td>\n" +
-                "      <td width=\"10\" valign=\"middle\"><br></td>\n" +
-                "    </tr>\n" +
-                "    <tr>\n" +
-                "      <td height=\"30\"><br></td>\n" +
-                "    </tr>\n" +
-                "  </tbody></table><div class=\"yj6qo\"></div><div class=\"adL\">\n" +
-                "\n" +
-                "</div></div>";
+                "      </div>\n" +
+                "    </div>\n" +
+                "  </body>\n" +
+                "</html>\n";
     }
     public User currentlyAuthenticatedUser()
     {
