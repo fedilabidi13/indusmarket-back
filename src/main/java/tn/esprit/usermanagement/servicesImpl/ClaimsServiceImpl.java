@@ -1,5 +1,6 @@
 package tn.esprit.usermanagement.servicesImpl;
 
+import com.cloudinary.Cloudinary;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -51,6 +52,10 @@ public class ClaimsServiceImpl implements ClaimsService {
     InvoiceImpl invoiceService;
     @Autowired
     ClaimProductRefRepo claimProductRefRepo;
+    @Autowired
+    Cloudinary cloudinary;
+    @Autowired
+    MediaRepo mediaRepo;
     @Override
     public List<Claims> ShowAllClaims() {
         return claimsRepo.findAll();
@@ -82,20 +87,22 @@ return orders.getClaims();
         claim.setUser(user);
         claim.setTypeClaim(TypeClaim.Other);
         Claims savedClaim = claimsRepo.save(claim);
-        List<Pictures> picturesList = new ArrayList<>();
-        for (MultipartFile file : files) {
-            Pictures picture = new Pictures();
-            byte[] data = file.getBytes();
-            if (data.length > 500) { // check if the file is too large
-                data = Arrays.copyOfRange(data, 0, 500); // truncate the data
-            }
-            picture.setContentType(file.getContentType());
-            picture.setData(data);
-            picturesList.add(picture);
+        List<Media> mediaList = new ArrayList<>();
+        for (MultipartFile multipartFile : files) {
+            Media media = new Media();
+            String url = cloudinary.uploader()
+                    .upload(multipartFile.getBytes(),
+                            Map.of("public_id", UUID.randomUUID().toString()))
+                    .get("url")
+                    .toString();
+            media.setImagenUrl(url);
+            media.setName(multipartFile.getName());
+            mediaList.add(media);
         }
-        picturesRepo.saveAll(picturesList);
-        savedClaim.setPictures(picturesList);
-        return claimsRepo.save(savedClaim);  }
+        mediaRepo.saveAll(mediaList);
+        savedClaim.setMedias(mediaList);
+        return claimsRepo.save(savedClaim);
+    }
 
     @Override
     public String AddDeliveryClaimsToOrderWithPicturesAndAssignToUser(Integer orderId,Claims claim, List<MultipartFile> files) throws IOException {

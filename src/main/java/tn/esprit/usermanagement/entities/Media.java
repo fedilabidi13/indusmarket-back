@@ -38,10 +38,4 @@ public class Media implements Serializable{
         this.codeImage = imagencode;
     }
 
-
-
-
-
-
-
 }
