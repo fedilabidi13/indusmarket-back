@@ -1,64 +1,59 @@
 package tn.esprit.usermanagement.controllers.ChatController;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import tn.esprit.usermanagement.entities.ChatEntities.Chatroom;
+import tn.esprit.usermanagement.entities.ChatEntities.Message;
 import tn.esprit.usermanagement.entities.User;
-import tn.esprit.usermanagement.repositories.ChatroomRepo;
 import tn.esprit.usermanagement.repositories.UserRepo;
-import tn.esprit.usermanagement.servicesImpl.ChatServiceImpl.ChatService;
+import tn.esprit.usermanagement.services.ChatIservice;
+import tn.esprit.usermanagement.servicesImpl.AuthenticationService;
 
+import java.io.IOException;
 import java.util.List;
 
+
 @RestController
-@RequestMapping("/api/chat")
+@AllArgsConstructor
 public class ChatController {
-    /*
-
-    @Autowired
-    ChatService cs ;
-    @Autowired
-    UserRepo ur ;
-
-    @Autowired
-    ChatroomRepo cr ;
-
-    @GetMapping("/Chatroom/{Idsender}/{idreciver}")
-    @ResponseBody
-    public Chatroom chatfind(@PathVariable("Idsender") Integer Idsender, @PathVariable("idreciver") Integer idreciver) {
-        return cs.findchat(Idsender, idreciver);
+ChatIservice chatIservice;
+UserRepo userRepo;
+AuthenticationService authenticationService;
+    @PostMapping("/addChatroom")
+    public ResponseEntity<Chatroom> addChatroom(@RequestBody Chatroom chatroom) {
+        Chatroom savedChatroom = chatIservice.createChatroom(chatroom);
+        return new ResponseEntity<>(savedChatroom, HttpStatus.CREATED);
     }
-
-	@PostMapping("/send/{idreciver}")
-	@ResponseBody
-	public void send(@RequestBody Message m,@PathVariable("idreciver") Long idreciver) {
-	 cs.sendmessage(m, idreciver);
-	}
-
-    @PostMapping("/getc/{idreciver}")
-    @ResponseBody
-    public Chatroom getcon(@PathVariable("idreciver") Integer idreciver) {
-        return cs.getConv(idreciver);
+    @PostMapping("/joinChatroom/{codeRoom}")
+    public ResponseEntity<?> joinChatroom(@PathVariable String codeRoom) {
+        Chatroom chatroom = chatIservice.findByCodeRoom(codeRoom);
+        if (chatroom == null) {
+            return ResponseEntity.notFound().build();
+        }
+        chatroom = chatIservice.addUserToChatroom(chatroom);
+        return ResponseEntity.ok(chatroom);
     }
-
-    @GetMapping("/ListUser")
-    @ResponseBody
-    public List<User> getListUser() {
-        return ur.findAll();
+    @PostMapping("sendMessageToChatroom/{chatroomId}")
+    public ResponseEntity<String> sendMessageToChatroom(@RequestBody String message, @PathVariable Integer chatroomId, @RequestParam("files") List<MultipartFile> files) throws IOException {
+        chatIservice.sendMessageToChatroom(message, chatroomId,files);
+        return ResponseEntity.ok("Message sent successfully.");
     }
-
-    @GetMapping("/allchat")
-    @ResponseBody
-    public List<Chatroom> getChat() {
-        return cr.findAll();
+    @GetMapping("getAllMessagesByChatroomIdSortedByDate/{chatroomId}/messages")
+    public ResponseEntity<List<Message>> getAllMessagesByChatroomIdSortedByDate(@PathVariable Integer chatroomId) {
+        List<Message> messages = chatIservice.getAllMessagesByChatroomIdSortedByDate(chatroomId);
+        return ResponseEntity.ok(messages);
     }
-
-    @PostMapping("/color/{id}")
-    @ResponseBody
-    public void color(@PathVariable("id") Long id ,@RequestBody String c) {
-        cs.changecolor(id, c);
+    @GetMapping("/{chatroomId}/messages/{messageId}")
+    public ResponseEntity<Message> getMessage(@PathVariable Integer chatroomId, @PathVariable Integer messageId) {
+        Message message = chatIservice.findMessageByIdAndChatroomId(messageId, chatroomId);
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
-
-
-     */
+    @DeleteMapping("/deleteMessage/{messageId}")
+    public ResponseEntity<String> deleteMessageByIdAndSender(@PathVariable Integer messageId) {
+        chatIservice.deleteMessageByIdAndSender(messageId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Message deleted successfully");
+    }
 }

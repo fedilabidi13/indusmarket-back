@@ -27,16 +27,16 @@ public class ReactController {
 
 
     @PostMapping("post/addReact")
-    public ResponseEntity<React> addReact(@RequestParam Integer postId, @RequestParam String reactType) {
-        React react = reactIservice.addReactToPost(postId, ReactType.valueOf(reactType));
+    public ResponseEntity<React> addReact(@RequestParam Integer idPost, @RequestParam String reactType) {
+        React react = reactIservice.addReactToPost(idPost, ReactType.valueOf(reactType));
         return ResponseEntity.ok(react);
     }
 
 
     @PostMapping("/deleteReact")
-    public ResponseEntity<String> deleteReact(@RequestParam Integer reactId) {
-        reactIservice.deleteReact(reactId);
-        return new ResponseEntity<>("React with id " + reactId + " has been deleted successfully", HttpStatus.OK);
+    public ResponseEntity<String> deleteReact(@RequestParam Integer idReact) {
+        reactIservice.deleteReact(idReact);
+        return new ResponseEntity<>("React with id " + idReact + " has been deleted successfully", HttpStatus.OK);
     }
 
     @GetMapping("post/mostReacted")
@@ -51,15 +51,15 @@ public class ReactController {
     }
 
     @GetMapping("post/getAllReactsForPost")
-    public List<React> getAllReactsForPost(@RequestParam Integer postId) {
+    public List<React> getAllReactsForPost(@RequestParam Integer idPost) {
 
-        return reactIservice.getAllReactsForPost(postRepo.getReferenceById(postId));
+        return reactIservice.getAllReactsForPost(postRepo.getReferenceById(idPost));
     }
     @GetMapping("/post/{postId}/owner")
-    ResponseEntity<?> getAllReactionsByPostAndOwner(@PathVariable Integer postId) {
-        if (reactIservice.getAllReactionsByPostIdAndOwner(postId).isEmpty())
+    ResponseEntity<?> getAllReactionsByPostAndOwner(@PathVariable Integer idPost) {
+        if (reactIservice.getAllReactionsByPostIdAndOwner(idPost).isEmpty())
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        return new ResponseEntity<>(reactIservice.getAllReactionsByPostIdAndOwner(postId), HttpStatus.OK);
+        return new ResponseEntity<>(reactIservice.getAllReactionsByPostIdAndOwner(idPost), HttpStatus.OK);
     }
 
     @GetMapping("post/mostReactiveUser")
@@ -74,20 +74,20 @@ public class ReactController {
 
     //React For Comment
     @PostMapping("comment/addReact")
-    public ResponseEntity<React> addReactToComment( @RequestParam Integer commentId, @RequestParam ReactType reactType) {
-        React react = reactIservice.addReactToComment(commentId, reactType);
+    public ResponseEntity<React> addReactToComment( @RequestParam Integer idComment, @RequestParam ReactType reactType) {
+        React react = reactIservice.addReactToComment(idComment, reactType);
         return ResponseEntity.ok(react);
     }
     @GetMapping("comment/getAllReactsForComment")
-    public List<React> getAllReactsForComment(@RequestParam Integer commentId) {
+    public List<React> getAllReactsForComment(@RequestParam Integer idComment) {
 
-        return reactIservice.getAllReactsForComment(postCommentRepo.getReferenceById(commentId));
+        return reactIservice.getAllReactsForComment(postCommentRepo.getReferenceById(idComment));
     }
     @GetMapping("/comment/{commentId}/owner/{userId}")
-    ResponseEntity<?> getAllReactionsByCommentAndOwner(@PathVariable Integer commentId, @PathVariable Integer userId) {
-        if (reactIservice.getAllReactionsByCommentIdAndOwner(commentId, userId).isEmpty())
+    ResponseEntity<?> getAllReactionsByCommentAndOwner(@PathVariable Integer idComment, @PathVariable Integer userId) {
+        if (reactIservice.getAllReactionsByCommentIdAndOwner(idComment, userId).isEmpty())
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        return new ResponseEntity<>(reactIservice.getAllReactionsByCommentIdAndOwner(commentId, userId), HttpStatus.OK);
+        return new ResponseEntity<>(reactIservice.getAllReactionsByCommentIdAndOwner(idComment, userId), HttpStatus.OK);
     }
 
 

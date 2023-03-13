@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class NotificationService {
-    /*
     private final SimpMessagingTemplate messagingTemplate;
 
     @Autowired
@@ -25,6 +24,5 @@ public class NotificationService {
 
         messagingTemplate.convertAndSendToUser(userId,"/chat/private-notifications", message);
     }
-
-     */
 }
+

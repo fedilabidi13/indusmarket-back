@@ -4,14 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-import tn.esprit.usermanagement.entities.ChatEntities.ChatMessage;
 import tn.esprit.usermanagement.servicesImpl.ChatServiceImpl.WSService;
 
-@RestController
+
 public class WSController {
-/*
-    @Autowired
+
+ /*   @Autowired
     private WSService service;
 
     @PostMapping("/send-message")
@@ -24,7 +22,7 @@ public class WSController {
                                    @RequestBody final ChatMessage message) {
         service.notifyUser(id, message.getText());
     }
+*/
 
- */
 }
 

@@ -48,7 +48,7 @@ public class PostServiceImpl implements PostIservice {
     public ResponseEntity<?> Update_post(Post post,List<MultipartFile> files, Integer idPost) throws IOException {
         Post oldPost = postRepo.getReferenceById(idPost);
         User usr = authenticationService.currentlyAuthenticatedUser();
-if (post.getUser().getId()== usr.getId()) {
+if (oldPost.getUser().equals(usr)) {
     if (badWordService.Filtrage_bad_word(post.getBody()) == 0 && badWordService.Filtrage_bad_word(post.getPostTitle()) == 0) {
 
         if (post.getBody() != null) {
