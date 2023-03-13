@@ -228,7 +228,7 @@ public class AuthenticationService {
                     confirmationToken.getUser());
             tokenService.saveConfirmationToken(confirmationToken2);
             String link = "http://localhost:8085/api/v1/auth/confirm?token="+token2;
-            emailSender.send(confirmationToken.getUser().getEmail(),buildEmail(confirmationToken.getUser().getFirstName(),link));
+            emailSender.send(confirmationToken.getUser().getEmail(),buildEmail2(confirmationToken.getUser(),link));
             return "email expired a new Email is sent!";
         }
 
