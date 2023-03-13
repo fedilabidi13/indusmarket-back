@@ -63,4 +63,16 @@ public class AuthenticationController {
     {
         return ResponseEntity.ok(authenticationService.login2fa(mail,phone));
     }
+    @PostMapping("/resetPassword")
+    public ResponseEntity<?> requestPass(@RequestParam String email)
+    {
+        return ResponseEntity.ok(authenticationService.requestResetPassword(email));
+    }
+    @PostMapping("/confirmPassword")
+    public ResponseEntity<?> confirmPass (@RequestParam String email,
+                                          @RequestParam String phone,
+                                          @RequestParam String pass)
+    {
+        return ResponseEntity.ok(authenticationService.passwordResetConfirm(email, phone, pass));
+    }
 }

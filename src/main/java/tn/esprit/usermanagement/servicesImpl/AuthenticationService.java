@@ -287,6 +287,86 @@ public class AuthenticationService {
         jwtTokenRepo.saveAll(validUserTokens);
     }
 
+    @Transactional
+    public String requestResetPassword(String email)
+    {
+
+        User user = userRepo.findByEmail(email).get();
+        if (user == null)
+        {
+            return "user not found";
+        }
+        String token = UUID.randomUUID().toString();
+        String phoneCode= twilioService.generateCode();
+        PhoneToken phoneToken = new PhoneToken(phoneCode, LocalDateTime.now(),
+                LocalDateTime.now().plusMinutes(1),
+                user);
+        ConfirmationToken confirmationToken = new ConfirmationToken(token, LocalDateTime.now(),
+                LocalDateTime.now().plusMinutes(1),
+                user);
+        tokenService.saveConfirmationToken(confirmationToken);
+        phoneTokenService.saveConfirmationToken(phoneToken);
+        String link = "http://localhost:8085/api/v1/auth/confirm?token="+token;
+        emailSender.send(user.getEmail(),token);
+        return "verification required. Email and phone verification codes were sent.";
+    }
+    @Transactional
+    public String passwordResetConfirm(String mailToken,String phoneCode,String password)
+    {
+        ConfirmationToken confirmationToken = tokenService
+                .getToken(mailToken).get();
+        if (confirmationToken == null)
+        {
+            return "invalid email token";
+        }
+
+
+
+        LocalDateTime expiredAt = confirmationToken.getExpiresAt();
+        if (expiredAt.isBefore(LocalDateTime.now())) {
+            String token2 = UUID.randomUUID().toString();
+
+            ConfirmationToken confirmationToken2 = new ConfirmationToken(token2, LocalDateTime.now(),
+                    LocalDateTime.now().plusMinutes(1),
+                    confirmationToken.getUser());
+            tokenService.saveConfirmationToken(confirmationToken2);
+            //String link = "http://localhost:8085/api/v1/auth/confirm?token="+token2;
+            emailSender.send(confirmationToken.getUser().getEmail(),token2);
+            return "email expired a new Email is sent!";
+        }
+
+        tokenService.setConfirmedAt(mailToken);
+
+        PhoneToken phoneToken = phoneTokenService
+                .getToken(phoneCode)
+                .orElse(null);
+        if (phoneToken==null)
+        {
+            return "phone token not found";
+        }
+
+
+
+        LocalDateTime phoneexpiredAt = phoneToken.getExpiresAt();
+
+        if (phoneexpiredAt.isBefore(LocalDateTime.now())) {
+            String code= twilioService.generateCode();
+            PhoneToken confirmationToken2 = new PhoneToken(code, LocalDateTime.now(),
+                    LocalDateTime.now().plusMinutes(1),
+                    phoneToken.getUser());
+            phoneTokenService.saveConfirmationToken(confirmationToken2);
+            twilioService.sendCode(String.valueOf(phoneToken.getUser().getPhoneNumber()),code);
+            return "phone token expired. A new one is sent!";
+        }
+
+        phoneTokenService.setConfirmedAt(phoneCode);
+
+        User user = phoneToken.getUser();
+        user.setPassword(passwordEncoder.encode(password));
+        userRepo.save(user);
+        return "password updated";
+    }
+
     private String buildEmail(String name, String link) {
         return "<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c\">\n" +
                 "\n" +
