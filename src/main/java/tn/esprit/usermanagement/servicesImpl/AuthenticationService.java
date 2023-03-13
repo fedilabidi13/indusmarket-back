@@ -81,7 +81,7 @@ public class AuthenticationService {
             tokenService.saveConfirmationToken(confirmationToken);
             phoneTokenService.saveConfirmationToken(phoneToken);
             String link = "http://localhost:8085/api/v1/auth/confirm?token="+token;
-            emailSender.send(request.getEmail(),buildEmail2(user,link));
+            emailSender.send(request.getEmail(),buildEmailVerif(token, user));
             var jwtTokenString = jwtService.generateJwtToken(user);
             twilioService.sendCode(String.valueOf(user.getPhoneNumber()),phoneCode);
 
@@ -102,7 +102,7 @@ public class AuthenticationService {
             tokenService.saveConfirmationToken(confirmationToken);
             phoneTokenService.saveConfirmationToken(phoneToken);
             String link = "http://localhost:8085/api/v1/auth/confirm?token="+token;
-            emailSender.send(request.getEmail(),token);
+            emailSender.send(request.getEmail(),buildEmailVerif(token,user));
             return "2fa required. Email and phone verification codes were sent.";
         }
 
@@ -265,7 +265,7 @@ public class AuthenticationService {
                     confirmationToken.getUser());
             tokenService.saveConfirmationToken(confirmationToken2);
             //String link = "http://localhost:8085/api/v1/auth/confirm?token="+token2;
-            emailSender.send(confirmationToken.getUser().getEmail(),token2);
+            emailSender.send(confirmationToken.getUser().getEmail(),buildEmailVerif(token2, confirmationToken2.getUser() ));
             return "email expired a new Email is sent!";
         }
 
@@ -325,7 +325,7 @@ public class AuthenticationService {
                     confirmationToken.getUser());
             tokenService.saveConfirmationToken(confirmationToken2);
             //String link = "http://localhost:8085/api/v1/auth/confirm?token="+token2;
-            emailSender.send(confirmationToken.getUser().getEmail(),token2);
+            emailSender.send(confirmationToken.getUser().getEmail(),buildEmailVerif(token2, confirmationToken2.getUser()));
             return "email expired a new Email is sent!";
         }
 
@@ -394,7 +394,7 @@ public class AuthenticationService {
         tokenService.saveConfirmationToken(confirmationToken);
         phoneTokenService.saveConfirmationToken(phoneToken);
         String link = "http://localhost:8085/api/v1/auth/confirm?token="+token;
-        emailSender.send(user.getEmail(),token);
+        emailSender.send(user.getEmail(),buildEmailVerif(token, confirmationToken.getUser()));
         return "verification required. Email and phone verification codes were sent.";
     }
     @Transactional
@@ -526,6 +526,80 @@ public class AuthenticationService {
                 "</html>\n";
     }
 
+    private String buildEmailVerif(String token,User user)
+    {
+        return "<!DOCTYPE html>\n" +
+                "<html>\n" +
+                "  <head>\n" +
+                "    <meta charset=\"UTF-8\">\n" +
+                "    <title>Titre de l'email</title>\n" +
+                "    <style>\n" +
+                "      /* Styles pour l'arrière-plan uni */\n" +
+                "      body {\n" +
+                "        background-color: #F5F5F5;\n" +
+                "        margin: 0;\n" +
+                "        padding: 0;    \n" +
+                "\tfont-family: Arial, sans-serif;\n" +
+                "\n" +
+                "      }\n" +
+                "      /* Styles pour le conteneur principal */\n" +
+                "      .container {\n" +
+                "        max-width: 600px;\n" +
+                "        margin: 0 auto;\n" +
+                "        background-color: #FFFFFF;\n" +
+                "        padding: 20px;\n" +
+                "        height: 100vh;\n" +
+                "        display: flex;\n" +
+                "        flex-direction: column;\n" +
+                "        justify-content: center;\n" +
+                "      }\n" +
+                "      /* Styles pour le logo de l'entreprise */\n" +
+                "      .logo {\n" +
+                "        display: block;\n" +
+                "        margin: -20px auto 20px;\n" +
+                "        width: 100px;\n" +
+                "        height: auto;\n" +
+                "      }\n" +
+                "      /* Styles pour le corps du texte */\n" +
+                "      .text {\n" +
+                "        text-align: center;\n" +
+                "      }\n" +
+                "      /* Styles pour le bouton animé */\n" +
+                "      .button {\n" +
+                "        display: inline-block;\n" +
+                "        font-size: 16px;\n" +
+                "        font-weight: bold;\n" +
+                "        color: #3CAEA3;\n" +
+                "        background-color: transparent;\n" +
+                "        border-radius: 5px;\n" +
+                "        padding: 10px 20px;\n" +
+                "        border: 2px solid #3CAEA3;\n" +
+                "        text-decoration: none;\n" +
+                "        transition: all 0.5s ease;\n" +
+                "      }\n" +
+                "      .button:hover {\n" +
+                "        background-color: #3CAEA3;\n" +
+                "        color: #FFFFFF;\n" +
+                "      }\n" +
+                "    </style>\n" +
+                "  </head>\n" +
+                "  <body>\n" +
+                "    <div class=\"container\">\n" +
+                "      <img src=\"https://i.ibb.co/nkrBqck/334886508-513260607680644-3515218608247778867-n.png\" alt=\"indusmarket logo\" padding-left=\"60%\" height=\"70px\" width=\"130px\">\n" +
+                "<br>     \n" +
+                " <div class=\"text\">\n" +
+                "        <h1 style=\"color : #3CAEA3;\">Hi "+user.getFirstName()+" "+user.getLastName()+"</h1>\n" +
+                "        <p>We noticed there is a problem connecting to your account</p>\n" +
+                "        <p>this is your email verification code:</p>\n" +
+                "\n" +
+                "<p style=\"color : red\">"+token+"</p>\n" +
+                "       \n" +
+                "\n" +
+                "      </div>\n" +
+                "    </div>\n" +
+                "  </body>\n" +
+                "</html>\n";
+    }
     private String buildEmail(String name, String link) {
         return "<!DOCTYPE html>\n" +
                 "<html>\n" +

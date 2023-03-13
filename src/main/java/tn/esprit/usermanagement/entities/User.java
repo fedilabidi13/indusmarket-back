@@ -79,8 +79,6 @@ public class User implements UserDetails {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     List<React> postReacts;
 
-
-
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL)
     List<Advertising> advertising;
