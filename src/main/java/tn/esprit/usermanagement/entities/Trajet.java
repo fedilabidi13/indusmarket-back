@@ -33,4 +33,5 @@ public class Trajet implements Serializable {
     @JsonIgnore
     @ManyToOne
     private Delivery deliveryss;
+
 }
