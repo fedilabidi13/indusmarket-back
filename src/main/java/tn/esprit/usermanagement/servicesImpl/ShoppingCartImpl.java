@@ -20,12 +20,14 @@ public class ShoppingCartImpl implements IShoppingCartService {
     private UserRepo userRepo;
     private ShoppingCartRepo shoppingCartRepo;
 
+    AuthenticationService  authenticationService;
 
     /******************************** Create shoppingCartNotUse ****************************/
 
     @Override
-    public ShoppingCart create(Integer idUser) {
-        User user = userRepo.getReferenceById(idUser);
+    public ShoppingCart create() {
+
+        User user = authenticationService.currentlyAuthenticatedUser();
         ShoppingCart shoppingCart = new ShoppingCart();
         shoppingCart.setCartItemList(new ArrayList<>());
         shoppingCartRepo.save(shoppingCart);
@@ -37,8 +39,8 @@ public class ShoppingCartImpl implements IShoppingCartService {
 
     //************************************* Show all the cartitems in a shopping cart *********************//
     @Override
-    public List<CartItem> loadCartItem(Integer idUser) {
-        User user = userRepo.getReferenceById(idUser);
+    public List<CartItem> loadCartItem( ) {
+        User user = authenticationService.currentlyAuthenticatedUser();
         return user.getShoppingCart().getCartItemList();
 
     }
@@ -54,27 +56,5 @@ public class ShoppingCartImpl implements IShoppingCartService {
     }
 
 
-
-
-
-   /* @Override
-    public List<Product> getRecommendationsForUser(Integer userId) {
-
-        User user = userRepo.getReferenceById(userId);
-        ShoppingCart shoppingCart = user.getShoppingCart();
-        List<CartItem> cartItems = shoppingCart.getCartItemList();
-
-        Map<Category, List<CartItem>> cartItemsByCategory = cartItems.stream().collect(Collectors.groupingBy(cartItem -> cartItem.getProduct().getCategory()));
-
-        List<Product> recommendedProducts = new ArrayList<>();
-        cartItemsByCategory.forEach((category, items) -> {List<Product> products = productRepo.findByCategory(category);
-            if (!products.isEmpty()) {
-                int randomIndex = new Random().nextInt(products.size());
-                recommendedProducts.add(products.get(randomIndex));
-            }
-        });
-        return recommendedProducts;
-    }
-*/
 
 }

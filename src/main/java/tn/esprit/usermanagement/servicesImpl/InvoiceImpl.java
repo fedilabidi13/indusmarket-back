@@ -2,9 +2,11 @@ package tn.esprit.usermanagement.servicesImpl;
 
 import com.google.zxing.WriterException;
 import com.itextpdf.io.image.ImageDataFactory;
+import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
+import com.itextpdf.layout.borders.SolidBorder;
 import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
@@ -56,7 +58,7 @@ public class InvoiceImpl  implements IInvoiceService {
         theInvoice.setInvoiceRef(refGenerator.generateRef());
         theInvoice.setCreationDate(LocalDateTime.now());
         theInvoice.setOrdre(orderRepo.getReferenceById(orderId));
-        User user = userRepo.findById(orderRepo.getReferenceById(orderId).getUser().getId()).orElse(null);
+        User user = orderRepo.getReferenceById(orderId).getUser();
 
 
         ByteArrayOutputStream pdfOutputStream = new ByteArrayOutputStream();
@@ -64,52 +66,56 @@ public class InvoiceImpl  implements IInvoiceService {
         PdfDocument pdfDocument = new PdfDocument(pdfWriter);
         Document document = new Document(pdfDocument);
 
+         // Logo
 
-        Image logo = new Image(ImageDataFactory.create("src/main/resources/assets/1.png"));
 
-        logo.setWidth(100);
+        Image logo = new Image(ImageDataFactory.create("src/main/resources/assets/logo.png"));
+        logo.setWidth(75);
         logo.setHeight(50);
-
-        logo.setFixedPosition(10, 800);
-
+        logo.setFixedPosition(document.getLeftMargin()-20 , document.getPageEffectiveArea(document.getPdfDocument().getDefaultPageSize()).getTop() - 20);
         document.add(logo);
+
+
 
         // Add a title to the PDF
         Paragraph title = new Paragraph("A purchase order   : " + theInvoice.getInvoiceRef());
         title.setTextAlignment(TextAlignment.CENTER);
         document.add(title);
 
+        document.add(new Paragraph("\n"));
+
+
         // Add a description to the PDF
         Paragraph description = new Paragraph("The date that the order was placed was " + theInvoice.getCreationDate() +".");
         description.setTextAlignment(TextAlignment.JUSTIFIED);
         document.add(description);
 
+        document.add(new Paragraph("\n"));
+        document.add(new Paragraph("\n"));
 
 
 
-        // Add order items to the PDF
         Table table = new Table(new float[]{4, 1, 2});
         table.setWidth(UnitValue.createPercentValue(100));
-        table.addCell(new Cell().add(new Paragraph("Product")));
-        table.addCell(new Cell().add(new Paragraph("Quantity")));
-        table.addCell(new Cell().add(new Paragraph("Price")));
+        table.addHeaderCell(new Cell().add(new Paragraph("Product")));
+        table.addHeaderCell(new Cell().add(new Paragraph("Quantity")));
+        table.addHeaderCell(new Cell().add(new Paragraph("Price")));
 
-
-
-
-        //Integer idUser = authenticationService.currentlyAuthenticatedUser().getId();
-        List<CartItem> orderItems =theInvoice.getOrdre().getSecondCartItemList();
-
-
-
-
+          List<CartItem> orderItems =theInvoice.getOrdre().getSecondCartItemList();
 
         for (CartItem item : orderItems) {
             table.addCell(new Cell().add(new Paragraph(item.getProduct().getName())));
             table.addCell(new Cell().add(new Paragraph(String.valueOf(item.getQuantity()))));
-            table.addCell(new Cell().add(new Paragraph(String.valueOf(item.getProduct().getPrice()))));
+            table.addCell(new Cell().add(new Paragraph(String.format("$%.2f", item.getProduct().getPrice()))));
         }
+
+
         document.add(table);
+        table.setBorder(new SolidBorder(1));
+        table.setMarginTop(20);
+        table.setFontSize(10);
+
+
 
 
         // Add other information to the PDF

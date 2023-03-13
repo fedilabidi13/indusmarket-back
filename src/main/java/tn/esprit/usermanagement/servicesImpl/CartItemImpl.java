@@ -1,19 +1,15 @@
 package tn.esprit.usermanagement.servicesImpl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
-import tn.esprit.usermanagement.entities.CartItem;
-import tn.esprit.usermanagement.entities.Product;
-import tn.esprit.usermanagement.entities.ShoppingCart;
-import tn.esprit.usermanagement.entities.User;
-import tn.esprit.usermanagement.repositories.ShoppingCartRepo;
+import tn.esprit.usermanagement.entities.*;
+import tn.esprit.usermanagement.repositories.*;
 import tn.esprit.usermanagement.services.ICartItemService;
-import tn.esprit.usermanagement.repositories.CartItemRepo;
-import tn.esprit.usermanagement.repositories.ProductRepo;
-import tn.esprit.usermanagement.repositories.UserRepo;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 @AllArgsConstructor
 public class CartItemImpl implements ICartItemService {
     private UserRepo userRepo;
@@ -21,14 +17,20 @@ public class CartItemImpl implements ICartItemService {
     private final ProductRepo productRepo;
     private final ShoppingCartRepo shoppingCartRepo;
 
+    private final ProductRequestRepo productRequestRepo;
+
+
+    AuthenticationService authenticationService;
+
     @Override
     @Transactional
-    public CartItem addAndAssignToCart(Integer idProduct, Integer qte, Integer idUser) {
-        User user = userRepo.getReferenceById(idUser);
+    public String addAndAssignToCart(Integer idProduct, Integer qte) {
+        User user = authenticationService.currentlyAuthenticatedUser();
+
         Product product = productRepo.getReferenceById(idProduct);
 
 
-        if (product.getStock().getCurrentQuantity() > 0 && product.getStock().getCurrentQuantity()>=qte ) {
+        if (product.getStock().getCurrentQuantity() > 0 && product.getStock().getCurrentQuantity()>=qte &&  product.getShop().getUser().getEnabled()==true ) {
             if (user.getShoppingCart() == null) {
                 ShoppingCart newShoppingcart = new ShoppingCart();
                 user.setShoppingCart(newShoppingcart);
@@ -38,7 +40,7 @@ public class CartItemImpl implements ICartItemService {
                 cartItem.setProduct(product);
                 shoppingCartRepo.save(newShoppingcart);
                 cartItemRepo.save(cartItem);
-                return cartItem;
+                return "cartItem added !";
 
             } else {
                 ShoppingCart shoppingCart = user.getShoppingCart();
@@ -48,21 +50,27 @@ public class CartItemImpl implements ICartItemService {
                 cartItem.setProduct(product);
                 shoppingCartRepo.save(shoppingCart);
                 cartItemRepo.save(cartItem);
-                return cartItem;
+                return "cartItem added!";
             }
         } else {
-            //throw new RuntimeException("Error: this product is not available anymore");
-            System.err.println("romena il mazyouna tahfouna");
+
+            ProductRequest productRequest = new ProductRequest();
+            productRequest.setProduct(product);
+            productRequest.setUser(user);
+            productRequest.setQuantityNeeded(qte);
+            productRequestRepo.save(productRequest);
+
+                return "Error: we have problem with the product or the buyer";
             }
-             return null;
-    }
+        }
+
 
     @Override
     public void updateCartItemQuantity(Integer cartItemId,Integer counterValue) {
         CartItem theCart = cartItemRepo.getReferenceById(cartItemId);
         int currentQuantity = theCart.getQuantity();
 
-        if (theCart.getProduct().getStock().getCurrentQuantity() > 0 && currentQuantity >= 1) {
+        if (theCart.getProduct().getStock().getCurrentQuantity() > 0 && currentQuantity >= 1 ) {
             if (counterValue == 1 || counterValue == -1) {
                 int newQuantity = currentQuantity + counterValue;
                 theCart.setQuantity(newQuantity);
@@ -85,9 +93,7 @@ public class CartItemImpl implements ICartItemService {
 
         @Override
         public CartItem AfficherCartItem (Integer idCartItem){
-
         CartItem cartItem = cartItemRepo.getReferenceById(idCartItem);
-
          cartItem.getProduct();
 
          return  cartItem;

@@ -1,6 +1,7 @@
 package tn.esprit.usermanagement.controllers;
 
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tn.esprit.usermanagement.entities.User;
 import tn.esprit.usermanagement.enumerations.Role;
@@ -34,8 +35,8 @@ public class AdminController {
     }
 
     @GetMapping("/currentUser")
-    public User getcurrentuser()
+    public ResponseEntity<?> getcurrentuser()
     {
-        return authenticationService.currentlyAuthenticatedUser();
+        return ResponseEntity.ok(authenticationService.currentlyAuthenticatedUser().getEmail());
     }
 }

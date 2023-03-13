@@ -7,6 +7,7 @@ import tn.esprit.usermanagement.dto.ProductSpecification;
 import tn.esprit.usermanagement.dto.SearchCriteria;
 import tn.esprit.usermanagement.entities.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
+import tn.esprit.usermanagement.enumerations.Category;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,4 +58,7 @@ public interface ProductRepo extends JpaRepository<Product,Integer>, JpaSpecific
 
         return findAll(spec);
     }
+
+    List<Product> findByCategory(Category category);
+
 }

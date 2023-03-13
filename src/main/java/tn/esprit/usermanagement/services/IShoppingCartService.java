@@ -7,8 +7,8 @@ import tn.esprit.usermanagement.entities.ShoppingCart;
 import java.util.List;
 
 public interface IShoppingCartService {
-    ShoppingCart create (Integer idUser);
-    List<CartItem> loadCartItem(Integer idUser);
+    ShoppingCart create ( );
+    List<CartItem> loadCartItem( );
 
       void deleteShoppingCart ( Integer idShoppingCart);
 

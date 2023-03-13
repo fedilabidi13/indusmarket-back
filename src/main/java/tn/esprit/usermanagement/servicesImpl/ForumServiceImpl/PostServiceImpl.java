@@ -24,6 +24,7 @@ public class PostServiceImpl implements PostIservice {
     PostRepo postRepo;
     UserRepo userRepo;
     private AuthenticationService authenticationService;
+
     private DataLoadServiceImpl dataLoadService;
     private BadWordServiceImpl badWordService;
     private ImageServiceImpl imageService;

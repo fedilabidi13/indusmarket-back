@@ -15,15 +15,15 @@ import java.util.List;
 @AllArgsConstructor
 public class ShoppingCartController {
     private IShoppingCartService shoppingCartService;
-    @PostMapping("/add/{id}")
-    public ShoppingCart addingShoppingCart(@PathVariable("id") Integer id)
+    @PostMapping("/add")
+    public ShoppingCart addingShoppingCart( )
     {
-        return shoppingCartService.create(id);
+        return shoppingCartService.create();
     }
     @GetMapping("/load-items")
-    public List<CartItem> AllCartItems(@RequestParam Integer id)
+    public List<CartItem> AllCartItems( )
     {
-        return shoppingCartService.loadCartItem(id);
+        return shoppingCartService.loadCartItem( );
     }
     @DeleteMapping("/deleteShoppingCart")
     void deleteShoppingCart (@RequestParam Integer idShoppingCart) {

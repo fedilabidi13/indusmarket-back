@@ -9,13 +9,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import tn.esprit.usermanagement.entities.Invoice;
-import tn.esprit.usermanagement.entities.Orders;
-import tn.esprit.usermanagement.entities.ShoppingCart;
-import tn.esprit.usermanagement.repositories.InvoiceRepo;
-import tn.esprit.usermanagement.repositories.OrderRepo;
+import tn.esprit.usermanagement.entities.*;
+import tn.esprit.usermanagement.repositories.*;
 import tn.esprit.usermanagement.services.IInvoiceService;
 import tn.esprit.usermanagement.services.IOrderService;
+import tn.esprit.usermanagement.servicesImpl.AuthenticationService;
 
 import java.io.IOException;
 
@@ -29,6 +27,17 @@ public class CheckoutController {
     public String stripePublicKey;
     @Autowired
     private OrderRepo orderRepo;
+    @Autowired
+    private CartItemRepo cartItemRepo;
+    @Autowired
+    private ProductRepo productRepo;
+    @Autowired
+    private AuthenticationService authenticationService;
+    @Autowired
+    private ShoppingCartRepo shoppingCartRepo;
+    @Autowired
+    private UserRepo userRepo;
+
     @GetMapping("/checkout")
     public String checkout (Model model, @RequestParam(required = true) String orderId)
     {
@@ -40,9 +49,9 @@ public class CheckoutController {
         model.addAttribute("orderId",orderId);
         Orders orderpaid = orderRepo.getReferenceById(Integer.valueOf(orderId));
         orderpaid.setPaid(true);
-        // diminuer la quantite des produits
-
         orderRepo.save(orderpaid);
+        orderService.lessQuantity(orderId);
+        shoppingCartRepo.delete(orderpaid.getUser().getShoppingCart());
         return "checkout";
     }
 

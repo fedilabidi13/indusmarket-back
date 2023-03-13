@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import tn.esprit.usermanagement.entities.CartItem;
 import tn.esprit.usermanagement.entities.Orders;
+import tn.esprit.usermanagement.entities.Product;
 import tn.esprit.usermanagement.services.IInvoiceService;
 import tn.esprit.usermanagement.services.IOrderService;
 
@@ -23,7 +24,6 @@ public class OrderController {
 //    }
 
 
-
 //    @GetMapping("/load-items")
 //    public List<CartItem> selectOrder (@RequestParam Integer id)
 //    {
@@ -31,18 +31,28 @@ public class OrderController {
 //    }
 
 
-    @GetMapping("/createOrder")
-    public Orders createOrder (@RequestParam Integer id)
-    {
-        return orderService.createOrder(id);
+    @PostMapping("/add")
+    public Orders createOrder() {
+        return orderService.createOrder();
     }
 
-  @DeleteMapping("/deleteOrder")
-    public void deleteOrder( @RequestParam Integer orderId){
+    @DeleteMapping("/delete")
+    public void deleteOrder(@RequestParam Integer orderId) {
 
         orderService.deleteOrder(orderId);
-  }
+    }
 
+
+    @PostMapping("/update")
+    public void updateOrder(@RequestParam Integer idOrder, @RequestParam String dilevryAdresse) {
+        orderService.updateOrder(idOrder, dilevryAdresse);
+    }
+
+
+    @GetMapping("/recommendProduct")
+    public Product recommendProduct() {
+      return   orderService.recommendProduct();
+    }
 
 
 
