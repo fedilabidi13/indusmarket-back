@@ -69,7 +69,8 @@ public class ClaimsServiceImpl implements ClaimsService {
     @Override
     public List<Claims> ShowClaimsByOrder(int orderId) {
         Orders orders = orderRepo.findById(orderId).get();
-return new ArrayList<>();    }
+return new ArrayList<>();
+    }
 
 
     @Override

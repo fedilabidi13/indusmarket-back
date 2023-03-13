@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import tn.esprit.usermanagement.entities.ForumEntities.Post;
-import tn.esprit.usermanagement.entities.PostComment;
+import tn.esprit.usermanagement.entities.ForumEntities.PostComment;
 import tn.esprit.usermanagement.entities.User;
 import tn.esprit.usermanagement.repositories.PostCommentRepo;
 import tn.esprit.usermanagement.repositories.PostRepo;
@@ -16,7 +16,6 @@ import tn.esprit.usermanagement.repositories.UserRepo;
 import tn.esprit.usermanagement.services.ForumIservice.CommentIservice;
 import tn.esprit.usermanagement.servicesImpl.AuthenticationService;
 
-import javax.xml.stream.events.Comment;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;

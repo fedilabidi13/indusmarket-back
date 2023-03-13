@@ -3,9 +3,8 @@ package tn.esprit.usermanagement.repositories;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import tn.esprit.usermanagement.entities.ForumEntities.Post;
-import tn.esprit.usermanagement.entities.PostComment;
+import tn.esprit.usermanagement.entities.ForumEntities.PostComment;
 
-import javax.xml.stream.events.Comment;
 import java.util.List;
 
 @Repository

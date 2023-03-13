@@ -17,9 +17,9 @@ public class BadWordController {
     //BadWord Test Successfully
     @PostMapping("/add")
     @ResponseBody
-    public BadWord addBadWord(@ModelAttribute BadWord b) {
+    public BadWord addBadWord(@ModelAttribute BadWord badWord) {
 
-        return badWordIservice.addBadWord(b);
+        return badWordIservice.addBadWord(badWord);
     }
 
     @PostMapping("/update")

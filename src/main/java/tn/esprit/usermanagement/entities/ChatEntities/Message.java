@@ -5,9 +5,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import tn.esprit.usermanagement.entities.ChatEntities.Chatroom;
+import tn.esprit.usermanagement.entities.Pictures;
+import tn.esprit.usermanagement.entities.User;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -21,8 +25,20 @@ public class Message implements Serializable{
     private Integer  messageId;
 
     String body;
+    LocalDateTime date;
 
     @JsonIgnore
     @ManyToOne
-    Chatroom chat;
+    User sender;
+    @JsonIgnore
+    @ManyToOne
+    User reciver;
+    @JsonIgnore
+    @ManyToOne
+    Chatroom chatroom;
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<Pictures> pictures;
+
+
+
 }

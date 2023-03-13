@@ -10,7 +10,6 @@ import tn.esprit.usermanagement.services.ForumIservice.PostIservice;
 import tn.esprit.usermanagement.servicesImpl.AuthenticationService;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -27,13 +26,13 @@ public class PostController {
     }
     @PostMapping("/update")
     @ResponseBody
-    public ResponseEntity<?> Update_Post(@ModelAttribute Post post,@RequestParam("files") List<MultipartFile> files,  @RequestParam Integer IdPost) throws IOException {
-        return postIservice.Update_post(post,files,IdPost);
+    public ResponseEntity<?> Update_Post(@ModelAttribute Post post,@RequestParam("files") List<MultipartFile> files,  @RequestParam Integer idPost) throws IOException {
+        return postIservice.Update_post(post,files,idPost);
     }
     @PostMapping("/delete")
-    public ResponseEntity<String> deletePost(@RequestParam Integer IdPost) {
-        postIservice.deletePost(IdPost);
-        return new ResponseEntity<>("post with id " + IdPost + " has been deleted successfully", HttpStatus.OK);
+    public ResponseEntity<String> deletePost(@RequestParam Integer idPost) {
+        postIservice.deletePost(idPost);
+        return new ResponseEntity<>("post with id " + idPost + " has been deleted successfully", HttpStatus.OK);
     }
 
 
@@ -48,11 +47,11 @@ public class PostController {
         return postIservice.Get_post_by_User(idUser);
     }
     @GetMapping("/findById")
-    public Post Get_Post_Details(@RequestParam Integer postId) {
-        return postIservice.getPostById(postId);
+    public Post Get_Post_Details(@RequestParam Integer idPost) {
+        return postIservice.getPostById(idPost);
 
     }
-    @GetMapping("/search")
+    @GetMapping("/searchPost")
     public  List<Post> adversting_bydata(@RequestParam String ch){
         Integer idUser = authenticationService.currentlyAuthenticatedUser().getId();
         return postIservice.Searchpost(ch,idUser);

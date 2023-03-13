@@ -5,8 +5,6 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import tn.esprit.usermanagement.entities.ForumEntities.Post;
-import tn.esprit.usermanagement.entities.PostComment;
 import tn.esprit.usermanagement.entities.User;
 import tn.esprit.usermanagement.enumerations.ReactType;
 

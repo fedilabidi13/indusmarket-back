@@ -145,7 +145,6 @@ public class AuthenticationService {
         }
 
         LocalDateTime expiredAt = phoneToken.getExpiresAt();
-
         if (expiredAt.isBefore(LocalDateTime.now())) {
             String phoneCode= twilioService.generateCode();
             PhoneToken confirmationToken2 = new PhoneToken(phoneCode, LocalDateTime.now(),
