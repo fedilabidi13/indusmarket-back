@@ -8,7 +8,6 @@ import com.google.zxing.oned.Code93Writer;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import tn.esprit.usermanagement.entities.Pictures;
@@ -18,7 +17,6 @@ import tn.esprit.usermanagement.entities.Stock;
 import tn.esprit.usermanagement.repositories.*;
 import tn.esprit.usermanagement.services.IProductService;
 
-import javax.validation.constraints.NotNull;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.util.*;
@@ -199,5 +197,33 @@ public class ProductImpl implements IProductService {
             Collections.reverse(holder);
             return holder;
         }
+
+    public List<String> compareProductFeatures(Product product1, Product product2){
+    List<String> comparedFeatures = new ArrayList<>();
+        if (product1.getPrice() < product2.getPrice()) {
+        comparedFeatures.add(product1.getName() + " is cheaper than " + product2.getName());
+    } else if (product1.getPrice() > product2.getPrice()) {
+        comparedFeatures.add(product2.getName() + " is cheaper than " + product1.getName());
+    } else {
+        comparedFeatures.add("Both products have the same price.");
+    }
+        if ((product1.getStock().getCurrentQuantity())-(product1.getStock().getCurrentQuantity()) < (product2.getStock().getCurrentQuantity())-(product2.getStock().getCurrentQuantity())){
+            comparedFeatures.add(product1.getName() + " is less sold than " + product2.getName());
+        }
+        else if ((product1.getStock().getCurrentQuantity())-(product1.getStock().getCurrentQuantity()) > (product2.getStock().getCurrentQuantity())-(product2.getStock().getCurrentQuantity())){
+            comparedFeatures.add(product1.getName() + " is more sold than " + product2.getName());
+        }
+        else {
+            comparedFeatures.add("Both products are sold equally");
+
+        }
+        return comparedFeatures;
+}
+    public List<String> compareProducts(int productId1, int productId2) {
+        Product product1 = productRepo.findById(productId1).get();
+        Product product2 = productRepo.findById(productId2).get();
+        List<String> comparedFeatures1 = compareProductFeatures(product1, product2);
+        return comparedFeatures1;
+    }
 
 }

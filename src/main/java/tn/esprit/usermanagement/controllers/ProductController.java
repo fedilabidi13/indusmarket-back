@@ -86,4 +86,8 @@ public class ProductController {
             @RequestParam("max") float maxPrice) {
         return productService.getProductsByPriceRange(minPrice, maxPrice);
     }
+    @GetMapping("/compare")
+    public List<String> compareProducts(@RequestParam int productId1, @RequestParam int productId2) {
+        return productService.compareProducts(productId1,productId2);
+    }
 }
