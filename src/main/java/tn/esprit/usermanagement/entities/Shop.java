@@ -40,7 +40,7 @@ public class Shop implements Serializable {
     private Address address;
     private float somme =0;
 
-    //
+
 
 
 }

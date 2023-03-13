@@ -18,4 +18,6 @@ public interface IProductService {
     public List<Product> SortProductByCategory(String category);
     public List<Product> searchProducts(String reference, String name, Integer quantity,Float price, String description, String brand);
     public List<Product> getProductsByPriceRange(float minPrice, float maxPrice);
+    public List<String> compareProductFeatures(Product product1, Product product2);
+    public List<String> compareProducts(int productId1, int productId2);
 }

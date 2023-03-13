@@ -2,6 +2,7 @@ package tn.esprit.usermanagement.controllers;
 
 
 import lombok.AllArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,6 +15,7 @@ import tn.esprit.usermanagement.services.ShopServices;
 import tn.esprit.usermanagement.servicesImpl.AuthenticationService;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 @RestController
 @AllArgsConstructor
@@ -70,13 +72,17 @@ public class ShopController {
     public ResponseEntity<List<Product>> getAllProductsOfShop(@RequestParam int shopId) {
         return shopServices.getAllProductsOfShop(shopId);
     }
-/*
+
     @GetMapping("/createReport")
-    public double generateReportForShop(@RequestParam Integer shopId, @RequestParam) {
-        return shopServices.generateReportForShop(shopId);
+    public Shop generateReportForShop(
+            @RequestParam Integer shopId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd ") LocalDateTime debut,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd ") LocalDateTime fin
+    ) {
+        return shopServices.generateReportForShop(shopId,debut,fin);
     }
 
-*/
+
 
 
 }
