@@ -1,6 +1,7 @@
 package tn.esprit.usermanagement.servicesImpl;
 
 
+import com.cloudinary.Cloudinary;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
@@ -31,11 +32,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
-    @Service
+@Service
     @AllArgsConstructor
 public class ShopServicesImpl implements ShopServices {
     ShopRepo shopRepo;
@@ -46,6 +45,8 @@ public class ShopServicesImpl implements ShopServices {
     AuthenticationService authenticationService;
         private final AddressRepo addressRepo;
         private final ShoppingCartRepo shoppingCartRepo;
+        private Cloudinary cloudinary;
+        private MediaRepo mediaRepo;
 
         @Override
         public List<Shop> ShowAllShops() {
@@ -56,19 +57,22 @@ public class ShopServicesImpl implements ShopServices {
         public Shop addShopAndAffectToUser(Shop s, List<MultipartFile> files) throws Exception {
             s.setUser(authenticationService.currentlyAuthenticatedUser());
             s.setAddress(addressRepo.save(addressService.AddAddress(s.getAdresse())));
-            List<Pictures> picturesList = new ArrayList<>();
-            for (MultipartFile file : files) {
-                Pictures picture = new Pictures();
-                byte[] data = file.getBytes();
-                if (data.length > 500) { // check if the file is too large
-                    data = Arrays.copyOfRange(data, 0, 500); // truncate the data
-                }
-                picture.setData(data);
-                picturesList.add(picture);
+            List<Media> mediaList = new ArrayList<>();
+            for (MultipartFile multipartFile : files) {
+                Media media = new Media();
+                String url = cloudinary.uploader()
+                        .upload(multipartFile.getBytes(),
+                                Map.of("public_id", UUID.randomUUID().toString()))
+                        .get("url")
+                        .toString();
+                media.setImagenUrl(url);
+                media.setName(multipartFile.getName());
+                mediaList.add(media);
             }
-            picturesRepo.saveAll(picturesList);
+            mediaRepo.saveAll(mediaList);
+            s.setMedias(mediaList);
             s.setValidated(false);
-            s.setPicturesList(picturesList);
+            //s.setPicturesList(picturesList);
             shopRepo.save(s);
 
         return s;
@@ -79,6 +83,7 @@ public class ShopServicesImpl implements ShopServices {
            Address newAdresse = addressService.AddAddress(s.getAdresse());
            newAdresse.setId(shopRepo.getReferenceById(s.getIdShop()).getAddress().getId());
            s.setAddress(addressRepo.save(newAdresse));
+           s.setUser(authenticationService.currentlyAuthenticatedUser());
         return shopRepo.save(s);}
         else{
             throw new IllegalStateException("You aren't the owner of this shop");}
@@ -185,7 +190,7 @@ public class ShopServicesImpl implements ShopServices {
             date.setTextAlignment(TextAlignment.CENTER);
             document.add(date);
             //Add the logo to the page
-            Image logo = new Image(ImageDataFactory.create("src/main/resources/assets/logo.png"));
+            Image logo = new Image(ImageDataFactory.create("usr/src/main/resources/assets/logo.png"));
             logo.setWidth(75);
             logo.setHeight(50);
             logo.setFixedPosition(document.getLeftMargin()-20 , document.getPageEffectiveArea(document.getPdfDocument().getDefaultPageSize()).getTop() - 20);
@@ -195,7 +200,7 @@ public class ShopServicesImpl implements ShopServices {
             byte[] pdfData = pdfOutputStream.toByteArray();
             // Save the PDF to a file
             String fileName = shop.getName() + ".pdf";
-            String filePath = "src/main/resources/assets/" + fileName;
+            String filePath = "usr/src/main/resources/assets/" + fileName;
             try (FileOutputStream fos = new FileOutputStream(filePath)) {
                 fos.write(pdfData);
             }

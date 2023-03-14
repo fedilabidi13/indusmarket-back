@@ -1,6 +1,7 @@
 package tn.esprit.usermanagement.servicesImpl;
 
 
+import com.cloudinary.Cloudinary;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
@@ -10,10 +11,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import tn.esprit.usermanagement.entities.Pictures;
-import tn.esprit.usermanagement.entities.Product;
-import tn.esprit.usermanagement.entities.Shop;
-import tn.esprit.usermanagement.entities.Stock;
+import tn.esprit.usermanagement.entities.*;
 import tn.esprit.usermanagement.repositories.*;
 import tn.esprit.usermanagement.services.IProductService;
 
@@ -24,6 +22,8 @@ import java.util.*;
 @Service
 @AllArgsConstructor
 public class ProductImpl implements IProductService {
+    private Cloudinary cloudinary;
+    private MediaRepo mediaRepo;
     private ProductRepo productRepo;
     ShopRepo shopRepo;
     UserRepo userRepo;
@@ -67,25 +67,27 @@ public class ProductImpl implements IProductService {
         product.setShop(shop);
         product.setBarcodeImage(pngData);
         // Enregistrement de l'image du code-barres
-        FileOutputStream fos = new FileOutputStream("src/main/resources/assets/"+product.getReference()+".png");
+        FileOutputStream fos = new  FileOutputStream("usr/src/main/resources/assets/"+product.getReference()+".png");
         fos.write(pngData);
         fos.flush();
         fos.close();
         // Retour de l'objet Product avec le code-barres et autres attributs
         Product savedProd = productRepo.save(product);
-        List<Pictures> picturesList = new ArrayList<>();
-        for (MultipartFile file : files) {
-            Pictures picture = new Pictures();
-            byte[] data = file.getBytes();
-            if (data.length > 500) { // check if the file is too large
-                data = Arrays.copyOfRange(data, 0, 500); // truncate the data
-            }
-            picture.setData(data);
-            picturesList.add(picture);
+        List<Media> mediaList = new ArrayList<>();
+        for (MultipartFile multipartFile : files) {
+            Media media = new Media();
+            String url = cloudinary.uploader()
+                    .upload(multipartFile.getBytes(),
+                            Map.of("public_id", UUID.randomUUID().toString()))
+                    .get("url")
+                    .toString();
+            media.setImagenUrl(url);
+            media.setName(multipartFile.getName());
+            mediaList.add(media);
         }
-        picturesRepo.saveAll(picturesList);
+        mediaRepo.saveAll(mediaList);
+        savedProd.setMedias(mediaList);
         savedProd.setStatus("In Stock");
-        savedProd.setPictures(picturesList);
         savedProd.setValidated(false);
         savedProd.setStock(s);
         productRepo.save(savedProd);
@@ -162,10 +164,80 @@ public class ProductImpl implements IProductService {
     }
         @Scheduled(cron = "0 */5 * * * *")
         public void checkProductQuantity() {
+
             List<Product> products = productRepo.findAll();
             for (Product product : products) {
                 if (product.getStock().getCurrentQuantity() <= 0.3 * product.getStock().getInitialQuantity() && oneTimeEmail ==0) {
-                    emailService.send(product.getShop().getUser().getEmail(),product.toString());
+                    String email = "<!DOCTYPE html>\n" +
+                            "<html>\n" +
+                            "  <head>\n" +
+                            "    <meta charset=\"UTF-8\">\n" +
+                            "    <title>Titre de l'email</title>\n" +
+                            "    <style>\n" +
+                            "      /* Styles pour l'arrière-plan uni */\n" +
+                            "      body {\n" +
+                            "        background-color: #F5F5F5;\n" +
+                            "        margin: 0;\n" +
+                            "        padding: 0;    \n" +
+                            "\tfont-family: Arial, sans-serif;\n" +
+                            "\n" +
+                            "      }\n" +
+                            "      /* Styles pour le conteneur principal */\n" +
+                            "      .container {\n" +
+                            "        max-width: 600px;\n" +
+                            "        margin: 0 auto;\n" +
+                            "        background-color: #FFFFFF;\n" +
+                            "        padding: 20px;\n" +
+                            "        height: 100vh;\n" +
+                            "        display: flex;\n" +
+                            "        flex-direction: column;\n" +
+                            "        justify-content: center;\n" +
+                            "      }\n" +
+                            "      /* Styles pour le logo de l'entreprise */\n" +
+                            "      .logo {\n" +
+                            "        display: block;\n" +
+                            "        margin: -20px auto 20px;\n" +
+                            "        width: 100px;\n" +
+                            "        height: auto;\n" +
+                            "      }\n" +
+                            "      /* Styles pour le corps du texte */\n" +
+                            "      .text {\n" +
+                            "        text-align: center;\n" +
+                            "      }\n" +
+                            "      /* Styles pour le bouton animé */\n" +
+                            "      .button {\n" +
+                            "        display: inline-block;\n" +
+                            "        font-size: 16px;\n" +
+                            "        font-weight: bold;\n" +
+                            "        color: #3CAEA3;\n" +
+                            "        background-color: transparent;\n" +
+                            "        border-radius: 5px;\n" +
+                            "        padding: 10px 20px;\n" +
+                            "        border: 2px solid #3CAEA3;\n" +
+                            "        text-decoration: none;\n" +
+                            "        transition: all 0.5s ease;\n" +
+                            "      }\n" +
+                            "      .button:hover {\n" +
+                            "        background-color: #3CAEA3;\n" +
+                            "        color: #FFFFFF;\n" +
+                            "      }\n" +
+                            "    </style>\n" +
+                            "  </head>\n" +
+                            "  <body>\n" +
+                            "    <div class=\"container\">\n" +
+                            "      <img src=\"https://i.ibb.co/nkrBqck/334886508-513260607680644-3515218608247778867-n.png\" alt=\"indusmarket logo\" padding-left=\"60%\" height=\"70px\" width=\"130px\">\n" +
+                            "<br>     \n" +
+                            " <div class=\"text\">\n" +
+                            "        <h1 style=\"color : #3CAEA3;\">Product Stock Alert!</h1>\n" +
+                            "        <p>we noticed there a lot of demain on product: "+product.getName()+" </p>\n" +
+                            "<p style=\"color : red\">Please re-Stock it</p>\n" +
+                            "       \n" +
+                            "\n" +
+                            "      </div>\n" +
+                            "    </div>\n" +
+                            "  </body>\n" +
+                            "</html>\n";
+                    emailService.send(product.getShop().getUser().getEmail(),email);
                     oneTimeEmail = 1;
                 } else if (product.getStock().getCurrentQuantity() > 0.3 * product.getStock().getInitialQuantity()) {
                     oneTimeEmail = 0;
@@ -173,7 +245,8 @@ public class ProductImpl implements IProductService {
             }
         }
 
-        public Product updateProductQuantity(Product p ,int quantity){
+        public Product updateProductQuantity(int id ,int quantity){
+        Product p = productRepo.getReferenceById(id);
             int newQuantity =p.getStock().getCurrentQuantity() + quantity;
             p.getStock().setInitialQuantity(newQuantity);
             p.getStock().setCurrentQuantity(newQuantity);
@@ -198,7 +271,10 @@ public class ProductImpl implements IProductService {
             return holder;
         }
 
-    public List<String> compareProductFeatures(Product product1, Product product2){
+    public List<String> compareProductFeatures(int product1id, int product2id){
+        Product product1 = productRepo.getReferenceById(product1id);
+        Product product2 = productRepo.getReferenceById(product2id);
+
     List<String> comparedFeatures = new ArrayList<>();
         if (product1.getPrice() < product2.getPrice()) {
         comparedFeatures.add(product1.getName() + " is cheaper than " + product2.getName());
@@ -219,11 +295,5 @@ public class ProductImpl implements IProductService {
         }
         return comparedFeatures;
 }
-    public List<String> compareProducts(int productId1, int productId2) {
-        Product product1 = productRepo.findById(productId1).get();
-        Product product2 = productRepo.findById(productId2).get();
-        List<String> comparedFeatures1 = compareProductFeatures(product1, product2);
-        return comparedFeatures1;
-    }
 
 }

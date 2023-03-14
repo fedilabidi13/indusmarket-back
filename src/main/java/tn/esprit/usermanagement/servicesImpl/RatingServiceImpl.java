@@ -33,8 +33,6 @@ public class RatingServiceImpl implements RatingService {
         rate.setUser1(user);
         userRepo.save(user);
         return rateRepository.save(rate);
-
-
     }
 
     public List<Rating> getAllRatesForShop(Integer shopId) {

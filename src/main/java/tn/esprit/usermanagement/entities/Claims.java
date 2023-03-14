@@ -40,9 +40,10 @@ public class Claims implements Serializable {
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL)
     private List<Pictures> pictures;
-    @JsonIgnore
+
     @OneToMany(cascade = CascadeType.ALL)
     private List<Media> medias;
+
     @JsonIgnore
     @ManyToOne
     private Post post;

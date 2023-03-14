@@ -17,15 +17,7 @@ import java.util.List;
 
 public class ProductController {
     private IProductService productService;
-   /*
-    @PostMapping("/add")
-    @ResponseBody
-    public Product dfghjk(@RequestBody Product product)
-    {
-        return productService.ajouter(product);
-    }
 
-    */
 
     @PostMapping(path = "/add")
     public Product addProductToShop(@ModelAttribute Product p,@RequestParam int quantity,@RequestParam int ShopId,@RequestParam("file") List<MultipartFile> files) throws Exception {
@@ -88,6 +80,11 @@ public class ProductController {
     }
     @GetMapping("/compare")
     public List<String> compareProducts(@RequestParam int productId1, @RequestParam int productId2) {
-        return productService.compareProducts(productId1,productId2);
+        return productService.compareProductFeatures(productId1,productId2);
+    }
+    @PostMapping("/updateQuantity")
+    public Product updateQte(@RequestParam Integer id,@RequestParam Integer qte)
+    {
+        return productService.updateProductQuantity(id,qte);
     }
 }

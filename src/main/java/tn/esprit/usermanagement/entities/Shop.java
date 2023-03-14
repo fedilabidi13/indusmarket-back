@@ -40,6 +40,8 @@ public class Shop implements Serializable {
     private Address address;
     private float somme =0;
 
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<Media> medias;
 
 
 

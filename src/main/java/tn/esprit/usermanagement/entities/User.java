@@ -71,7 +71,7 @@ public class User implements UserDetails {
     private List<Orders> ordersList;
 
     // Shop
-    @OneToMany(cascade = CascadeType.ALL,mappedBy = "user")
+    @OneToMany(mappedBy = "user")
     private List<Shop> shops;
     @OneToMany(mappedBy = "user1")
     private List<Rating> rates;
