@@ -33,9 +33,8 @@ public class Event implements Serializable {
     private LocalDateTime endDate;
     private String adresse;
     public boolean accepted=false;
-    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL)
-    private List<Pictures> pictures;
+    private List<Media> medias;
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy="event")
     private List<Ticket> tickets;
@@ -43,7 +42,6 @@ public class Event implements Serializable {
     @ManyToOne
     User user;
     private double price;
-    @JsonIgnore
     @OneToOne
     private Address address;
 }

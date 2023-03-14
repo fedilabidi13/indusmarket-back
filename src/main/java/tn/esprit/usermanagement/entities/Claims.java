@@ -37,16 +37,11 @@ public class Claims implements Serializable {
     @JsonIgnore
     @ManyToOne
     private Orders order;
-    @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<Pictures> pictures;
-    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL)
     private List<Media> medias;
     @JsonIgnore
     @ManyToOne
     private Post post;
-    @JsonIgnore
-    @OneToMany(mappedBy = "claims", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "claims", cascade = CascadeType.ALL)
     private List<ClaimProductRef> claimProductRefs;
 }

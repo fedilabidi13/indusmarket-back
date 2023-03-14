@@ -37,8 +37,5 @@ public class Orders implements Serializable {
     @JsonIgnore
     @ManyToOne
     private Delivery deliveryS;
-    @JsonIgnore
-    @OneToMany
-    private List<Claims> claims;
     private String dilevryAdresse;
 }
