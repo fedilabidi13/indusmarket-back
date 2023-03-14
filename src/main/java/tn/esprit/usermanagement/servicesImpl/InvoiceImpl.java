@@ -18,26 +18,29 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import tn.esprit.usermanagement.entities.*;
-import tn.esprit.usermanagement.repositories.InvoiceRepo;
-import tn.esprit.usermanagement.repositories.OrderRepo;
-import tn.esprit.usermanagement.repositories.UserRepo;
+import tn.esprit.usermanagement.repositories.*;
 import tn.esprit.usermanagement.services.IInvoiceService;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @AllArgsConstructor
 @Slf4j
 public class InvoiceImpl  implements IInvoiceService {
+    private final ProductRequestRepo productRequestRepo;
 
     private OrderRepo orderRepo;
     private final UserRepo userRepo;
     private RefGenerator refGenerator;
     private final InvoiceRepo invoiceRepo;
+    private  final EmailService emailService;
+
+    private final ProductRepo productRepository;
 
     @Override
     public Invoice createInvoice (Integer idOrder) {
@@ -154,4 +157,6 @@ public class InvoiceImpl  implements IInvoiceService {
 
 
     }
+
+
 }

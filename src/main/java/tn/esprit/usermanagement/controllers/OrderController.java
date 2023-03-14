@@ -17,18 +17,6 @@ import java.util.List;
 
 public class OrderController {
     private IOrderService orderService;
-//    @PostMapping("/add")
-//    private Orders addOrder(@RequestParam Integer id)
-//    {
-//        return orderService.create(id);
-//    }
-
-
-//    @GetMapping("/load-items")
-//    public List<CartItem> selectOrder (@RequestParam Integer id)
-//    {
-//        return orderService.loadItems(id);
-//    }
 
 
     @PostMapping("/add")

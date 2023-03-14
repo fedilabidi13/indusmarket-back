@@ -6,4 +6,6 @@ import tn.esprit.usermanagement.entities.ProductRequest;
 
 public interface ProductRequestRepo extends JpaRepository<ProductRequest,Integer> {
 
+
+
 }

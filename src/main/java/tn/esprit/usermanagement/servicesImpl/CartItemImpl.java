@@ -65,6 +65,7 @@ public class CartItemImpl implements ICartItemService {
         }
 
 
+
     @Override
     public void updateCartItemQuantity(Integer cartItemId,Integer counterValue) {
         CartItem theCart = cartItemRepo.getReferenceById(cartItemId);
@@ -90,6 +91,8 @@ public class CartItemImpl implements ICartItemService {
             shoppingCartRepo.save(shoppingCart);
 
         }
+
+
 
         @Override
         public CartItem AfficherCartItem (Integer idCartItem){

@@ -93,7 +93,6 @@ public class EmailService implements EmailSender {
             mailSender.send(mimeMessage);
         } catch (MessagingException e) {
             log.error("failed to send email "+e);
-
             throw new IllegalStateException("failed to send email");
         }
     }
