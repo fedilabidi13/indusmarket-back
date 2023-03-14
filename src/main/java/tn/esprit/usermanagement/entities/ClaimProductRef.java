@@ -19,6 +19,6 @@ public class ClaimProductRef implements Serializable {
     private String productRef;
     private Integer quantity;
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     private Claims claims;
 }

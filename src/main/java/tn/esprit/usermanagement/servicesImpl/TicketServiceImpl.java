@@ -1,12 +1,20 @@
 package tn.esprit.usermanagement.servicesImpl;
 
+import com.cloudinary.Cloudinary;
 import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
+import com.google.zxing.oned.Code93Writer;
 import com.google.zxing.qrcode.QRCodeWriter;
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+import com.itextpdf.io.image.ImageData;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfPage;
 import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.property.HorizontalAlignment;
@@ -15,20 +23,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.itextpdf.io.image.ImageDataFactory;
+import com.itextpdf.kernel.geom.Rectangle;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfPage;
+import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.layout.element.Image;
-import tn.esprit.usermanagement.entities.Event;
-import tn.esprit.usermanagement.entities.ForumEntities.Pictures;
-import tn.esprit.usermanagement.entities.Ticket;
-import tn.esprit.usermanagement.entities.User;
-import tn.esprit.usermanagement.repositories.EventRepo;
-import tn.esprit.usermanagement.repositories.PicturesRepo;
-import tn.esprit.usermanagement.repositories.TicketRepo;
-import tn.esprit.usermanagement.repositories.UserRepo;
+import tn.esprit.usermanagement.entities.*;
+import tn.esprit.usermanagement.repositories.*;
 import tn.esprit.usermanagement.services.TicketService;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -48,6 +57,10 @@ public class TicketServiceImpl implements TicketService {
     AuthenticationService authenticationService;
     @Autowired
     RefGenerator refGenerator;
+    @Autowired
+    MediaRepo mediaRepo;
+    @Autowired
+    Cloudinary cloudinary;
     @Override
     public Ticket AddTicketForEventAndAssignToUser(Ticket ticket,Integer eventId) throws IOException, WriterException {
         User user = userRepo.findById(authenticationService.currentlyAuthenticatedUser().getId()).get();
@@ -133,14 +146,18 @@ public class TicketServiceImpl implements TicketService {
         fos.flush();
         fos.close();
         // Create a new Pictures object with the PDF data
-        Pictures pdfPicture = new Pictures();
-        pdfPicture.setData(pdfData);
-        pdfPicture.setContentType("application/pdf");
-        picturesRepo.save(pdfPicture);
+        Media pdfPicture = new Media();
+        pdfPicture.setName(ticket.getReference());
+        pdfPicture.setImagenUrl(cloudinary.uploader()
+                .upload(pdfData,
+                        Map.of("public_id", UUID.randomUUID().toString()))
+                .get("url")
+                .toString());
+        mediaRepo.save(pdfPicture);
         // Add the Pictures object to the list of QR codes in the Ticket object
-        List<Pictures> PdfImage = new ArrayList<>();
+        List<Media> PdfImage = new ArrayList<>();
         PdfImage.add(pdfPicture);
-        savedTicket.setFiles(PdfImage);
+        savedTicket.setMedias(PdfImage);
         return ticketRepo.save(savedTicket);
     }
 }

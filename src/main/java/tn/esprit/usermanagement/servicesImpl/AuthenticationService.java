@@ -152,7 +152,9 @@ public class AuthenticationService {
                 .enabled(false)
                 .country(ipService.getCountry())
                 .twoFactorsAuth(false)
+                .banNumber(0)
                 .build();
+
         userRepo.save(user);
         String token = UUID.randomUUID().toString();
         String phoneCode= twilioService.generateCode();

@@ -18,4 +18,5 @@ public interface ClaimsRepo extends JpaRepository<Claims,Integer> {
     @Query("select c from Claims c where c.statusClaims=?1 AND  c.ConsultAt<?2 ")
     List<Claims> findByStatusClaimsAndConsultAtIsBefore(StatusClaims statusClaims, LocalDateTime limite);
     List<Claims> findByUserAndPost(User user, Post post);
+    List<Claims> findByOrder(Orders orders);
 }

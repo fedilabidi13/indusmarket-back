@@ -31,8 +31,6 @@ public class ClaimsServiceImpl implements ClaimsService {
     @Autowired
     UserRepo userRepo;
     @Autowired
-    PicturesRepo picturesRepo;
-    @Autowired
     ProductRepo productRepo;
     @Autowired
     PostRepo postRepo;
@@ -76,8 +74,7 @@ public class ClaimsServiceImpl implements ClaimsService {
 
     @Override
     public List<Claims> ShowClaimsByOrder(int orderId) {
-        Orders orders = orderRepo.findById(orderId).get();
-return orders.getClaims();
+return claimsRepo.findByOrder(orderRepo.findById(orderId).get());
     }
 
     @Override
@@ -88,6 +85,40 @@ return orders.getClaims();
         claim.setStatusClaims(StatusClaims.Pending);
         claim.setUser(user);
         claim.setTypeClaim(TypeClaim.Other);
+        Claims savedClaim = claimsRepo.save(claim);
+        if (files==null||files.isEmpty()){
+            savedClaim.setMedias(null);
+            return claimsRepo.save(savedClaim);
+        }
+        else {
+            List<Media> mediaList = new ArrayList<>();
+            for (MultipartFile multipartFile : files) {
+                Media media = new Media();
+                String url = cloudinary.uploader()
+                        .upload(multipartFile.getBytes(),
+                                Map.of("public_id", UUID.randomUUID().toString()))
+                        .get("url")
+                        .toString();
+                media.setImagenUrl(url);
+                media.setName(multipartFile.getName());
+                mediaList.add(media);
+            }
+            mediaRepo.saveAll(mediaList);
+            savedClaim.setMedias(mediaList);
+        }
+        return claimsRepo.save(savedClaim);
+    }
+    @Override
+    public String AddDeliveryClaimsToOrderWithPicturesAndAssignToUser(Integer orderId,Claims claim, List<MultipartFile> files) throws IOException {
+
+        User user = authenticationService.currentlyAuthenticatedUser();
+        claim.setUser(user);
+        claim.setCreatedAt(LocalDateTime.now());
+        claim.setConsultAt(null);
+        claim.setTypeClaim(TypeClaim.DELIVERY);
+        claim.setStatusClaims(StatusClaims.Pending);
+        Orders orders = orderRepo.findById(orderId).get();
+        claim.setOrder(orders);
         Claims savedClaim = claimsRepo.save(claim);
         List<Media> mediaList = new ArrayList<>();
         for (MultipartFile multipartFile : files) {
@@ -103,37 +134,10 @@ return orders.getClaims();
         }
         mediaRepo.saveAll(mediaList);
         savedClaim.setMedias(mediaList);
-        return claimsRepo.save(savedClaim);
-    }
-
-    @Override
-    public String AddDeliveryClaimsToOrderWithPicturesAndAssignToUser(Integer orderId,Claims claim, List<MultipartFile> files) throws IOException {
-
-        User user = authenticationService.currentlyAuthenticatedUser();
-        claim.setUser(user);
-        claim.setCreatedAt(LocalDateTime.now());
-        claim.setConsultAt(null);
-        claim.setTypeClaim(TypeClaim.DELIVERY);
-        claim.setStatusClaims(StatusClaims.Pending);
-        Orders orders = orderRepo.findById(orderId).get();
-        claim.setOrder(orders);
-        Claims savedClaim = claimsRepo.save(claim);
-        List<Pictures> picturesList = new ArrayList<>();
-        for (MultipartFile file : files) {
-            Pictures picture = new Pictures();
-            byte[] data = file.getBytes();
-            if (data.length > 500) { // check if the file is too large
-                data = Arrays.copyOfRange(data, 0, 500); // truncate the data
-            }
-            picture.setContentType(file.getContentType());
-            picture.setData(data);
-            picturesList.add(picture);
-        }
-        picturesRepo.saveAll(picturesList);
-        savedClaim.setPictures(picturesList);
          claimsRepo.save(savedClaim);
          return " Your claim"+claim.getIdClaims().toString()+" saved succefully";
     }
+
     @Override
     public String AddOrdersClaimsToOrderWithPicturesAndAssignToUser(Integer orderId, Claims claim, List<MultipartFile> files) throws IOException {
         User user = authenticationService.currentlyAuthenticatedUser();
@@ -144,7 +148,7 @@ return orders.getClaims();
         claim.setStatusClaims(StatusClaims.Pending);
         Orders orders = orderRepo.findById(orderId).get();
         claim.setOrder(orders);
-       claimsRepo.save(claim);
+        claimsRepo.save(claim);
         List<ClaimProductRef> claimProductRefs = claim.getClaimProductRefs();
         for (ClaimProductRef c : claimProductRefs){
             claimProductRefRepo.save(c);
@@ -152,19 +156,20 @@ return orders.getClaims();
             claimProductRefRepo.save(c);
         }
         claimsRepo.save(claim);
-        List<Pictures> picturesList = new ArrayList<>();
-        for (MultipartFile file : files) {
-            Pictures picture = new Pictures();
-            byte[] data = file.getBytes();
-            if (data.length > 500) { // check if the file is too large
-                data = Arrays.copyOfRange(data, 0, 500); // truncate the data
-            }
-            picture.setContentType(file.getContentType());
-            picture.setData(data);
-            picturesList.add(picture);
+        List<Media> mediaList = new ArrayList<>();
+        for (MultipartFile multipartFile : files) {
+            Media media = new Media();
+            String url = cloudinary.uploader()
+                    .upload(multipartFile.getBytes(),
+                            Map.of("public_id", UUID.randomUUID().toString()))
+                    .get("url")
+                    .toString();
+            media.setImagenUrl(url);
+            media.setName(multipartFile.getName());
+            mediaList.add(media);
         }
-        picturesRepo.saveAll(picturesList);
-        claim.setPictures(picturesList);
+        mediaRepo.saveAll(mediaList);
+        claim.setMedias(mediaList);
         claimsRepo.save(claim);
         return " Your claim"+claim.getIdClaims().toString()+" saved succefully";
     }
@@ -183,24 +188,25 @@ return orders.getClaims();
                 // Existing claim is not pending, update it
                 existingClaim.setDescription(claim.getDescription());
                 // delete old pictures
-                List<Pictures> oldPictures = existingClaim.getPictures();
+                List<Media> oldPictures = existingClaim.getMedias();
                 if (oldPictures != null) {
-                    picturesRepo.deleteAll(oldPictures);
+                    mediaRepo.deleteAll(oldPictures);
                 }
                 // set new pictures
-                List<Pictures> newPictures = new ArrayList<>();
-                for (MultipartFile file : files) {
-                    Pictures picture = new Pictures();
-                    byte[] data = file.getBytes();
-                    if (data.length > 500) { // check if the file is too large
-                        data = Arrays.copyOfRange(data, 0, 500); // truncate the data
-                    }
-                    picture.setContentType(file.getContentType());
-                    picture.setData(data);
-                    newPictures.add(picture);
+                List<Media> mediaList = new ArrayList<>();
+                for (MultipartFile multipartFile : files) {
+                    Media media = new Media();
+                    String url = cloudinary.uploader()
+                            .upload(multipartFile.getBytes(),
+                                    Map.of("public_id", UUID.randomUUID().toString()))
+                            .get("url")
+                            .toString();
+                    media.setImagenUrl(url);
+                    media.setName(multipartFile.getName());
+                    mediaList.add(media);
                 }
-                picturesRepo.saveAll(newPictures);
-                existingClaim.setPictures(newPictures);
+                mediaRepo.saveAll(mediaList);
+                existingClaim.setMedias(mediaList);
                 Claims savedClaim = claimsRepo.save(existingClaim);
                 return "Updated existing claim";
             }
@@ -213,21 +219,21 @@ return orders.getClaims();
         claim.setPost(post);
         claim.setTypeClaim(TypeClaim.Post);
         Claims savedClaim = claimsRepo.save(claim);
-
         // save pictures
-        List<Pictures> picturesList = new ArrayList<>();
-        for (MultipartFile file : files) {
-            Pictures picture = new Pictures();
-            byte[] data = file.getBytes();
-            if (data.length > 500) { // check if the file is too large
-                data = Arrays.copyOfRange(data, 0, 500); // truncate the data
-            }
-            picture.setContentType(file.getContentType());
-            picture.setData(data);
-            picturesList.add(picture);
+        List<Media> mediaList = new ArrayList<>();
+        for (MultipartFile multipartFile : files) {
+            Media media = new Media();
+            String url = cloudinary.uploader()
+                    .upload(multipartFile.getBytes(),
+                            Map.of("public_id", UUID.randomUUID().toString()))
+                    .get("url")
+                    .toString();
+            media.setImagenUrl(url);
+            media.setName(multipartFile.getName());
+            mediaList.add(media);
         }
-        picturesRepo.saveAll(picturesList);
-        savedClaim.setPictures(picturesList);
+        mediaRepo.saveAll(mediaList);
+        savedClaim.setMedias(mediaList);
         claimsRepo.save(savedClaim);
 
         return "Saved new claim";
@@ -253,75 +259,44 @@ return orders.getClaims();
         Optional<Claims> optionalClaims = claimsRepo.findById(claims.getIdClaims());
         if (optionalClaims.isPresent()) {
             Claims existingClaims = optionalClaims.get();
+            claimProductRefRepo.deleteAll(existingClaims.getClaimProductRefs());
             if (existingClaims.getStatusClaims() == StatusClaims.Pending) {
                 if (files == null || files.isEmpty()) {
-                    claims.setPictures(existingClaims.getPictures());
+                    claims.setMedias(existingClaims.getMedias());
                 } else {
-                    List<Pictures> picturesList = new ArrayList<>();
-                    for (MultipartFile file : files) {
-                        Pictures picture = new Pictures();
-                        byte[] data = file.getBytes();
-                        if (data.length > 500) {
-                            data = Arrays.copyOfRange(data, 0, 500);
-                        }
-                        picture.setData(data);
-                        picture.setContentType(file.getContentType());
-                        picturesList.add(picture);
+                    List<Media> mediaList = new ArrayList<>();
+                    for (MultipartFile multipartFile : files) {
+                        Media media = new Media();
+                        String url = cloudinary.uploader()
+                                .upload(multipartFile.getBytes(),
+                                        Map.of("public_id", UUID.randomUUID().toString()))
+                                .get("url")
+                                .toString();
+                        media.setImagenUrl(url);
+                        media.setName(multipartFile.getName());
+                        mediaList.add(media);
                     }
-                    List<Pictures> existingPictures = existingClaims.getPictures();
-                    for (Pictures picture : existingPictures) {
-                        picturesRepo.delete(picture);
+                    mediaRepo.saveAll(mediaList);
+                    List<Media> existingPictures = existingClaims.getMedias();
+                    for (Media picture : existingPictures) {
+                        mediaRepo.delete(picture);
                     }
-                    picturesRepo.saveAll(picturesList);
-                    claims.setPictures(picturesList);
+                    mediaRepo.saveAll(mediaList);
+                    claims.setMedias(mediaList);
                 }
-
-                    claims.setOrder(orderRepo.findById(orderId).get());
+                claims.setOrder(orderRepo.findById(orderId).get());
+                List<ClaimProductRef> claimProductRefs = claims.getClaimProductRefs();
+                for (ClaimProductRef c : claimProductRefs){
+                    claimProductRefRepo.save(c);
+                    c.setClaims(claims);
+                    claimProductRefRepo.save(c);
+                }
+                claimsRepo.save(claims);
                 claimProductRefRepo.saveAll(claims.getClaimProductRefs());
                 claims.setCreatedAt(existingClaims.getCreatedAt());
-                claims.setUser(existingClaims.getUser());
                 claims.setStatusClaims(existingClaims.getStatusClaims());
-                claimsRepo.save(claims);
-                return "Claims updated successfully";
-            } else {
-                return "You can't update this claim as it is not in Pending status";
-            }
-        } else {
-            return "Claim with id " + claims.getIdClaims() + " not found";
-        }
-    }
-    @Transactional
-    @Override
-    public String updatePostClaims(Integer postId, Claims claims, List<MultipartFile> files) throws IOException {
-        Optional<Claims> optionalClaims = claimsRepo.findById(claims.getIdClaims());
-        if (optionalClaims.isPresent()) {
-            Claims existingClaims = optionalClaims.get();
-            if (existingClaims.getStatusClaims() == StatusClaims.Pending) {
-                if (files == null || files.isEmpty()) {
-                    claims.setPictures(existingClaims.getPictures());
-                } else {
-                    List<Pictures> picturesList = new ArrayList<>();
-                    for (MultipartFile file : files) {
-                        Pictures picture = new Pictures();
-                        byte[] data = file.getBytes();
-                        if (data.length > 500) {
-                            data = Arrays.copyOfRange(data, 0, 500);
-                        }
-                        picture.setData(data);
-                        picture.setContentType(file.getContentType());
-                        picturesList.add(picture);
-                    }
-                    List<Pictures> existingPictures = existingClaims.getPictures();
-                    for (Pictures picture : existingPictures) {
-                        picturesRepo.delete(picture);
-                    }
-                    picturesRepo.saveAll(picturesList);
-                    claims.setPictures(picturesList);
-                }
-                claims.setStatusClaims(StatusClaims.Pending);
-                claims.setPost(postRepo.findById(postId).get());
-                claims.setCreatedAt(existingClaims.getCreatedAt());
                 claims.setUser(existingClaims.getUser());
+                claims.setTypeClaim(TypeClaim.Order);
                 claims.setStatusClaims(existingClaims.getStatusClaims());
                 claimsRepo.save(claims);
                 return "Claims updated successfully";
@@ -340,30 +315,33 @@ return orders.getClaims();
             Claims existingClaims = optionalClaims.get();
             if (existingClaims.getStatusClaims() == StatusClaims.Pending) {
                 if (files == null || files.isEmpty()) {
-                    claims.setPictures(existingClaims.getPictures());
+                    claims.setMedias(existingClaims.getMedias());
                 } else {
-                    List<Pictures> picturesList = new ArrayList<>();
-                    for (MultipartFile file : files) {
-                        Pictures picture = new Pictures();
-                        byte[] data = file.getBytes();
-                        if (data.length > 500) {
-                            data = Arrays.copyOfRange(data, 0, 500);
-                        }
-                        picture.setData(data);
-                        picture.setContentType(file.getContentType());
-                        picturesList.add(picture);
+                    List<Media> mediaList = new ArrayList<>();
+                    for (MultipartFile multipartFile : files) {
+                        Media media = new Media();
+                        String url = cloudinary.uploader()
+                                .upload(multipartFile.getBytes(),
+                                        Map.of("public_id", UUID.randomUUID().toString()))
+                                .get("url")
+                                .toString();
+                        media.setImagenUrl(url);
+                        media.setName(multipartFile.getName());
+                        mediaList.add(media);
                     }
-                    List<Pictures> existingPictures = existingClaims.getPictures();
-                    for (Pictures picture : existingPictures) {
-                        picturesRepo.delete(picture);
+                    List<Media> existingPictures = existingClaims.getMedias();
+                    for (Media picture : existingPictures) {
+                        mediaRepo.delete(picture);
                     }
-                    picturesRepo.saveAll(picturesList);
-                    claims.setPictures(picturesList);
+                    mediaRepo.saveAll(mediaList);
+                    claims.setMedias(mediaList);
                 }
                claims.setOrder(orderRepo.findById(orderId).get());
                 claims.setCreatedAt(existingClaims.getCreatedAt());
                 claims.setUser(existingClaims.getUser());
                 claims.setStatusClaims(existingClaims.getStatusClaims());
+                claims.setTypeClaim(TypeClaim.DELIVERY);
+                claims.setClaimProductRefs(null);
                 claimsRepo.save(claims);
                 return "Claims updated successfully";
             } else {
@@ -394,10 +372,6 @@ return orders.getClaims();
                     }
                     float price = product.getPriceAfterDiscount() > 0 ? product.getPriceAfterDiscount() : product.getPrice();
                     totalAmount += price * quantity;
-                    CartItem cartItem = cartItemRepo.findAllByProductReference(productReference);
-                    if (cartItem == null) {
-                        throw new RuntimeException("Cart item not found");
-                    }
                     Shop shop = product.getShop();
                     User shopUser = shop.getUser();
                     shopUser.setBanNumber(shopUser.getBanNumber() + 1);
@@ -484,6 +458,7 @@ return orders.getClaims();
             }
             claimsRepo.findById(claimId).get().setStatusClaims(status);
             claimsRepo.findById(claimId).get().setStatusClaims(status);
+            claimsRepo.findById(claimId).get().setConsultAt(LocalDateTime.now());
             claimsRepo.save(claimsRepo.findById(claimId).get());
             return "claims treated succefully !";
         }

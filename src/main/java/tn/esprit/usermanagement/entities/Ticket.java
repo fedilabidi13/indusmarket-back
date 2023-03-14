@@ -28,8 +28,6 @@ public class Ticket implements Serializable {
     @JsonIgnore
     @ManyToOne
     private Event event;
-    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL)
-    private List<Pictures> files;
-
+    private List<Media> medias;
 }

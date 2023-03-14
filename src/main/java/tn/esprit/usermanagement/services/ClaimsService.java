@@ -17,7 +17,6 @@ public interface ClaimsService {
     public void UpdatePendingClaims();
     public void DeleteRejectedClaims();
     public String updateDeliveryClaims(Integer orderId, Claims newClaims, List<MultipartFile> files) throws IOException;
-    public String updatePostClaims(Integer postId, Claims newClaims, List<MultipartFile> files) throws IOException;
     public String updateOrderClaims(Integer orderId, Claims newClaims, List<MultipartFile> files) throws IOException;
     public String OrderClaimTreatment(Integer claimId, StatusClaims status);
     public String PostClaimTreatment(Integer claimId, StatusClaims status);
