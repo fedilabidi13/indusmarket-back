@@ -39,6 +39,8 @@ public class Shop implements Serializable {
     @OneToOne
     private Address address;
     private float somme =0;
+    
+    
 
 
 
