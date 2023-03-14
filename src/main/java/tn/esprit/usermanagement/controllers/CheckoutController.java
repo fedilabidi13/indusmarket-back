@@ -51,6 +51,7 @@ public class CheckoutController {
         orderpaid.setPaid(true);
         orderRepo.save(orderpaid);
         orderService.lessQuantity(orderId);
+       // orderRepo.save(orderpaid);
         shoppingCartRepo.delete(orderpaid.getUser().getShoppingCart());
         return "checkout";
     }

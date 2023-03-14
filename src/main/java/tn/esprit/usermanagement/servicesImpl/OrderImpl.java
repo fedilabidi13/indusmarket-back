@@ -48,11 +48,12 @@ public class OrderImpl implements IOrderService {
                 order.getSecondCartItemList().add(cartItem);
                 if (cartItem.getProduct().getPriceAfterDiscount()==0){
                     amount+= cartItem.getProduct().getPrice()* cartItem.getQuantity();
-                   // order.getUser().getShoppingCart().getCartItemList().remove(cartItem);
+                    cartItem.getProduct().setSoldAt(LocalDateTime.now());
                    }
                 else  { amount+= cartItem.getProduct().getPriceAfterDiscount()* cartItem.getQuantity();
-                              //order.getUser().getShoppingCart().getCartItemList().remove(cartItem);
-                    }
+                    cartItem.getProduct().setSoldAt(LocalDateTime.now());
+
+                }
             } else {
                 //throw new RuntimeException("Error: this product is not available anymore");
                 System.err.println("sorry now the product is out of stock");
@@ -73,8 +74,10 @@ public class OrderImpl implements IOrderService {
         long hoursSinceCreation = ChronoUnit.HOURS.between(creationTime, currentTime);
 
 
-        if (order.getUser().getId()== usr.getId() && hoursSinceCreation >= 24 ) {
+        if (order.getUser().getId()== usr.getId() && hoursSinceCreation <= 24 ) {
             order.setDilevryAdresse(dilevryAdresse);
+            orderRepo.save(order);
+
         }
         orderRepo.save(order);
 
@@ -92,7 +95,7 @@ public class OrderImpl implements IOrderService {
         LocalDateTime currentTime = LocalDateTime.now();
         long hoursSinceCreation = ChronoUnit.HOURS.between(creationTime, currentTime);
 
-        if (order.getUser().getId()== usr.getId() && hoursSinceCreation >= 24 ) {
+        if (order.getUser().getId()== usr.getId() && hoursSinceCreation <= 24 ) {
             System.err.println("the order is in charge you can not delete it");
         }
         else {
@@ -160,7 +163,6 @@ public class OrderImpl implements IOrderService {
 
 
            }
-
 
            orderRepo.save(orderpaid);
 
