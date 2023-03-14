@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import tn.esprit.usermanagement.entities.Pictures;
 import tn.esprit.usermanagement.entities.User;
 
 import java.io.Serializable;
@@ -44,9 +43,8 @@ public class PostComment implements Serializable{
 
 
 
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<Pictures> pictures;
-
+    @OneToMany
+    List<Media> medias;
 
 }
 

@@ -5,7 +5,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import tn.esprit.usermanagement.entities.Event;
-import tn.esprit.usermanagement.entities.Pictures;
+import tn.esprit.usermanagement.entities.ForumEntities.Pictures;
 import tn.esprit.usermanagement.entities.Ticket;
 import tn.esprit.usermanagement.entities.User;
 import tn.esprit.usermanagement.repositories.EventRepo;

@@ -21,7 +21,7 @@ import java.net.URL;
 public class IpService {
 
      public String getCountry() throws IOException, GeoIp2Exception {
-         File database = new File("C:\\GeoLite2-City.mmdb");
+         File database = new File("D:\\GeoLite2-City.mmdb");
 
 // This reader object should be reused across lookups as creation of it is
 // expensive.

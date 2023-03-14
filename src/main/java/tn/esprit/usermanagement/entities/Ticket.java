@@ -1,20 +1,14 @@
 package tn.esprit.usermanagement.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.WriterException;
-import com.google.zxing.common.BitMatrix;
-import com.google.zxing.qrcode.QRCodeWriter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import com.google.zxing.EncodeHintType;
-import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+import tn.esprit.usermanagement.entities.ForumEntities.Pictures;
+
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Entity
 @NoArgsConstructor

@@ -15,4 +15,6 @@ public interface CommentIservice {
     ResponseEntity<?> Delete_PostCom(Integer idPostCom) ;
     List<PostComment> get_post_Comm(Integer idPost) ;
     List<PostComment> get_comm_Comm(Integer idComment) ;
-}
+    public PostComment getCommentById(Integer idComment) ;
+
+    }

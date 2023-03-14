@@ -21,7 +21,7 @@ public class PostController {
     //Post
     @PostMapping("/add")
     @ResponseBody
-    public ResponseEntity<?> addPost(@ModelAttribute Post post, @RequestParam("files") List<MultipartFile> files) throws IOException {
+    public ResponseEntity<?> addPost(@ModelAttribute Post post, @RequestParam(value = "files",required = false) List<MultipartFile> files) throws IOException {
         return postIservice.addPost(files,post);
     }
     @PostMapping("/update")
@@ -30,9 +30,8 @@ public class PostController {
         return postIservice.Update_post(post,files,idPost);
     }
     @PostMapping("/delete")
-    public ResponseEntity<String> deletePost(@RequestParam Integer idPost) {
-        postIservice.deletePost(idPost);
-        return new ResponseEntity<>("post with id " + idPost + " has been deleted successfully", HttpStatus.OK);
+    public String deletePost(@RequestParam Integer idPost) {
+       return postIservice.deletePost(idPost);
     }
 
 

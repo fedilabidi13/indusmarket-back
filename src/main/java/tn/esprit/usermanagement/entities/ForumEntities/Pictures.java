@@ -1,4 +1,4 @@
-package tn.esprit.usermanagement.entities;
+package tn.esprit.usermanagement.entities.ForumEntities;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -23,4 +23,6 @@ public class Pictures implements Serializable {
     private byte[] data;
     private String contentType;
 
+    public Pictures(Integer id, String name, String imagenUrl, String codeImage) {
+    }
 }

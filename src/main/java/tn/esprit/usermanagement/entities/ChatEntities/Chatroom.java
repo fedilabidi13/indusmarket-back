@@ -28,4 +28,6 @@ public class Chatroom implements Serializable{
     List<Message> messages;
     @OneToMany
     List<User> recievres;
+
+
 }

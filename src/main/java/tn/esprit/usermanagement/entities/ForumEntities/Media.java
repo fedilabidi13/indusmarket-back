@@ -1,4 +1,4 @@
-package tn.esprit.usermanagement.entities;
+package tn.esprit.usermanagement.entities.ForumEntities;
 
 
 
@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import tn.esprit.usermanagement.entities.Advertising;
 import tn.esprit.usermanagement.entities.ForumEntities.Post;
 
 import java.io.Serializable;
@@ -25,12 +26,6 @@ public class Media implements Serializable{
     private String name;
     private String imagenUrl;
     private String codeImage;
-    @JsonIgnore
-    @ManyToOne
-    Post post;
-    @ManyToOne
-    Advertising advertising;
-
     public Media(String name, String imagenUrl, String imagencode) {
 
         this.name = name;
