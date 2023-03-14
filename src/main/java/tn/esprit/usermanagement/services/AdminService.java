@@ -6,6 +6,7 @@ import tn.esprit.usermanagement.enumerations.Role;
 import java.util.List;
 
 public interface AdminService {
+
     String addMod(String email);
     String banUser(String email);
     List<User> getUsers (Role role);
