@@ -8,10 +8,6 @@
 		<version>3.0.1</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-
-
-
-
 	<groupId>tn.esprit</groupId>
 	<artifactId>UserManagement</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
