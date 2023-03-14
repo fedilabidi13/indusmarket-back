@@ -10,7 +10,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import tn.esprit.usermanagement.entities.Pictures;
+import tn.esprit.usermanagement.entities.ForumEntities.Pictures;
 import tn.esprit.usermanagement.entities.Product;
 import tn.esprit.usermanagement.entities.Shop;
 import tn.esprit.usermanagement.entities.Stock;

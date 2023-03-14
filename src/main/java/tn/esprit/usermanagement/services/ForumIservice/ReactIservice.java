@@ -25,7 +25,6 @@ public interface ReactIservice {
 
     React addReactToComment(Integer commentId, ReactType reactType) ;
     public List<React> getAllReactsForComment(PostComment comment) ;
-    public List<React> getAllReactionsByCommentIdAndOwner(Integer commentId, Integer userId) ;
 
 
     }

@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import tn.esprit.usermanagement.entities.ChatEntities.Chatroom;
 import tn.esprit.usermanagement.entities.ChatEntities.Message;
-import tn.esprit.usermanagement.entities.User;
 import tn.esprit.usermanagement.repositories.UserRepo;
 import tn.esprit.usermanagement.services.ChatIservice;
 import tn.esprit.usermanagement.servicesImpl.AuthenticationService;
@@ -17,18 +16,19 @@ import java.util.List;
 
 
 @RestController
+@RequestMapping("/chatroom")
 @AllArgsConstructor
 public class ChatController {
 ChatIservice chatIservice;
 UserRepo userRepo;
 AuthenticationService authenticationService;
-    @PostMapping("/addChatroom")
-    public ResponseEntity<Chatroom> addChatroom(@RequestBody Chatroom chatroom) {
+    @PostMapping("/add")
+    public ResponseEntity<Chatroom> addChatroom(@ModelAttribute Chatroom chatroom) {
         Chatroom savedChatroom = chatIservice.createChatroom(chatroom);
         return new ResponseEntity<>(savedChatroom, HttpStatus.CREATED);
     }
-    @PostMapping("/joinChatroom/{codeRoom}")
-    public ResponseEntity<?> joinChatroom(@PathVariable String codeRoom) {
+    @PostMapping("/join")
+    public ResponseEntity<?> joinChatroom(@RequestParam String codeRoom) {
         Chatroom chatroom = chatIservice.findByCodeRoom(codeRoom);
         if (chatroom == null) {
             return ResponseEntity.notFound().build();
@@ -36,24 +36,23 @@ AuthenticationService authenticationService;
         chatroom = chatIservice.addUserToChatroom(chatroom);
         return ResponseEntity.ok(chatroom);
     }
-    @PostMapping("sendMessageToChatroom/{chatroomId}")
-    public ResponseEntity<String> sendMessageToChatroom(@RequestBody String message, @PathVariable Integer chatroomId, @RequestParam("files") List<MultipartFile> files) throws IOException {
-        chatIservice.sendMessageToChatroom(message, chatroomId,files);
-        return ResponseEntity.ok("Message sent successfully.");
+    @PostMapping("/sendMessageToChatroom")
+    public ResponseEntity<String> sendMessageToChatroom(@RequestParam Integer chatroomId,
+                                                        @RequestParam String message,
+                                                        @RequestParam List<MultipartFile> files) throws IOException {
+        chatIservice.sendMessageToChatroom(message, chatroomId, files);
+        return ResponseEntity.ok(message);
+
     }
-    @GetMapping("getAllMessagesByChatroomIdSortedByDate/{chatroomId}/messages")
-    public ResponseEntity<List<Message>> getAllMessagesByChatroomIdSortedByDate(@PathVariable Integer chatroomId) {
+    @GetMapping("/getAllMessages")
+    public ResponseEntity<List<Message>> getAllMessagesByChatroomIdSortedByDate(@RequestParam Integer chatroomId) {
         List<Message> messages = chatIservice.getAllMessagesByChatroomIdSortedByDate(chatroomId);
         return ResponseEntity.ok(messages);
     }
-    @GetMapping("/{chatroomId}/messages/{messageId}")
-    public ResponseEntity<Message> getMessage(@PathVariable Integer chatroomId, @PathVariable Integer messageId) {
+    @GetMapping("/getMessage")
+    public ResponseEntity<Message> getMessage(@RequestParam Integer chatroomId, @RequestParam Integer messageId) {
         Message message = chatIservice.findMessageByIdAndChatroomId(messageId, chatroomId);
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
-    @DeleteMapping("/deleteMessage/{messageId}")
-    public ResponseEntity<String> deleteMessageByIdAndSender(@PathVariable Integer messageId) {
-        chatIservice.deleteMessageByIdAndSender(messageId);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Message deleted successfully");
-    }
+
 }

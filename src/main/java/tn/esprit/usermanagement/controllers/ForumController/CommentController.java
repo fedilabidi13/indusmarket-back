@@ -1,6 +1,7 @@
 package tn.esprit.usermanagement.controllers.ForumController;
 
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -48,5 +49,11 @@ public class CommentController {
     public  List<PostComment> Get_comm_Comm( @RequestParam Integer idComment ){
         return commentIservice.get_comm_Comm (idComment);
     }
+    @GetMapping("/getById")
+    public ResponseEntity<PostComment> getCommentById(@RequestParam Integer idComment) {
+        PostComment comment = commentIservice.getCommentById(idComment);
+        return new ResponseEntity<>(comment, HttpStatus.OK);
+    }
+
 
 }

@@ -1,7 +1,7 @@
 package tn.esprit.usermanagement.services;
 
 import org.springframework.web.multipart.MultipartFile;
-import tn.esprit.usermanagement.entities.Pictures;
+import tn.esprit.usermanagement.entities.ForumEntities.Pictures;
 
 import java.io.IOException;
 import java.util.List;

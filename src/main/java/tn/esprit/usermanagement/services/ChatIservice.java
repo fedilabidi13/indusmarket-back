@@ -1,5 +1,6 @@
 package tn.esprit.usermanagement.services;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import tn.esprit.usermanagement.entities.ChatEntities.Chatroom;
 import tn.esprit.usermanagement.entities.ChatEntities.Message;
@@ -12,10 +13,9 @@ public interface ChatIservice {
     Chatroom createChatroom(Chatroom chatroom)  ;
     Chatroom findByCodeRoom(String codeRoom) ;
     Chatroom addUserToChatroom(Chatroom chatroom) ;
-    public void sendMessageToChatroom(String message, Integer chatroomId, List<MultipartFile> files) throws IOException ;
+    public ResponseEntity<?> sendMessageToChatroom(String messageBody, Integer chatroomId, List<MultipartFile> files) throws IOException ;
     List<Message> getAllMessagesByChatroomIdSortedByDate(Integer chatroomId);
     Message findMessageByIdAndChatroomId(Integer messageId, Integer chatroomId);
-    void deleteMessageByIdAndSender(Integer messageId);
 
 
 

@@ -2,7 +2,7 @@ package tn.esprit.usermanagement.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import tn.esprit.usermanagement.entities.Media;
+import tn.esprit.usermanagement.entities.ForumEntities.Media;
 
 @Repository
 public interface MediaRepo extends JpaRepository<Media, Integer> {

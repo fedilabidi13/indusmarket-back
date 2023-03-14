@@ -1,19 +1,17 @@
 package tn.esprit.usermanagement.entities;
 
 import jakarta.persistence.*;
-import lombok.*;
 
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import tn.esprit.usermanagement.entities.ForumEntities.Pictures;
 import tn.esprit.usermanagement.enumerations.Category;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 

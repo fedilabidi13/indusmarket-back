@@ -5,7 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import tn.esprit.usermanagement.entities.Pictures;
+import tn.esprit.usermanagement.entities.ForumEntities.Media;
+import tn.esprit.usermanagement.entities.ForumEntities.Pictures;
 import tn.esprit.usermanagement.entities.User;
 
 import java.io.Serializable;
@@ -36,8 +37,9 @@ public class Message implements Serializable{
     @JsonIgnore
     @ManyToOne
     Chatroom chatroom;
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<Pictures> pictures;
+    @OneToMany
+    List<Media> medias;
+
 
 
 

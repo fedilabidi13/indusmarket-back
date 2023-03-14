@@ -14,19 +14,20 @@ import tn.esprit.usermanagement.servicesImpl.AuthenticationService;
 import java.io.IOException;
 import java.util.List;
 @RestController
+@RequestMapping("/message")
 @AllArgsConstructor
 public class MessageController {
     MessageIservice messageIservice;
     private AuthenticationService authenticationService;
 
-    @PostMapping("/send")
-    public ResponseEntity<?> sendMessage(@RequestParam String body, @RequestParam String reciverEmail, @RequestParam("files") List<MultipartFile> files) throws IOException {
+    @PostMapping("/sendPrivate")
+    public ResponseEntity<?> sendMessage(@RequestParam String body, @RequestParam String reciverEmail, @RequestParam(value = "files" ,required = false) List<MultipartFile> files) throws IOException {
         return messageIservice.sendMessage(body, reciverEmail,files);
     }
 
-    @GetMapping("/get/{senderId}/{receiverId}")
-    public ResponseEntity<List<Message>> getMessagesBySenderAndReceiver(@PathVariable Integer senderId,
-                                                                        @PathVariable Integer receiverId) {
+    @GetMapping("/getBySenderAndReceiver")
+    public ResponseEntity<List<Message>> getMessagesBySenderAndReceiver(@RequestParam Integer senderId,
+                                                                        @RequestParam Integer receiverId) {
         User sender = new User();
         sender.setId(senderId);
         User receiver = new User();
@@ -34,9 +35,10 @@ public class MessageController {
         List<Message> messages = messageIservice.getMessagesBySenderAndReceiver(sender, receiver);
         return new ResponseEntity<>(messages, HttpStatus.OK);
     }
-    @GetMapping("/searchMessage")
-    public  List<Message> SearchMesssage(@RequestParam String ch){
-        Integer idUser = authenticationService.currentlyAuthenticatedUser().getId();
-        return messageIservice.Searchmessage(ch,idUser);
+    @GetMapping("/search")
+    public ResponseEntity<List<Message>> searchMessages(@RequestParam String query,
+                                                        @RequestParam Integer recipientId) {
+        List<Message> matchingMessages = messageIservice.Searchmessage(query, recipientId);
+        return ResponseEntity.ok(matchingMessages);
     }
 }
