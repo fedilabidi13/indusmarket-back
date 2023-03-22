@@ -30,6 +30,7 @@ import com.itextpdf.kernel.pdf.PdfPage;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.layout.element.Image;
 import tn.esprit.usermanagement.entities.*;
+import tn.esprit.usermanagement.entities.ForumEntities.Media;
 import tn.esprit.usermanagement.repositories.*;
 import tn.esprit.usermanagement.services.TicketService;
 

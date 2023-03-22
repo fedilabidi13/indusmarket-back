@@ -18,7 +18,7 @@ import tn.esprit.usermanagement.servicesImpl.AuthenticationService;
 import java.io.IOException;
 
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/auth")
 @Slf4j
 @RequiredArgsConstructor
 public class AuthenticationController {
@@ -78,5 +78,11 @@ public class AuthenticationController {
     public ResponseEntity<?> confirmAddress(@RequestParam String mail,
                                             @RequestParam String phone) throws IOException, GeoIp2Exception {
         return ResponseEntity.ok(authenticationService.verifyLocation(mail,phone));
+    }
+    @PostMapping("/newPassword")
+    public ResponseEntity<?> loginModerator(@RequestParam String code,
+                                            @RequestParam String pwd)
+    {
+        return ResponseEntity.ok(authenticationService.loginMod(code,pwd));
     }
 }

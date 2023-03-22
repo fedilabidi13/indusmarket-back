@@ -12,6 +12,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import tn.esprit.usermanagement.entities.*;
+import tn.esprit.usermanagement.entities.ForumEntities.Media;
 import tn.esprit.usermanagement.repositories.*;
 import tn.esprit.usermanagement.services.IProductService;
 

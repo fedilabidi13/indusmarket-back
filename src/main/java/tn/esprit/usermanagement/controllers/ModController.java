@@ -2,6 +2,7 @@ package tn.esprit.usermanagement.controllers;
 
 import com.maxmind.geoip2.exception.GeoIp2Exception;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,8 +16,9 @@ import tn.esprit.usermanagement.servicesImpl.AuthenticationService;
 
 import java.io.IOException;
 
-@Controller
+@RestController
 @AllArgsConstructor
+@RequestMapping("/mod")
 public class ModController {
     private UserRepo userRepo;
     private AuthenticationService authenticationService;
@@ -24,38 +26,13 @@ public class ModController {
     private AdminService adminService;
 
 
-    @GetMapping("/api/v1/auth/mod")
-    public String showForm(Model model) {
-        model.addAttribute("formData", new AuthenticationRequest("",""));
-        return "form";
-    }
+   @GetMapping("/demo")
+   public ResponseEntity<?> sayHeMod()
+   {
+       return ResponseEntity.ok("hello from mod endpoint");
+   }
 
-    @PostMapping("/api/v1/auth/mod/submit")
-    public String submitForm(@ModelAttribute("formData") AuthenticationRequest formData, Model model) throws IOException, GeoIp2Exception {
-        if (userRepo.findByEmail2(formData.getEmail()).getFirtAttempt())
-        {
-            return "verif";
-        }
-        else
-        {
-            String response = authenticationService.authenticate(formData);
-            model.addAttribute("jwt",response);
-            return "ok";
-        }
-    }
-
-    @PostMapping("/api/v1/auth/mod/confirmPassword")
-    public String passForm(@ModelAttribute("formData") AuthenticationRequest formData2) {
-        String password = formData2.getPassword();
-        String email = formData2.getEmail();
-        User user = userRepo.findByEmail2(email);
-        user.setPassword(passwordEncoder.encode(password));
-        user.setFirtAttempt(false);
-        userRepo.save(user);
-        return "ok2";
-    }
-
-    @PostMapping("/api/v1/auth/mod/approveProduct")
+    @PostMapping("/approveProduct")
     public String approveProd(@RequestParam Integer id)
     {
         return adminService.approveProduct(id);

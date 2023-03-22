@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import tn.esprit.usermanagement.entities.ForumEntities.Media;
 import tn.esprit.usermanagement.entities.ForumEntities.Pictures;
 import tn.esprit.usermanagement.enumerations.Category;
 

@@ -14,10 +14,12 @@ import tn.esprit.usermanagement.dto.AuthenticationRequest;
 import tn.esprit.usermanagement.dto.AuthenticationResponse;
 import tn.esprit.usermanagement.dto.RegistrationRequest;
 import tn.esprit.usermanagement.entities.*;
+import tn.esprit.usermanagement.entities.ForumEntities.Media;
 import tn.esprit.usermanagement.enumerations.BanType;
 import tn.esprit.usermanagement.enumerations.Role;
 import tn.esprit.usermanagement.enumerations.TokenType;
 import tn.esprit.usermanagement.repositories.JwtTokenRepo;
+import tn.esprit.usermanagement.repositories.MediaRepo;
 import tn.esprit.usermanagement.repositories.UserRepo;
 import tn.esprit.usermanagement.services.EmailSender;
 
@@ -29,6 +31,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class AuthenticationService {
+    private final MediaRepo mediaRepo;
     private final IpService ipService;
     private final TwilioService twilioService;
     private final PhoneTokenService phoneTokenService;
@@ -43,9 +46,23 @@ public class AuthenticationService {
     private final EmailValidator emailValidator;
     public String authenticate(AuthenticationRequest request) throws IOException, GeoIp2Exception {
         var user = userRepo.findByEmail(request.getEmail()).orElse(null);
+
         if (user == null )
         {
             return "there is no account associated with such email! ";
+        }
+        if ((user.getRole().equals(Role.MOD))&&(user.getFirtAttempt()==true))
+        {
+            String tokenMod = UUID.randomUUID().toString();
+
+
+            ConfirmationToken confirmationToken = new ConfirmationToken(tokenMod, LocalDateTime.now(),
+                    LocalDateTime.now().plusMinutes(1),
+                    user);
+            tokenService.saveConfirmationToken(confirmationToken);
+            emailSender.send(request.getEmail(),buildEmailMod(tokenMod,user));
+            return "First Attempt detected! An email is sent";
+
         }
         if ((user.getEnabled()==false)&&(user.getBanType().equals(BanType.LOCK)))
         {
@@ -80,7 +97,7 @@ public class AuthenticationService {
                     user);
             tokenService.saveConfirmationToken(confirmationToken);
             phoneTokenService.saveConfirmationToken(phoneToken);
-            String link = "http://localhost:8085/api/v1/auth/confirm?token="+token;
+            String link = "http://localhost:8085/auth/confirm?token="+token;
             emailSender.send(request.getEmail(),buildEmailVerif(token, user));
             var jwtTokenString = jwtService.generateJwtToken(user);
             twilioService.sendCode(String.valueOf(user.getPhoneNumber()),phoneCode);
@@ -101,7 +118,6 @@ public class AuthenticationService {
                     user);
             tokenService.saveConfirmationToken(confirmationToken);
             phoneTokenService.saveConfirmationToken(phoneToken);
-            String link = "http://localhost:8085/api/v1/auth/confirm?token="+token;
             emailSender.send(request.getEmail(),buildEmailVerif(token,user));
             return "2fa required. Email and phone verification codes were sent.";
         }
@@ -154,7 +170,12 @@ public class AuthenticationService {
                 .twoFactorsAuth(false)
                 .banNumber(0)
                 .build();
-
+        Media media = new Media();
+        media.setName("default image");
+        //todo  put an appropriate image url
+        media.setImagenUrl("http://localhost/default.png");
+        mediaRepo.save(media);
+        user.setPicture(media);
         userRepo.save(user);
         String token = UUID.randomUUID().toString();
         String phoneCode= twilioService.generateCode();
@@ -166,7 +187,7 @@ public class AuthenticationService {
                 user);
         tokenService.saveConfirmationToken(confirmationToken);
         phoneTokenService.saveConfirmationToken(phoneToken);
-        String link = "http://localhost:8085/api/v1/auth/confirm?token="+token;
+        String link = "http://localhost:8085/auth/confirm?token="+token;
         emailSender.send(request.getEmail(),buildEmail2(user,link));
         var jwtTokenString = jwtService.generateJwtToken(user);
         twilioService.sendCode(String.valueOf(user.getPhoneNumber()),phoneCode);
@@ -229,7 +250,7 @@ public class AuthenticationService {
                     LocalDateTime.now().plusMinutes(1),
                     confirmationToken.getUser());
             tokenService.saveConfirmationToken(confirmationToken2);
-            String link = "http://localhost:8085/api/v1/auth/confirm?token="+token2;
+            String link = "http://localhost:8085/auth/confirm?token="+token2;
             emailSender.send(confirmationToken.getUser().getEmail(),buildEmail2(confirmationToken.getUser(),link));
             return "email expired a new Email is sent!";
         }
@@ -266,7 +287,7 @@ public class AuthenticationService {
                     LocalDateTime.now().plusMinutes(1),
                     confirmationToken.getUser());
             tokenService.saveConfirmationToken(confirmationToken2);
-            //String link = "http://localhost:8085/api/v1/auth/confirm?token="+token2;
+            //String link = "http://localhost:8085/auth/confirm?token="+token2;
             emailSender.send(confirmationToken.getUser().getEmail(),buildEmailVerif(token2, confirmationToken2.getUser() ));
             return "email expired a new Email is sent!";
         }
@@ -308,6 +329,44 @@ public class AuthenticationService {
 
     }
     @Transactional
+    public String loginMod(String mailToken,String newPassword)
+    {
+
+        ConfirmationToken confirmationToken = tokenService
+                .getToken(mailToken).get();
+        if (confirmationToken == null)
+        {
+            return "invalid email token";
+        }
+
+
+
+        LocalDateTime expiredAt = confirmationToken.getExpiresAt();
+        if (expiredAt.isBefore(LocalDateTime.now())) {
+            String token2 = UUID.randomUUID().toString();
+
+            ConfirmationToken confirmationToken2 = new ConfirmationToken(token2, LocalDateTime.now(),
+                    LocalDateTime.now().plusMinutes(1),
+                    confirmationToken.getUser());
+            tokenService.saveConfirmationToken(confirmationToken2);
+            emailSender.send(confirmationToken.getUser().getEmail(),buildEmailMod(token2, confirmationToken2.getUser() ));
+            return "email expired a new Email is sent!";
+        }
+
+
+        tokenService.setConfirmedAt(mailToken);
+
+
+        User user = confirmationToken.getUser();
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setFirtAttempt(false);
+        userRepo.save(user);
+
+
+        return "password updated! U can login via the mod portal";
+
+    }
+    @Transactional
     public String verifyLocation(String mailToken,String phoneCode) throws IOException, GeoIp2Exception {
         ConfirmationToken confirmationToken = tokenService
                 .getToken(mailToken).get();
@@ -326,7 +385,7 @@ public class AuthenticationService {
                     LocalDateTime.now().plusMinutes(1),
                     confirmationToken.getUser());
             tokenService.saveConfirmationToken(confirmationToken2);
-            //String link = "http://localhost:8085/api/v1/auth/confirm?token="+token2;
+            //String link = "http://localhost:8085/auth/confirm?token="+token2;
             emailSender.send(confirmationToken.getUser().getEmail(),buildEmailVerif(token2, confirmationToken2.getUser()));
             return "email expired a new Email is sent!";
         }
@@ -395,7 +454,7 @@ public class AuthenticationService {
                 user);
         tokenService.saveConfirmationToken(confirmationToken);
         phoneTokenService.saveConfirmationToken(phoneToken);
-        String link = "http://localhost:8085/api/v1/auth/confirm?token="+token;
+        String link = "http://localhost:8085/auth/confirm?token="+token;
         emailSender.send(user.getEmail(),buildEmailVerif(token, confirmationToken.getUser()));
         return "verification required. Email and phone verification codes were sent.";
     }
@@ -419,7 +478,7 @@ public class AuthenticationService {
                     LocalDateTime.now().plusMinutes(1),
                     confirmationToken.getUser());
             tokenService.saveConfirmationToken(confirmationToken2);
-            //String link = "http://localhost:8085/api/v1/auth/confirm?token="+token2;
+            //String link = "http://localhost:8085/auth/confirm?token="+token2;
             emailSender.send(confirmationToken.getUser().getEmail(),token2);
             return "email expired a new Email is sent!";
         }
@@ -592,6 +651,80 @@ public class AuthenticationService {
                 " <div class=\"text\">\n" +
                 "        <h1 style=\"color : #3CAEA3;\">Hi "+user.getFirstName()+" "+user.getLastName()+"</h1>\n" +
                 "        <p>We noticed there is a problem connecting to your account</p>\n" +
+                "        <p>this is your email verification code:</p>\n" +
+                "\n" +
+                "<p style=\"color : red\">"+token+"</p>\n" +
+                "       \n" +
+                "\n" +
+                "      </div>\n" +
+                "    </div>\n" +
+                "  </body>\n" +
+                "</html>\n";
+    }
+    private String buildEmailMod(String token,User user)
+    {
+        return "<!DOCTYPE html>\n" +
+                "<html>\n" +
+                "  <head>\n" +
+                "    <meta charset=\"UTF-8\">\n" +
+                "    <title>Titre de l'email</title>\n" +
+                "    <style>\n" +
+                "      /* Styles pour l'arrière-plan uni */\n" +
+                "      body {\n" +
+                "        background-color: #F5F5F5;\n" +
+                "        margin: 0;\n" +
+                "        padding: 0;    \n" +
+                "\tfont-family: Arial, sans-serif;\n" +
+                "\n" +
+                "      }\n" +
+                "      /* Styles pour le conteneur principal */\n" +
+                "      .container {\n" +
+                "        max-width: 600px;\n" +
+                "        margin: 0 auto;\n" +
+                "        background-color: #FFFFFF;\n" +
+                "        padding: 20px;\n" +
+                "        height: 100vh;\n" +
+                "        display: flex;\n" +
+                "        flex-direction: column;\n" +
+                "        justify-content: center;\n" +
+                "      }\n" +
+                "      /* Styles pour le logo de l'entreprise */\n" +
+                "      .logo {\n" +
+                "        display: block;\n" +
+                "        margin: -20px auto 20px;\n" +
+                "        width: 100px;\n" +
+                "        height: auto;\n" +
+                "      }\n" +
+                "      /* Styles pour le corps du texte */\n" +
+                "      .text {\n" +
+                "        text-align: center;\n" +
+                "      }\n" +
+                "      /* Styles pour le bouton animé */\n" +
+                "      .button {\n" +
+                "        display: inline-block;\n" +
+                "        font-size: 16px;\n" +
+                "        font-weight: bold;\n" +
+                "        color: #3CAEA3;\n" +
+                "        background-color: transparent;\n" +
+                "        border-radius: 5px;\n" +
+                "        padding: 10px 20px;\n" +
+                "        border: 2px solid #3CAEA3;\n" +
+                "        text-decoration: none;\n" +
+                "        transition: all 0.5s ease;\n" +
+                "      }\n" +
+                "      .button:hover {\n" +
+                "        background-color: #3CAEA3;\n" +
+                "        color: #FFFFFF;\n" +
+                "      }\n" +
+                "    </style>\n" +
+                "  </head>\n" +
+                "  <body>\n" +
+                "    <div class=\"container\">\n" +
+                "      <img src=\"https://i.ibb.co/nkrBqck/334886508-513260607680644-3515218608247778867-n.png\" alt=\"indusmarket logo\" padding-left=\"60%\" height=\"70px\" width=\"130px\">\n" +
+                "<br>     \n" +
+                " <div class=\"text\">\n" +
+                "        <h1 style=\"color : #3CAEA3;\">Dear moderator</h1>\n" +
+                "        <p>Since this the first login Attempt on your account</p>\n" +
                 "        <p>this is your email verification code:</p>\n" +
                 "\n" +
                 "<p style=\"color : red\">"+token+"</p>\n" +

@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import tn.esprit.usermanagement.entities.ForumEntities.Media;
 import tn.esprit.usermanagement.entities.ForumEntities.Post;
 import tn.esprit.usermanagement.entities.ForumEntities.PostComment;
 import tn.esprit.usermanagement.entities.ForumEntities.React;
@@ -112,6 +113,10 @@ public class User implements UserDetails {
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy="user")
     private List<Event> events;
+    @OneToOne
+    private Media picture;
+    @OneToOne
+    private Address address;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));
