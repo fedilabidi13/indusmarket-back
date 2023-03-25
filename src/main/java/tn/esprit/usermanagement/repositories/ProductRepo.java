@@ -3,6 +3,7 @@ package tn.esprit.usermanagement.repositories;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 import tn.esprit.usermanagement.dto.ProductSpecification;
 import tn.esprit.usermanagement.dto.SearchCriteria;
 import tn.esprit.usermanagement.entities.Product;
@@ -11,25 +12,21 @@ import tn.esprit.usermanagement.enumerations.Category;
 
 import java.util.ArrayList;
 import java.util.List;
-
+@Repository
 public interface ProductRepo extends JpaRepository<Product,Integer>, JpaSpecificationExecutor<Product> {
 
     @Query("select p from Product p where p.discount is null")
-    public List<Product> ShowAllProductsWithoutDiscount();
+     List<Product> ShowAllProductsWithoutDiscount();
     @Query("select p from Product p where  p.discount is not null ")
-    public List<Product> ShowAllProductsWithDiscount();
+     List<Product> ShowAllProductsWithDiscount();
 
-    @Query("select p from Product p where p.category =?1")
-    public List<Product> SortProductByCategory(String category);
+     List<Product> findByCategory(Category category);
     Product findByReference(String ref);
     List<Product> findByPriceBetween(float minPrice, float maxPrice);
-    // List<Product> findByPriceOrQuantityOrReferenceOrNameOrDescriptionOrBrand(Float x,String w,String c,String z,String a,String b);
-
-
 
 
     default List<Product> searchProducts(String reference, String name, Integer quantity,
-                                         Float price, String description, String brand) {
+                                         Float price, String description, String brand,String category) {
         List<SearchCriteria> searchCriteriaList = new ArrayList<>();
 
         if (reference != null) {
@@ -50,6 +47,9 @@ public interface ProductRepo extends JpaRepository<Product,Integer>, JpaSpecific
         if (brand != null) {
             searchCriteriaList.add(new SearchCriteria("brand", ":", brand));
         }
+        if (category != null) {
+            searchCriteriaList.add(new SearchCriteria("category", ":", Category.valueOf(category)));
+        }
 
         Specification<Product> spec = Specification.where(null);
         for (SearchCriteria criteria : searchCriteriaList) {
@@ -59,6 +59,5 @@ public interface ProductRepo extends JpaRepository<Product,Integer>, JpaSpecific
         return findAll(spec);
     }
 
-    List<Product> findByCategory(Category category);
 
 }

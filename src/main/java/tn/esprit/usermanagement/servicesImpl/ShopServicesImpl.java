@@ -2,14 +2,9 @@ package tn.esprit.usermanagement.servicesImpl;
 
 
 import com.cloudinary.Cloudinary;
-import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
-import com.google.zxing.client.j2se.MatrixToImageWriter;
-import com.google.zxing.common.BitMatrix;
-import com.google.zxing.qrcode.QRCodeWriter;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfPage;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Cell;
@@ -18,16 +13,17 @@ import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.property.TextAlignment;
 import com.itextpdf.layout.property.UnitValue;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import tn.esprit.usermanagement.entities.*;
+import tn.esprit.usermanagement.entities.ForumEntities.Media;
 import tn.esprit.usermanagement.repositories.*;
 import tn.esprit.usermanagement.services.ShopServices;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -37,18 +33,17 @@ import java.util.*;
 @Service
     @AllArgsConstructor
 public class ShopServicesImpl implements ShopServices {
-    ShopRepo shopRepo;
-    UserRepo userRepo;
-    PicturesRepo picturesRepo;
-    ProductRepo productRepo;
-    AddressService addressService;
-    AuthenticationService authenticationService;
-        private final AddressRepo addressRepo;
-        private final ShoppingCartRepo shoppingCartRepo;
-        private Cloudinary cloudinary;
-        private MediaRepo mediaRepo;
+    private ShopRepo shopRepo;
 
-        @Override
+    private ProductRepo productRepo;
+    private AddressService addressService;
+    private AuthenticationService authenticationService;
+    private final AddressRepo addressRepo;
+    private Cloudinary cloudinary;
+    private MediaRepo mediaRepo;
+    private final PicturesRepo picturesRepo;
+
+    @Override
         public List<Shop> ShowAllShops() {
             return shopRepo.ShowAllShops();
         }
@@ -72,14 +67,29 @@ public class ShopServicesImpl implements ShopServices {
             mediaRepo.saveAll(mediaList);
             s.setMedias(mediaList);
             s.setValidated(false);
-            //s.setPicturesList(picturesList);
             shopRepo.save(s);
 
         return s;
     }
     @Override
-    public Shop editShop(Shop s) throws IOException {
+    public Shop editShop(Shop s, List<MultipartFile> files) throws IOException {
         if(shopRepo.getReferenceById(s.getIdShop()).getUser().getId()== authenticationService.currentlyAuthenticatedUser().getId()){
+            if(files!= null){
+                List<Media> mediaList = new ArrayList<>();
+                for (MultipartFile multipartFile : files) {
+                    Media media = new Media();
+                    String url = cloudinary.uploader()
+                            .upload(multipartFile.getBytes(),
+                                    Map.of("public_id", UUID.randomUUID().toString()))
+                            .get("url")
+                            .toString();
+                    media.setImagenUrl(url);
+                    media.setName(multipartFile.getName());
+                    mediaList.add(media);
+                }
+                mediaRepo.saveAll(mediaList);
+                s.setMedias(mediaList);
+            }
            Address newAdresse = addressService.AddAddress(s.getAdresse());
            newAdresse.setId(shopRepo.getReferenceById(s.getIdShop()).getAddress().getId());
            s.setAddress(addressRepo.save(newAdresse));
@@ -92,12 +102,11 @@ public class ShopServicesImpl implements ShopServices {
 
     @Override
     public Shop deleteShop(int idShop) {
-      Integer idUser = authenticationService.currentlyAuthenticatedUser().getId();
         Shop s = shopRepo.findById(idShop).get();
         if(s==null) {
             throw new IllegalStateException("This shop does not exist");
         }
-        if(idUser!=s.getUser().getId()) {
+        if(s.getUser()!=authenticationService.currentlyAuthenticatedUser()) {
             throw new IllegalStateException("You aren't the owner of this shop");
         }
         shopRepo.delete(s);
@@ -105,8 +114,9 @@ public class ShopServicesImpl implements ShopServices {
     }
 
         @Override
-        public List<Shop> ShowAllShopsByUser(Integer idUser) {
-            return shopRepo.ShowAllShops(idUser);
+        public List<Shop> ShowAllShopsByUser() {
+
+            return shopRepo.ShowAllShops(authenticationService.currentlyAuthenticatedUser().getId());
         }
         @Override
         public List<Product> GenerateCatalog(int idShop) {
@@ -114,6 +124,7 @@ public class ShopServicesImpl implements ShopServices {
         }
 
         @Override
+        @Transactional
         public ResponseEntity<String> removeProductFromShop(Integer shopId, Integer productId) {
             Shop shop = shopRepo.findById(shopId)
                     .orElseThrow(() -> new IllegalStateException("Shop not found with id " + shopId));
@@ -123,8 +134,10 @@ public class ShopServicesImpl implements ShopServices {
                 return ResponseEntity.badRequest().body("Product " + productId + " is not associated with Shop " + shopId);
             }
             shop.getProducts().remove(product);
+            productRepo.delete(product);
             shopRepo.save(shop);
             return ResponseEntity.ok("Product " + productId + " removed from Shop " + shopId);
+
         }
 
         @Override
@@ -169,7 +182,7 @@ public class ShopServicesImpl implements ShopServices {
             table.addCell(new Cell().add(new Paragraph("Current Quantity")));
             for (Product product: shop.getProducts())
             {
-                if ( (product.getSoldAt().isAfter(debut)) && (product.getSoldAt().isBefore(fin)) )
+                if ( (product.getSoldAt()!=null)&&(product.getSoldAt().isAfter(debut)) && (product.getSoldAt().isBefore(fin)) )
                 {
                     somme += (product.getStock().getInitialQuantity()- product.getStock().getCurrentQuantity())*product.getPrice();
                     table.addCell(new Cell().add(new Paragraph(product.getName())));
@@ -190,7 +203,7 @@ public class ShopServicesImpl implements ShopServices {
             date.setTextAlignment(TextAlignment.CENTER);
             document.add(date);
             //Add the logo to the page
-            Image logo = new Image(ImageDataFactory.create("usr/src/main/resources/assets/logo.png"));
+            Image logo = new Image(ImageDataFactory.create("src/main/resources/assets/logo.png"));
             logo.setWidth(75);
             logo.setHeight(50);
             logo.setFixedPosition(document.getLeftMargin()-20 , document.getPageEffectiveArea(document.getPdfDocument().getDefaultPageSize()).getTop() - 20);
@@ -200,7 +213,7 @@ public class ShopServicesImpl implements ShopServices {
             byte[] pdfData = pdfOutputStream.toByteArray();
             // Save the PDF to a file
             String fileName = shop.getName() + ".pdf";
-            String filePath = "usr/src/main/resources/assets/" + fileName;
+            String filePath = "src/main/resources/assets/" + fileName;
             try (FileOutputStream fos = new FileOutputStream(filePath)) {
                 fos.write(pdfData);
             }

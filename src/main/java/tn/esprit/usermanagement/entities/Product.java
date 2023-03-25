@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import tn.esprit.usermanagement.entities.ForumEntities.Media;
 import tn.esprit.usermanagement.entities.ForumEntities.Pictures;
 import tn.esprit.usermanagement.enumerations.Category;
 
@@ -40,11 +41,7 @@ public class Product implements Serializable {
     private Category category;
     @Lob
     private byte[] BarcodeImage;
-
-
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<Pictures> pictures;
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany( fetch = FetchType.EAGER)
     private List<Media> medias;
 
     @ManyToOne
@@ -57,4 +54,5 @@ public class Product implements Serializable {
     @JsonIgnore
     @ManyToMany
     private List<Orders> orders;
+    private Boolean oneTimeEmail;
 }

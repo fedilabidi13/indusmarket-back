@@ -13,16 +13,25 @@ import java.util.List;
 @Service
 @AllArgsConstructor
 public class ProductWishlistService implements IWishList {
-    ProductWishlistRepository wishlistRepository;
-    AuthenticationService authenticationService;
-    UserRepo userRepo;
+    private ProductWishlistRepository wishlistRepository;
+    private AuthenticationService authenticationService;
+    private UserRepo userRepo;
 
     @Override
-    public void addToWishlist(Product product) {
+    public Product addToWishlist(Product product) {
         Integer idUser = authenticationService.currentlyAuthenticatedUser().getId();
         User user = userRepo.findById(idUser).get();
+        boolean productExistsInWishlist = wishlistRepository.findByUserAndProduct(user, product).isPresent();
+
+        if (productExistsInWishlist) {
+            // Throw an exception if the product is already in the user's wishlist
+            throw new IllegalStateException("Product is already in wishlist");
+        }
+
+        // Add the product to the user's wishlist
         ProductWishlist wishlistItem = new ProductWishlist(product, user);
         wishlistRepository.save(wishlistItem);
+        return product;
     }
 
     @Override
@@ -33,7 +42,9 @@ public class ProductWishlistService implements IWishList {
     }
 
     @Override
-    public void removeFromWishlist(ProductWishlist wishlistItem) {
+    public ProductWishlist removeFromWishlist(ProductWishlist wishlistItem) {
+        ProductWishlist wishlist = wishlistItem;
         wishlistRepository.delete(wishlistItem);
+        return wishlist;
     }
 }

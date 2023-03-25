@@ -14,11 +14,11 @@ import java.util.List;
 
 public interface ShopRepo extends JpaRepository<Shop,Integer> {
     @Query("select s from Shop s join s.user u where u.id =?1")
-    public List<Shop> ShowAllShops(int idUser);
-    @Query("select p from Product p join Shop s  where s.idShop=?1 order by p.category")
-    public List<Product> GenerateCatalog(int idShop);
+     List<Shop> ShowAllShops(int idUser);
+    @Query("select p from Product p join p.shop s   where s.idShop=?1 ")
+     List<Product> GenerateCatalog(int idShop);
     @Query("select s from Shop s ")
-    public List<Shop> ShowAllShops();
+     List<Shop> ShowAllShops();
 
 
 
