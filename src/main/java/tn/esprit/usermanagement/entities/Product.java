@@ -41,11 +41,7 @@ public class Product implements Serializable {
     private Category category;
     @Lob
     private byte[] BarcodeImage;
-
-
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<Pictures> pictures;
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany( fetch = FetchType.EAGER)
     private List<Media> medias;
 
     @ManyToOne
@@ -58,4 +54,5 @@ public class Product implements Serializable {
     @JsonIgnore
     @ManyToMany
     private List<Orders> orders;
+    private Boolean oneTimeEmail;
 }

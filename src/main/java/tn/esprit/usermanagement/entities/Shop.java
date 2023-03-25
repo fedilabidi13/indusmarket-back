@@ -32,17 +32,13 @@ public class Shop implements Serializable {
     @OneToMany(cascade = CascadeType.ALL,mappedBy = "shop")
     private List<Product> products;
     @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<Pictures> picturesList;
-    @JsonIgnore
     @ManyToOne
     User user;
     @JsonIgnore
     @OneToOne
     private Address address;
     private float somme =0;
-
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER)
     private List<Media> medias;
 
 
