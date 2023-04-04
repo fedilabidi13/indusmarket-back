@@ -17,5 +17,6 @@ public interface EventService {
     public void DeleteEvent(Integer eventId);
     public void AcceptEvent(Integer eventId);
     public void ModDeleteEvent(Integer eventId);
+    public void deletePssedEvent();
     }
 

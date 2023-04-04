@@ -17,4 +17,9 @@ public class TicketController {
     public Ticket AddTicketForEventAndAssignToUser(@RequestBody Ticket ticket, @PathVariable("eventId") Integer eventId) throws IOException, WriterException {
         return ticketService.AddTicketForEventAndAssignToUser(ticket,eventId);
     }
+    @DeleteMapping("/delete/{idTicket}")
+    public String deleteTicket(@PathVariable("idTicket") Integer idTicket){
+        return ticketService.deleteTicket(idTicket);
+    }
+
 }
