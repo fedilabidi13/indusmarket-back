@@ -8,5 +8,6 @@ import java.io.IOException;
 public interface TicketService {
 
     public Ticket AddTicketForEventAndAssignToUser(Ticket ticket,Integer eventId) throws IOException, WriterException;
+    public String deleteTicket(Integer idTicket);
 
 }

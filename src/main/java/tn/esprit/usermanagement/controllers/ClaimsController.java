@@ -1,6 +1,5 @@
 package tn.esprit.usermanagement.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import tn.esprit.usermanagement.entities.Claims;
@@ -86,12 +85,12 @@ public class ClaimsController {
         return claimsService.ShowAllClaims();
     }
 
-    //http://localhost:8085/claims/mod/claimsForOrder/{orderId}
+    //http://localhost:8085/claims/claimsForOrder/{orderId}
     @GetMapping("/claimsForOrder/{orderId}")
     public List<Claims> ShowClaimsByOrder(@PathVariable("orderId") int orderId) {
         return claimsService.ShowClaimsByOrder(orderId);
     }
-    //http://localhost:8085/claims/mod/allClaimsByType/{type}
+    //http://localhost:8085/claims/allClaimsByType/{type}
     @GetMapping("/allClaimsByType/{type}")
     public List<Claims> ShowClaimsByType(@PathVariable("type") TypeClaim typeClaim) {
         return claimsService.ShowClaimsByType(typeClaim);

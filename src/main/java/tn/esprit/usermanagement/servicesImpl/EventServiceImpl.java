@@ -72,6 +72,9 @@ public class EventServiceImpl implements EventService {
         }
         eventRepo.delete(eventRepo.findById(eventId).get());
     }
+
+
+
     @Override
     public Event AddEventWithPictureAndAssignToUser(String address, Event event, List<MultipartFile> files) throws IOException {
         event.setUser(authenticationService.currentlyAuthenticatedUser());
@@ -148,6 +151,15 @@ public class EventServiceImpl implements EventService {
             eventRepo.delete(event);
         }
     }
-
+    @Scheduled(fixedRate = 10000) // runs every second
+    @Override
+    public void deletePssedEvent() {
+    List<Event> events = eventRepo.findAll();
+        for (Event event : events){
+            if (event.getEndDate()==LocalDateTime.now().minusDays(3)){
+        eventRepo.delete(event);
+        }
+        }
+    }
 
 }
