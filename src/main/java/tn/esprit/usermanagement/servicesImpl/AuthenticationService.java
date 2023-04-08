@@ -97,7 +97,7 @@ public class AuthenticationService {
                     user);
             tokenService.saveConfirmationToken(confirmationToken);
             phoneTokenService.saveConfirmationToken(phoneToken);
-            String link = "http://localhost:8085/auth/confirm?token="+token;
+            String link = "http://localhost:4200/mail-verif?token="+token;
             emailSender.send(request.getEmail(),buildEmailVerif(token, user));
             var jwtTokenString = jwtService.generateJwtToken(user);
             twilioService.sendCode(String.valueOf(user.getPhoneNumber()),phoneCode);
@@ -172,7 +172,6 @@ public class AuthenticationService {
                 .build();
         Media media = new Media();
         media.setName("default image");
-        //todo  put an appropriate image url
         media.setImagenUrl("http://localhost/default.png");
         mediaRepo.save(media);
         user.setPicture(media);
@@ -187,7 +186,7 @@ public class AuthenticationService {
                 user);
         tokenService.saveConfirmationToken(confirmationToken);
         phoneTokenService.saveConfirmationToken(phoneToken);
-        String link = "http://localhost:8085/auth/confirm?token="+token;
+        String link = "http://localhost:4200/mail-verif?token="+token;
         emailSender.send(request.getEmail(),buildEmail2(user,link));
         var jwtTokenString = jwtService.generateJwtToken(user);
         twilioService.sendCode(String.valueOf(user.getPhoneNumber()),phoneCode);
@@ -250,7 +249,7 @@ public class AuthenticationService {
                     LocalDateTime.now().plusMinutes(1),
                     confirmationToken.getUser());
             tokenService.saveConfirmationToken(confirmationToken2);
-            String link = "http://localhost:8085/auth/confirm?token="+token2;
+            String link = "http://localhost:4200/mail-verif?token="+token2;
             emailSender.send(confirmationToken.getUser().getEmail(),buildEmail2(confirmationToken.getUser(),link));
             return "email expired a new Email is sent!";
         }
@@ -287,7 +286,7 @@ public class AuthenticationService {
                     LocalDateTime.now().plusMinutes(1),
                     confirmationToken.getUser());
             tokenService.saveConfirmationToken(confirmationToken2);
-            //String link = "http://localhost:8085/auth/confirm?token="+token2;
+            //String link = "http://localhost:4200/mail-verif?token="+token2;
             emailSender.send(confirmationToken.getUser().getEmail(),buildEmailVerif(token2, confirmationToken2.getUser() ));
             return "email expired a new Email is sent!";
         }
@@ -385,7 +384,7 @@ public class AuthenticationService {
                     LocalDateTime.now().plusMinutes(1),
                     confirmationToken.getUser());
             tokenService.saveConfirmationToken(confirmationToken2);
-            //String link = "http://localhost:8085/auth/confirm?token="+token2;
+            //String link = "http://localhost:4200/mail-verif?token="+token2;
             emailSender.send(confirmationToken.getUser().getEmail(),buildEmailVerif(token2, confirmationToken2.getUser()));
             return "email expired a new Email is sent!";
         }
@@ -454,7 +453,7 @@ public class AuthenticationService {
                 user);
         tokenService.saveConfirmationToken(confirmationToken);
         phoneTokenService.saveConfirmationToken(phoneToken);
-        String link = "http://localhost:8085/auth/confirm?token="+token;
+        String link = "http://localhost:4200/mail-verif?token="+token;
         emailSender.send(user.getEmail(),buildEmailVerif(token, confirmationToken.getUser()));
         return "verification required. Email and phone verification codes were sent.";
     }
@@ -478,7 +477,7 @@ public class AuthenticationService {
                     LocalDateTime.now().plusMinutes(1),
                     confirmationToken.getUser());
             tokenService.saveConfirmationToken(confirmationToken2);
-            //String link = "http://localhost:8085/auth/confirm?token="+token2;
+            //String link = "http://localhost:4200/mail-verif?token="+token2;
             emailSender.send(confirmationToken.getUser().getEmail(),token2);
             return "email expired a new Email is sent!";
         }
