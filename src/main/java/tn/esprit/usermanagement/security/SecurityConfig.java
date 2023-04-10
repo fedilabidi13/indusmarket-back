@@ -36,7 +36,7 @@ public class SecurityConfig{
                 .csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/websocket/**","/auth/**","/facebook/**","/checkout/**","/charge/**","/checkoutEvent/**","pay/success","pay/cancel","/pay/**","/")
+                .requestMatchers("/websocket/**","/auth/**","/facebook/**","/checkout/**","/charge/**","/checkoutEvent/**","pay/success","pay/cancel","/pay/**","/","/**")
                 .permitAll()
                 .requestMatchers("/admin/**").hasAuthority(Role.ADMIN.name())
                 .requestMatchers("/mod/**").hasAuthority(Role.MOD.name())

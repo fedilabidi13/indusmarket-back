@@ -18,6 +18,7 @@ import tn.esprit.usermanagement.servicesImpl.ProductImpl;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "*")
 @RequestMapping("/product")
 @AllArgsConstructor
 

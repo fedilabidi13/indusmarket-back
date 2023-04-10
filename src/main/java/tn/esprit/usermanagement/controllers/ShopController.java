@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 @RestController
+@CrossOrigin(origins = "*")
 @AllArgsConstructor
 @RequestMapping("/shop")
 public class ShopController {
@@ -57,8 +58,8 @@ public class ShopController {
      public ResponseEntity<String> removeProductFromShop(@RequestParam("shopId") int shopId, @RequestParam("productId") int productId) {
         return shopServices.removeProductFromShop(shopId,productId);
      }
-    @GetMapping("/findAllProducts")
-    public ResponseEntity<List<Product>> getAllProductsOfShop(@RequestParam("shopId") int shopId) {
+    @GetMapping("/findAllProducts/{shopId}")
+    public ResponseEntity<List<Product>> getAllProductsOfShop(@PathVariable("shopId") int shopId) {
         return shopServices.getAllProductsOfShop(shopId);
     }
 
