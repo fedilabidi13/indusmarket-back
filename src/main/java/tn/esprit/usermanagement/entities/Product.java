@@ -39,8 +39,8 @@ public class Product implements Serializable {
     private String status;
     @Enumerated(EnumType.STRING)
     private Category category;
-    @Lob
-    private byte[] BarcodeImage;
+    @OneToOne
+    private Media barcodeImage;
     @OneToMany( fetch = FetchType.EAGER)
     private List<Media> medias;
 

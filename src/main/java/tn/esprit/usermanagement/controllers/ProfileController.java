@@ -2,10 +2,7 @@ package tn.esprit.usermanagement.controllers;
 
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import tn.esprit.usermanagement.servicesImpl.ProfileService;
 
@@ -14,6 +11,7 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/profile")
 @AllArgsConstructor
+@CrossOrigin(origins = "*")
 public class ProfileController {
     private ProfileService profileService;
     @PostMapping("/picture/update")

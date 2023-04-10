@@ -9,9 +9,11 @@ import com.google.zxing.oned.Code93Writer;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import tn.esprit.usermanagement.dto.CommunMultipartFile;
 import tn.esprit.usermanagement.entities.*;
 import tn.esprit.usermanagement.entities.ForumEntities.Media;
 import tn.esprit.usermanagement.enumerations.Category;
@@ -67,8 +69,20 @@ public class ProductImpl implements IProductService {
         MatrixToImageWriter.writeToStream(bitMatrix, "PNG", pngOutputStream);
         byte[] pngData = pngOutputStream.toByteArray();
         // Enregistrement du produit dans la base de données
+       // MultipartFile multipartFile1 = new CommunMultipartFile(
+               // new ByteArrayResource(pngData), product.getReference()+".png");
         product.setShop(shop);
-        product.setBarcodeImage(pngData);
+        //product.setBarcodeImage(pngData);
+        Media media1 = new Media();
+        String url1 = cloudinary.uploader()
+                .upload(pngData,
+                        Map.of("public_id", UUID.randomUUID().toString()))
+                .get("url")
+                .toString();
+        media1.setImagenUrl(url1);
+
+        media1.setName(product.getReference()+".png");
+        product.setBarcodeImage(mediaRepo.save(media1));
         // Enregistrement de l'image du code-barres
         FileOutputStream fos = new FileOutputStream("src/main/resources/assets/" + product.getReference() + ".png");
         fos.write(pngData);
