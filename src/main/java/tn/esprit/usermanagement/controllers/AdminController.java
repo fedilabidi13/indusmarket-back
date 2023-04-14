@@ -14,6 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/admin")
+@CrossOrigin(origins = "*")
 @AllArgsConstructor
 
 public class AdminController {
@@ -44,5 +45,10 @@ public class AdminController {
     public ResponseEntity<?> getcurrentuser()
     {
         return ResponseEntity.ok(authenticationService.currentlyAuthenticatedUser().getEmail());
+    }
+    @GetMapping("/users")
+    public List<User> showByrole(@RequestParam String role)
+    {
+        return adminService.getUsers(Role.valueOf(role));
     }
 }
