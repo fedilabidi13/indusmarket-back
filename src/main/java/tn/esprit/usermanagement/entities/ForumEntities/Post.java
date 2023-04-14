@@ -45,12 +45,8 @@ public class Post implements Serializable {
 
 
 
-    @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "post")
+    @OneToMany
     List<Media> medias;
-
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<Pictures> pictures;
     @JsonIgnore
     @JsonManagedReference
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "post")

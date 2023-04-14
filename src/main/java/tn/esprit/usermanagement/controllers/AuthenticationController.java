@@ -18,9 +18,10 @@ import tn.esprit.usermanagement.servicesImpl.AuthenticationService;
 import java.io.IOException;
 
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/auth")
 @Slf4j
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
     private final UserRepo userRepo;
@@ -43,9 +44,9 @@ public class AuthenticationController {
         return ResponseEntity.ok(authenticationService.authenticate(request));
     }
 
-    @GetMapping(path = "confirm")
-    public String confirm(@RequestParam("token") String token) {
-        return authenticationService.confirmEmailToken(token);
+    @GetMapping( "/confirm")
+    public ResponseEntity<?> confirm(@RequestParam("token") String token) {
+        return ResponseEntity.ok(authenticationService.confirmEmailToken(token));
     }
     @GetMapping("/verifyPhone")
     public String confirmPhone(@RequestParam("token")String token)
@@ -78,5 +79,16 @@ public class AuthenticationController {
     public ResponseEntity<?> confirmAddress(@RequestParam String mail,
                                             @RequestParam String phone) throws IOException, GeoIp2Exception {
         return ResponseEntity.ok(authenticationService.verifyLocation(mail,phone));
+    }
+    @PostMapping("/newPassword")
+    public ResponseEntity<?> loginModerator(@RequestParam String code,
+                                            @RequestParam String pwd)
+    {
+        return ResponseEntity.ok(authenticationService.loginMod(code,pwd));
+    }
+    @GetMapping("/get")
+    public User getbymail(@RequestParam String email)
+    {
+        return userRepo.findByEmail2(email);
     }
 }

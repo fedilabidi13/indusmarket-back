@@ -12,16 +12,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ShopServices {
-    public List<Shop> ShowAllShops();
-    public Shop addShopAndAffectToUser(Shop s, List<MultipartFile> files) throws Exception;
-    public Shop editShop(Shop s) throws IOException;
-    public Shop deleteShop(int idShop);
-
-
-
-    public List<Shop> ShowAllShopsByUser(Integer idUser);
-    public List<Product> GenerateCatalog(int idShop);
-    public ResponseEntity<String> removeProductFromShop( Integer shopId,  Integer productId);
-    public ResponseEntity<List<Product>> getAllProductsOfShop( Integer shopId);
-    public Shop generateReportForShop(Integer shopId, LocalDateTime debut, LocalDateTime fin) throws IOException, WriterException;
+     List<Shop> ShowAllShops();
+     Shop addShopAndAffectToUser(Shop s, List<MultipartFile> files) throws Exception;
+     Shop editShop(Shop s, List<MultipartFile> files) throws IOException;
+     Shop deleteShop(int idShop);
+     List<Shop> ShowAllShopsByUser();
+     List<Product> GenerateCatalog(int idShop);
+     ResponseEntity<String> removeProductFromShop( Integer shopId,  Integer productId);
+     ResponseEntity<List<Product>> getAllProductsOfShop( Integer shopId);
+     Shop generateReportForShop(Integer shopId, LocalDateTime debut, LocalDateTime fin) throws IOException, WriterException;
 }

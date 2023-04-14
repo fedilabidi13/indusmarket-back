@@ -1,6 +1,9 @@
 package tn.esprit.usermanagement.servicesImpl;
 
+import java.io.IOException;
 import java.time.temporal.ChronoUnit;
+
+import com.maxmind.geoip2.exception.GeoIp2Exception;
 import lombok.AllArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,18 +26,22 @@ public class AdminServiceImpl implements AdminService {
     private PasswordGenerator passwordGenerator;
     private PasswordEncoder passwordEncoder;
     private JwtService jwtService;
+    private IpService ipService;
     private AuthenticationService authenticationService;
     private UserRepo userRepo;
     private ProductRepo productRepo;
     @Override
-    public String addMod(String email) {
+    public String addMod(String email) throws IOException, GeoIp2Exception {
         String password = passwordGenerator.generatePassword();
         User mod = new User();
         mod.setEmail(email);
         mod.setRole(Role.MOD);
-        mod.setEnabled(true);
+        mod.setTwoFactorsAuth(false);
+        mod.setFirtAttempt(true);
+        mod.setCountry(ipService.getCountry());
         mod.setPassword(passwordEncoder.encode(password));
         mod.setEnabled(true);
+        mod.setBanType(BanType.NONE);
         userRepo.save(mod);
         //String token = jwtService.generateJwtToken(mod);
         String result = " Mod account : "+mod.getEmail()+" | "+ password;

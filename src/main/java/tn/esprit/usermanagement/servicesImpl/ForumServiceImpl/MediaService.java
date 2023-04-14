@@ -1,10 +1,10 @@
-package tn.esprit.usermanagement.servicesImpl;
+package tn.esprit.usermanagement.servicesImpl.ForumServiceImpl;
 
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tn.esprit.usermanagement.entities.Media;
+import tn.esprit.usermanagement.entities.ForumEntities.Media;
 import tn.esprit.usermanagement.repositories.MediaRepo;
 import tn.esprit.usermanagement.services.MediaIservice;
 

@@ -9,11 +9,14 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import tn.esprit.usermanagement.enumerations.Role;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -30,13 +33,14 @@ public class SecurityConfig{
         // todo reconfigure url structure
         // todo lets make it more conivienet to our project
         http
+                .cors().and()
                 .csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/websocket/**","/api/v1/auth/**","/facebook/**","/checkout/**","/charge/**","/checkoutEvent/**","pay/success","pay/cancel","/pay/**","/")
+                .requestMatchers("/websocket/**","/auth/**","/facebook/**","/checkout/**","/charge/**","/checkoutEvent/**","pay/success","pay/cancel","/pay/**","/**")
                 .permitAll()
-                .requestMatchers("/admin/**").hasRole(Role.ADMIN.name())
-                .requestMatchers("/mod/**").hasRole(Role.MOD.name())
+                .requestMatchers("/admin/**").hasAuthority(Role.ADMIN.name())
+                .requestMatchers("/mod/**").hasAuthority(Role.MOD.name())
                 .anyRequest()
                 .authenticated()
                 .and()

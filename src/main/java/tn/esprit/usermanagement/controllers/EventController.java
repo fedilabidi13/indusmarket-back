@@ -53,5 +53,13 @@ public class EventController {
     public void DeleteEvent(@PathVariable("eventId") Integer eventId) {
         eventService.DeleteEvent(eventId);
     }
+    @PutMapping("accepEvent/{eventId}")
+    public void AcceptEvent(@PathVariable("eventId") Integer eventId){
+        eventService.AcceptEvent(eventId);
+    }
+    @DeleteMapping("/modDeleteEvent/{eventId}")
+    public void deleteEvent(@PathVariable("eventId") Integer eventId){
+        eventService.ModDeleteEvent(eventId);
+    }
 }
 

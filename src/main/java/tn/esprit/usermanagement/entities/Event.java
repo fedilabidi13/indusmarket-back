@@ -7,10 +7,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
+import tn.esprit.usermanagement.entities.ForumEntities.Media;
+import tn.esprit.usermanagement.entities.ForumEntities.Pictures;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 @Entity
 @NoArgsConstructor
@@ -33,9 +34,8 @@ public class Event implements Serializable {
     private LocalDateTime endDate;
     private String adresse;
     public boolean accepted=false;
-    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL)
-    private List<Pictures> pictures;
+    private List<Media> medias;
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy="event")
     private List<Ticket> tickets;
@@ -43,7 +43,6 @@ public class Event implements Serializable {
     @ManyToOne
     User user;
     private double price;
-    @JsonIgnore
     @OneToOne
     private Address address;
 }

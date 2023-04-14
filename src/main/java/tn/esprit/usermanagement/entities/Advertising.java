@@ -6,7 +6,6 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -19,6 +18,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
+import tn.esprit.usermanagement.entities.ForumEntities.Media;
+import tn.esprit.usermanagement.entities.ForumEntities.Pictures;
 
 @Getter
 @Setter
@@ -60,10 +61,6 @@ public class Advertising implements Serializable {
     @JsonIgnore
     @ManyToOne
     User user;
-
-    @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "advertising")
-    List<Media> medias;
     @OneToMany(cascade = CascadeType.ALL)
     private List<Pictures> pictures;
 }

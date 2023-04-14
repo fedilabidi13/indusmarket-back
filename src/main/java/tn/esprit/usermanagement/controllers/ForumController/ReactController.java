@@ -26,8 +26,8 @@ public class ReactController {
     //React Post
 
 
-    @PostMapping("post/addReact")
-    public ResponseEntity<React> addReact(@RequestParam Integer idPost, @RequestParam String reactType) {
+    @PostMapping("post/add")
+    public ResponseEntity<React> addReactToPost(@RequestParam Integer idPost, @RequestParam String reactType) {
         React react = reactIservice.addReactToPost(idPost, ReactType.valueOf(reactType));
         return ResponseEntity.ok(react);
     }
@@ -50,18 +50,11 @@ public class ReactController {
         }
     }
 
-    @GetMapping("post/getAllReactsForPost")
+    @GetMapping("post/getAll")
     public List<React> getAllReactsForPost(@RequestParam Integer idPost) {
 
         return reactIservice.getAllReactsForPost(postRepo.getReferenceById(idPost));
     }
-    @GetMapping("/post/{postId}/owner")
-    ResponseEntity<?> getAllReactionsByPostAndOwner(@PathVariable Integer idPost) {
-        if (reactIservice.getAllReactionsByPostIdAndOwner(idPost).isEmpty())
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        return new ResponseEntity<>(reactIservice.getAllReactionsByPostIdAndOwner(idPost), HttpStatus.OK);
-    }
-
     @GetMapping("post/mostReactiveUser")
     public ResponseEntity<?> getMostReactiveUsers() {
         User user = reactIservice.findMostReactiveUsers();
@@ -73,22 +66,15 @@ public class ReactController {
     }
 
     //React For Comment
-    @PostMapping("comment/addReact")
+    @PostMapping("comment/add")
     public ResponseEntity<React> addReactToComment( @RequestParam Integer idComment, @RequestParam ReactType reactType) {
         React react = reactIservice.addReactToComment(idComment, reactType);
         return ResponseEntity.ok(react);
     }
-    @GetMapping("comment/getAllReactsForComment")
+    @GetMapping("comment/getAll")
     public List<React> getAllReactsForComment(@RequestParam Integer idComment) {
 
         return reactIservice.getAllReactsForComment(postCommentRepo.getReferenceById(idComment));
     }
-    @GetMapping("/comment/{commentId}/owner/{userId}")
-    ResponseEntity<?> getAllReactionsByCommentAndOwner(@PathVariable Integer idComment, @PathVariable Integer userId) {
-        if (reactIservice.getAllReactionsByCommentIdAndOwner(idComment, userId).isEmpty())
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        return new ResponseEntity<>(reactIservice.getAllReactionsByCommentIdAndOwner(idComment, userId), HttpStatus.OK);
-    }
-
 
 }

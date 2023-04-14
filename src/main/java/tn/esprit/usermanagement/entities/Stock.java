@@ -19,7 +19,6 @@ public class Stock implements Serializable {
     private Integer id;
     private Integer initialQuantity;
     private Integer currentQuantity;
-
     public int howManySold(){
         return this.initialQuantity - this.currentQuantity;
     }

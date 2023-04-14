@@ -15,6 +15,7 @@ import tn.esprit.usermanagement.repositories.UserRepo;
 import tn.esprit.usermanagement.services.ForumIservice.ReactIservice;
 import tn.esprit.usermanagement.servicesImpl.AuthenticationService;
 
+import javax.xml.stream.events.Comment;
 import java.util.Comparator;
 import java.util.List;
 
@@ -56,13 +57,21 @@ Post post = postRepo.findById(postId).orElseThrow(() -> new EntityNotFoundExcept
     public Post getMostReactedPost(ReactType reactType) {
         List<Post> postList = postRepo.findAll();
         if (reactType != null) {
-            return postList.stream().max(Comparator.comparingInt(post -> post.getReacts().stream()
-                    .filter(react -> react.getType().equals(reactType)).toArray().length)).orElse(null);
+            return postList.stream()
+                    .filter(post -> post.getReacts().stream()
+                            .anyMatch(react -> react.getType().equals(reactType)))
+                    .max(Comparator.comparingInt(post -> post.getReacts().stream()
+                            .filter(react -> react.getType().equals(reactType))
+                            .toArray().length))
+                    .orElse(null);
         } else {
-            return postList.stream().max(Comparator.comparingInt(post -> post.getReacts().toArray().length)).orElse(null);
-
+            return postList.stream()
+                    .max(Comparator.comparingInt(post -> post.getReacts().toArray().length))
+                    .orElse(null);
         }
     }
+
+
     public List<React> getAllReactsForPost(Post post) {
 
         return reactRepository.findByPost(post);
@@ -105,12 +114,11 @@ Post post = postRepo.findById(postId).orElseThrow(() -> new EntityNotFoundExcept
             return reactRepository.save(react);
         }
     }
+
+
     public List<React> getAllReactsForComment(PostComment comment) {
         return reactRepository.findByComment(comment);
     }
 
-    public List<React> getAllReactionsByCommentIdAndOwner(Integer commentId, Integer userId) {
-        return reactRepository.findAllByCommentIdAndUser(commentId, userId);
-    }
 
 }

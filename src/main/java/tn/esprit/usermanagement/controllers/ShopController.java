@@ -19,32 +19,22 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 @RestController
+@CrossOrigin(origins = "*")
 @AllArgsConstructor
 @RequestMapping("/shop")
 public class ShopController {
 
-    ShopServices shopServices;
-
-    ProductRepo productRepo;
-
-    UserRepo userRepo;
-
-    ShopRepo shopRepo;
-    AuthenticationService authenticationService;
-
-
-
+    private ShopServices shopServices;
 
     @PostMapping( "/add")
     public Shop addShopAndAffectToUser(@ModelAttribute Shop s, @RequestParam("file") List<MultipartFile> files) throws Exception{
-        Integer idUsr = authenticationService.currentlyAuthenticatedUser().getId();
         return shopServices.addShopAndAffectToUser(s, files);
     }
 
 
     @PostMapping("/update")
-        public Shop editShop(@ModelAttribute Shop s) throws IOException {
-      return shopServices.editShop(s);}
+        public Shop editShop(@ModelAttribute Shop s,@RequestParam List<MultipartFile> file) throws IOException {
+      return shopServices.editShop(s,file);}
 
 
 
@@ -56,29 +46,28 @@ public class ShopController {
     }
     @GetMapping( "/findByUser")
     public List<Shop> ShowAllShopsByUser(){
-        Integer idUser = authenticationService.currentlyAuthenticatedUser().getId();
-        return shopServices.ShowAllShopsByUser(idUser);
+        return shopServices.ShowAllShopsByUser();
     }
     @GetMapping("/createCatalog")
-    public List<Product> GenerateCatalog(@RequestParam int idShop){
+    public List<Product> GenerateCatalog(@RequestParam("idShop") int idShop){
         return shopServices.GenerateCatalog(idShop);
     }
     @GetMapping("/findAll" )
     public List<Shop> ShowAllShops(){return shopServices.ShowAllShops();}
      @DeleteMapping("/removeProduct")
-     public ResponseEntity<String> removeProductFromShop(@RequestParam int shopId, @RequestParam int productId) {
+     public ResponseEntity<String> removeProductFromShop(@RequestParam("shopId") int shopId, @RequestParam("productId") int productId) {
         return shopServices.removeProductFromShop(shopId,productId);
      }
-    @GetMapping("/findAllProducts")
-    public ResponseEntity<List<Product>> getAllProductsOfShop(@RequestParam int shopId) {
+    @GetMapping("/findAllProducts/{shopId}")
+    public ResponseEntity<List<Product>> getAllProductsOfShop(@PathVariable("shopId") int shopId) {
         return shopServices.getAllProductsOfShop(shopId);
     }
 
     @GetMapping("/createReport")
     public Shop generateReportForShop(
-            @RequestParam Integer shopId,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd ") LocalDateTime debut,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd ") LocalDateTime fin
+            @RequestParam("shopId") Integer shopId,
+            @RequestParam("deb") @DateTimeFormat(pattern = "yyyy-MM-dd ") LocalDateTime debut,
+            @RequestParam("fin") @DateTimeFormat(pattern = "yyyy-MM-dd ") LocalDateTime fin
     ) throws IOException, WriterException {
         return shopServices.generateReportForShop(shopId,debut,fin);
     }

@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
+
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,11 +20,11 @@ public class Rating implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
     private int value;
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     private Shop shop;
+    private LocalDateTime ratedAt;
     @JsonIgnore
     @ManyToOne
     private User user1;

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import tn.esprit.usermanagement.entities.ForumEntities.Media;
 import tn.esprit.usermanagement.entities.ForumEntities.Post;
 import tn.esprit.usermanagement.enumerations.StatusClaims;
 import tn.esprit.usermanagement.enumerations.TypeClaim;
@@ -37,17 +38,11 @@ public class Claims implements Serializable {
     @JsonIgnore
     @ManyToOne
     private Orders order;
-    @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<Pictures> pictures;
-
     @OneToMany(cascade = CascadeType.ALL)
     private List<Media> medias;
-
     @JsonIgnore
     @ManyToOne
     private Post post;
-    @JsonIgnore
-    @OneToMany(mappedBy = "claims", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "claims", cascade = CascadeType.ALL)
     private List<ClaimProductRef> claimProductRefs;
 }

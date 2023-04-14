@@ -1,19 +1,18 @@
 package tn.esprit.usermanagement.entities;
 
 import jakarta.persistence.*;
-import lombok.*;
 
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import tn.esprit.usermanagement.entities.ForumEntities.Media;
+import tn.esprit.usermanagement.entities.ForumEntities.Pictures;
 import tn.esprit.usermanagement.enumerations.Category;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -40,13 +39,9 @@ public class Product implements Serializable {
     private String status;
     @Enumerated(EnumType.STRING)
     private Category category;
-    @Lob
-    private byte[] BarcodeImage;
-
-
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<Pictures> pictures;
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToOne
+    private Media barcodeImage;
+    @OneToMany( fetch = FetchType.EAGER)
     private List<Media> medias;
 
     @ManyToOne
@@ -59,4 +54,5 @@ public class Product implements Serializable {
     @JsonIgnore
     @ManyToMany
     private List<Orders> orders;
+    private Boolean oneTimeEmail;
 }

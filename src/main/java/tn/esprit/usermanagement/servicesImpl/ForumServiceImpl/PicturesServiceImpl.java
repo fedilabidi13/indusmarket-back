@@ -1,11 +1,11 @@
-package tn.esprit.usermanagement.servicesImpl;
+package tn.esprit.usermanagement.servicesImpl.ForumServiceImpl;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import tn.esprit.usermanagement.entities.Pictures;
+import tn.esprit.usermanagement.entities.ForumEntities.Pictures;
 import tn.esprit.usermanagement.repositories.PicturesRepo;
 import tn.esprit.usermanagement.services.PicturesService;
 

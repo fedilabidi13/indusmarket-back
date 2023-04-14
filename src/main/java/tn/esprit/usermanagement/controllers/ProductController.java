@@ -7,30 +7,38 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import tn.esprit.usermanagement.entities.Product;
+import tn.esprit.usermanagement.enumerations.Category;
+import tn.esprit.usermanagement.repositories.ProductRepo;
+import tn.esprit.usermanagement.repositories.UserRepo;
+import tn.esprit.usermanagement.repositories.UserSearchHistoryRepo;
 import tn.esprit.usermanagement.services.IProductService;
+import tn.esprit.usermanagement.servicesImpl.AuthenticationService;
+import tn.esprit.usermanagement.servicesImpl.ProductImpl;
 
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "*")
 @RequestMapping("/product")
 @AllArgsConstructor
 
 public class ProductController {
     private IProductService productService;
+    private ProductImpl productImpl;
 
 
     @PostMapping(path = "/add")
-    public Product addProductToShop(@ModelAttribute Product p,@RequestParam int quantity,@RequestParam int ShopId,@RequestParam("file") List<MultipartFile> files) throws Exception {
+    public Product addProductToShop(@ModelAttribute Product p,@RequestParam("quantity") int quantity,@RequestParam("shopId") int ShopId,@RequestParam("file") List<MultipartFile> files) throws Exception {
         return productService.addProductToShop(p,quantity,ShopId,files);
 
 
     }
     @PostMapping(path ="/update" )
-    public Product editProduct(@RequestBody Product product,@RequestParam int id){
-        return productService.editProduct(product,id);
+    public Product editProduct(@ModelAttribute Product product,@RequestParam List<MultipartFile> file) throws Exception {
+        return productService.editProduct(product,file);
     }
     @DeleteMapping(path = "/delete")
-    public void deleteProduct(@RequestParam int idProduct){
+    public void deleteProduct(@RequestParam("idProduct") int idProduct){
         productService.deleteProduct(idProduct);
     }
     @GetMapping(path ="/findByNoDiscount" )
@@ -42,7 +50,7 @@ public class ProductController {
         return productService.ShowAllProductsWithDiscount();
     }
     @PostMapping(path = "/addDiscount")
-    public Product ApplicateDiscount(@RequestParam int Discount,@RequestParam int idProd){
+    public Product ApplicateDiscount(@RequestParam("Discount") int Discount,@RequestParam("idProd") int idProd){
         return productService.ApplicateDiscount(Discount,idProd);
     }
     @GetMapping(path ="/findAll" )
@@ -50,8 +58,9 @@ public class ProductController {
         return productService.ShowAllProducts();
     }
     @GetMapping(path = "/sortByCategory")
-    public List<Product> SortProductByCategory(@RequestParam String category){
-        return productService.SortProductByCategory(category);
+    public List<Product> SortProductByCategory(@RequestParam("category") String category){
+
+        return productService.findByCategory(Category.valueOf(category));
     }
 
     @GetMapping("/find")
@@ -61,16 +70,18 @@ public class ProductController {
             @RequestParam(required = false) Integer quantity,
             @RequestParam(required = false) Float price,
             @RequestParam(required = false) String description,
-            @RequestParam(required = false) String brand) {
+            @RequestParam(required = false) String brand,
+            @RequestParam(required = false) String category)
+    {
+            List<Product> products = productService.searchProducts(reference, name, quantity, price, description, brand,category);
 
-        List<Product> products = productService.searchProducts(reference, name, quantity, price, description, brand);
-
-        if (products.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            return new ResponseEntity<>(products, HttpStatus.OK);
+            if (products.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            } else {
+                return new ResponseEntity<>(products, HttpStatus.OK);
+            }
         }
-    }
+
 
     @GetMapping("/findByMaxAndMinPrice")
     public List<Product> getProductsByPriceRange(
@@ -79,12 +90,23 @@ public class ProductController {
         return productService.getProductsByPriceRange(minPrice, maxPrice);
     }
     @GetMapping("/compare")
-    public List<String> compareProducts(@RequestParam int productId1, @RequestParam int productId2) {
+    public List<String> compareProducts(@RequestParam("productId1") int productId1, @RequestParam("productId2") int productId2) {
         return productService.compareProductFeatures(productId1,productId2);
     }
     @PostMapping("/updateQuantity")
-    public Product updateQte(@RequestParam Integer id,@RequestParam Integer qte)
+    public String updateQte(@RequestParam("id") Integer id,@RequestParam("qte") Integer qte)
     {
         return productService.updateProductQuantity(id,qte);
     }
+
+    @GetMapping("/showProductsToSpeceficUser")
+    public List<Product> showProductsToSpeceficUser(){
+        return productImpl.showProductsToSpeceficUser();
+    }
+    @GetMapping("/mostSoldFirst")
+    public List<Product>  listToGetMostSold(){
+        return productImpl.mostSoldPruducts();
+    }
+
+
 }

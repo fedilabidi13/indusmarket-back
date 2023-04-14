@@ -1,4 +1,4 @@
-package tn.esprit.usermanagement.servicesImpl;
+package tn.esprit.usermanagement.servicesImpl.ForumServiceImpl;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
@@ -18,11 +18,13 @@ public class CloudinaryService {
 	    private Map<String, String> valuesMap = new HashMap<>();
 
 	    public CloudinaryService() {
-			valuesMap.put("cloud_name", "dyrmuaqac");
-			valuesMap.put("api_key", "918834391481365");
-			valuesMap.put("api_secret", "m96lDOqbXwGnpu1UsuG7mCWlurk");
+			valuesMap.put("cloud_name","dh3co0nj3");
+			valuesMap.put("api_key", "427651133419167");
+			valuesMap.put("api_secret", "ymc1eOdevnWvpap28KjwbUna8Ig");
 	        cloudinary = new Cloudinary(valuesMap);
-	    }
+
+
+		}
 
 	    public Map upload(MultipartFile multipartFile) throws IOException {
 	        File file = convert(multipartFile);

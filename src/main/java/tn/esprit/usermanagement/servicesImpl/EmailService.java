@@ -96,5 +96,24 @@ public class EmailService implements EmailSender {
             throw new IllegalStateException("failed to send email");
         }
     }
+    @Override
+    @Async
+    public void sendForProductRestock(String to, String email) {
+        try {
+
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper =
+                    new MimeMessageHelper(mimeMessage, "utf-8");
+            helper.setText(email, true);
+            helper.setTo(to);
+            helper.setSubject("Product stock alert!");
+            helper.setFrom("contact@indusmarket.tn");
+            mailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            log.error("failed to send email "+e);
+
+            throw new IllegalStateException("failed to send email");
+        }
+    }
 }
 

@@ -1,24 +1,27 @@
 package tn.esprit.usermanagement.servicesImpl.ForumServiceImpl;
 
+import com.cloudinary.Cloudinary;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import tn.esprit.usermanagement.entities.ForumEntities.Media;
 import tn.esprit.usermanagement.entities.ForumEntities.Post;
 import tn.esprit.usermanagement.entities.ForumEntities.PostComment;
 import tn.esprit.usermanagement.entities.User;
-import tn.esprit.usermanagement.repositories.PostCommentRepo;
-import tn.esprit.usermanagement.repositories.PostRepo;
-import tn.esprit.usermanagement.repositories.ReactRepo;
-import tn.esprit.usermanagement.repositories.UserRepo;
+import tn.esprit.usermanagement.repositories.*;
 import tn.esprit.usermanagement.services.ForumIservice.CommentIservice;
 import tn.esprit.usermanagement.servicesImpl.AuthenticationService;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 @Service
 @AllArgsConstructor
 public class CommentServiceImpl implements CommentIservice {
@@ -29,7 +32,8 @@ public class CommentServiceImpl implements CommentIservice {
     AuthenticationService authenticationService;
     private DataLoadServiceImpl dataLoadService;
     private BadWordServiceImpl badWordService;
-    private ImageServiceImpl imageService;
+    Cloudinary cloudinary;
+    MediaRepo mediaRepo;
 
     //Comment
     public ResponseEntity<?> addComment_to_Post(PostComment postComment, List<MultipartFile> files, Integer idPost) throws IOException {
@@ -40,12 +44,35 @@ public class CommentServiceImpl implements CommentIservice {
 
             comment.setCommentBody(postComment.getCommentBody());
             comment.setCommentedAt(postComment.getCommentedAt());
-            comment.setPictures(imageService.addimages(files));
-            comment.setPost(p);
-            comment.setUser(authenticationService.currentlyAuthenticatedUser());
-            comment.setCommentedAt(LocalDateTime.now())	;
-            postCommentRepo.save(comment);
-            return ResponseEntity.ok().body(comment.getCommentBody());
+            if (files==null||files.isEmpty()) {
+                comment.setMedias(null);
+                comment.setPost(p);
+                comment.setUser(authenticationService.currentlyAuthenticatedUser());
+                comment.setCommentedAt(LocalDateTime.now());
+                postCommentRepo.save(comment);
+                return ResponseEntity.ok().body(comment.getCommentBody());
+            }
+            else{
+                List<Media> mediaList = new ArrayList<>();
+                for (MultipartFile multipartFile : files) {
+                    Media media = new Media();
+                    String url = cloudinary.uploader()
+                            .upload(multipartFile.getBytes(),
+                                    Map.of("public_id", UUID.randomUUID().toString()))
+                            .get("url")
+                            .toString();
+                    media.setImagenUrl(url);
+                    media.setName(multipartFile.getName());
+                    mediaList.add(media);
+                }
+                mediaRepo.saveAll(mediaList);
+                comment.setMedias(mediaList);
+                comment.setPost(p);
+                comment.setUser(authenticationService.currentlyAuthenticatedUser());
+                comment.setCommentedAt(LocalDateTime.now());
+                postCommentRepo.save(comment);
+                return ResponseEntity.ok().body(comment.getCommentBody());
+            }
         }else
 
             return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY).body("Bads Word Detected");
@@ -59,7 +86,20 @@ public class CommentServiceImpl implements CommentIservice {
             comment.setCommentBody(postComment.getCommentBody());
             comment.setCommentedAt(postComment.getCommentedAt());
             comment.setPost(postComment.getPost());
-            comment.setPictures(imageService.addimages(files));
+            List<Media> mediaList = new ArrayList<>();
+            for (MultipartFile multipartFile : files) {
+                Media media = new Media();
+                String url = cloudinary.uploader()
+                        .upload(multipartFile.getBytes(),
+                                Map.of("public_id", UUID.randomUUID().toString()))
+                        .get("url")
+                        .toString();
+                media.setImagenUrl(url);
+                media.setName(multipartFile.getName());
+                mediaList.add(media);
+            }
+            mediaRepo.saveAll(mediaList);
+            comment.setMedias(mediaList);
             comment.setCommentedAt(LocalDateTime.now())	;
             postCommentRepo.save(comment);
             return ResponseEntity.ok().body(comment.getCommentBody());
@@ -70,8 +110,8 @@ public class CommentServiceImpl implements CommentIservice {
 
     }
 
-    public ResponseEntity<?> Update_Comment(PostComment postComment, Integer idPostCom) {
-        if (postComment.getUser().equals(authenticationService.currentlyAuthenticatedUser())) {
+    /*public ResponseEntity<?> Update_Comment(PostComment postComment, Integer idPostCom) {
+        if (postComment.getUser().getId()==authenticationService.currentlyAuthenticatedUser().getId()) {
             if (postCommentRepo.existsById(idPostCom)) {
                 PostComment postCom1 = postCommentRepo.findById(idPostCom)
                         .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
@@ -86,7 +126,36 @@ public class CommentServiceImpl implements CommentIservice {
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("you are not the owner of this comment");
 
+    }*/
+    public ResponseEntity<?> Update_Comment(PostComment postComment, Integer idPostCom) {
+        // Get the currently authenticated user
+        User currentUser = authenticationService.currentlyAuthenticatedUser();
+
+        // Check if the user is the owner of the comment
+        if (postCommentRepo.existsById(idPostCom)) {
+            PostComment postCom1 = postCommentRepo.findById(idPostCom)
+                    .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
+
+            if (postCom1.getUser().getId() == currentUser.getId()) {
+                // Update the comment
+                postCom1.setCommentBody(postComment.getCommentBody());
+                postCommentRepo.save(postCom1);
+                return ResponseEntity.ok().body("comment updated");
+            } else {
+                // User is not the owner of the comment
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not the owner of this comment");
+            }
+        } else {
+            // Comment not found
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Comment not found");
+        }
     }
+
+
+
+
+
+
     public ResponseEntity<?> Delete_PostCom(Integer idPostCom) {
         if (postCommentRepo.existsById(idPostCom)) {
             PostComment postCom1 = postCommentRepo.findById(idPostCom)
@@ -111,7 +180,9 @@ public class CommentServiceImpl implements CommentIservice {
     public List<PostComment> get_comm_Comm(Integer idComment) {
         return postCommentRepo.findByPostComment(postCommentRepo.getReferenceById(idComment));
     }
-
-
+    public PostComment getCommentById(Integer idComment) {
+        return postCommentRepo.findById(idComment)
+                .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
+    }
 
 }
