@@ -508,5 +508,10 @@ return claimsRepo.findByOrder(orderRepo.findById(orderId).get());
         return "Claim has been successfully treated.";
     }
 
+    @Override
+    public void DeleteClaim(Integer id) {
+        claimsRepo.deleteById(id);
+    }
+
 }
 

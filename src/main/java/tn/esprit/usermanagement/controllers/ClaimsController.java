@@ -11,6 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/claims")
+@CrossOrigin(origins = "*")
 public class ClaimsController {
     @Autowired
     ClaimsServiceImpl claimsService;
@@ -94,6 +95,11 @@ public class ClaimsController {
     @GetMapping("/allClaimsByType/{type}")
     public List<Claims> ShowClaimsByType(@PathVariable("type") TypeClaim typeClaim) {
         return claimsService.ShowClaimsByType(typeClaim);
+    }
+    //http://localhost:8085/claims/delete/{id}
+    @DeleteMapping("/delete/{id}")
+    public void delete(@PathVariable("id") Integer id){
+        claimsService.DeleteClaim(id);
     }
 }
 
