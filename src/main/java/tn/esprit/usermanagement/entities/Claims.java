@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 import tn.esprit.usermanagement.entities.ForumEntities.Media;
 import tn.esprit.usermanagement.entities.ForumEntities.Post;
 import tn.esprit.usermanagement.enumerations.StatusClaims;
@@ -30,7 +31,9 @@ public class Claims implements Serializable {
     private TypeClaim typeClaim;
     @Enumerated(EnumType.STRING)
     private StatusClaims statusClaims;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime CreatedAt;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime   ConsultAt;
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
