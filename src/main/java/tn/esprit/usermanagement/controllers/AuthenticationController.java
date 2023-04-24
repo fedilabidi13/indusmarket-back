@@ -59,32 +59,32 @@ public class AuthenticationController {
         return authenticationService.enable2FA();
     }
     @PostMapping("/authenticate2fa")
-    public ResponseEntity<?> login2fa(@RequestParam String mail,@RequestParam String phone)
+    public String login2fa(@RequestParam String mail,@RequestParam String phone)
     {
-        return ResponseEntity.ok(authenticationService.login2fa(mail,phone));
+        return authenticationService.login2fa(mail,phone);
     }
     @PostMapping("/resetPassword")
-    public ResponseEntity<?> requestPass(@RequestParam String email)
+    public String requestPass(@RequestParam String email)
     {
-        return ResponseEntity.ok(authenticationService.requestResetPassword(email));
+        return authenticationService.requestResetPassword(email);
     }
     @PostMapping("/confirmPassword")
-    public ResponseEntity<?> confirmPass (@RequestParam String email,
+    public String confirmPass (@RequestParam String email,
                                           @RequestParam String phone,
                                           @RequestParam String pass)
     {
-        return ResponseEntity.ok(authenticationService.passwordResetConfirm(email, phone, pass));
+        return authenticationService.passwordResetConfirm(email, phone, pass);
     }
     @PostMapping("/confirmAddress")
-    public ResponseEntity<?> confirmAddress(@RequestParam String mail,
+    public String confirmAddress(@RequestParam String mail,
                                             @RequestParam String phone) throws IOException, GeoIp2Exception {
-        return ResponseEntity.ok(authenticationService.verifyLocation(mail,phone));
+        return authenticationService.verifyLocation(mail,phone);
     }
     @PostMapping("/newPassword")
-    public ResponseEntity<?> loginModerator(@RequestParam String code,
+    public String loginModerator(@RequestParam String code,
                                             @RequestParam String pwd)
     {
-        return ResponseEntity.ok(authenticationService.loginMod(code,pwd));
+        return authenticationService.loginMod(code,pwd);
     }
     @GetMapping("/get")
     public User getbymail(@RequestParam String email)

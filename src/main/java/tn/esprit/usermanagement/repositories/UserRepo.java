@@ -52,4 +52,6 @@ public interface UserRepo extends JpaRepository<User,Integer> {
     @Query(" select u from User u where u.role ='DELIVERY' and u.etatLivreur = 'OCUPPE' ")
     public List<User> findLivreurOcuppe();
 
+
+
 }
