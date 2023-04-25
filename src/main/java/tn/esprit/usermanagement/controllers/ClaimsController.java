@@ -79,6 +79,11 @@ public class ClaimsController {
     public void OtherClaimTreatment(@PathVariable("claimId") Integer ClaimId, @PathVariable("status") StatusClaims status) {
         claimsService.OtherClaimTreatment(ClaimId, status);
     }
+    //http://localhost:8085/claims/claimTreatment/{claimId}/{status}
+    @PutMapping("/claimTreatment/{claimId}/{status}")
+    public String claimTreatment(@PathVariable("claimId") Integer ClaimId, @PathVariable("status") StatusClaims status) {
+        return claimsService.claimTreatment(ClaimId,status);
+    }
 
     //http://localhost:8085/claims/allClaims
     @GetMapping("/allClaims")

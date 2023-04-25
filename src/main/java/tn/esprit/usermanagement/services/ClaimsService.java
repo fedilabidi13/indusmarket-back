@@ -23,5 +23,6 @@ public interface ClaimsService {
     public String DeliviryClaimTreatment(Integer claimId, StatusClaims status);
     public String OtherClaimTreatment(Integer claimId, StatusClaims status);
     public void DeleteClaim(Integer id);
+    public String claimTreatment(Integer claimId, StatusClaims status);
 
 }
