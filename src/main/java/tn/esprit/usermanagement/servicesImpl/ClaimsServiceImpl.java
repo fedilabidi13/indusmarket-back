@@ -493,7 +493,7 @@ return claimsRepo.findByOrder(orderRepo.findById(orderId).get());
         if (claims == null) {
             return "Invalid claim ID.";
         }
-        if (claims.getStatusClaims() != StatusClaims.Pending) {
+        if (claims.getStatusClaims() != StatusClaims.In_process) {
             return "Claim has already been resolved or rejected.";
         }
         if (status != StatusClaims.Resolved && claims.getTypeClaim() != TypeClaim.Other) {
@@ -506,6 +506,28 @@ return claimsRepo.findByOrder(orderRepo.findById(orderId).get());
         claims.setConsultAt(LocalDateTime.now());
         claimsRepo.save(claims);
         return "Claim has been successfully treated.";
+    }
+    @Override
+    public String claimTreatment(Integer claimId, StatusClaims status) {
+        Claims claims = claimsRepo.findById(claimId).orElse(null);
+        if (claims == null) {
+            return "Claim not found.";
+        }
+
+        TypeClaim typeClaim = claims.getTypeClaim();
+
+        if (typeClaim == TypeClaim.Order) {
+            return OrderClaimTreatment(claimId, status);
+        } else if (typeClaim == TypeClaim.Post) {
+            return PostClaimTreatment(claimId, status);
+        } else if(typeClaim == TypeClaim.DELIVERY) {
+            return DeliviryClaimTreatment(claimId,status) ;
+        } else if (typeClaim==TypeClaim.Other) {
+            return OtherClaimTreatment(claimId,status);
+        }
+        else {
+            return "Invalid type claim.";
+        }
     }
 
     @Override
