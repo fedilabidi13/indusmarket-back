@@ -35,15 +35,12 @@ public class Claims implements Serializable {
     private LocalDateTime CreatedAt;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime   ConsultAt;
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
-    @JsonIgnore
     @ManyToOne
     private Orders order;
     @OneToMany(cascade = CascadeType.ALL)
     private List<Media> medias;
-    @JsonIgnore
     @ManyToOne
     private Post post;
     @OneToMany(mappedBy = "claims", cascade = CascadeType.ALL)

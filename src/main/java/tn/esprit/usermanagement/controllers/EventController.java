@@ -54,6 +54,8 @@ public class EventController {
     public void DeleteEvent(@PathVariable("eventId") Integer eventId) {
         eventService.DeleteEvent(eventId);
     }
+    //http://localhost:8085/events/accepEvent/{eventId}
+
     @PutMapping("accepEvent/{eventId}")
     public void AcceptEvent(@PathVariable("eventId") Integer eventId){
         eventService.AcceptEvent(eventId);
