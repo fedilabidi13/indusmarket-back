@@ -36,10 +36,8 @@ public class Event implements Serializable {
     public boolean accepted=false;
     @OneToMany(cascade = CascadeType.ALL)
     private List<Media> medias;
-    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy="event")
     private List<Ticket> tickets;
-    @JsonIgnore
     @ManyToOne
     User user;
     private double price;

@@ -1,4 +1,5 @@
 package tn.esprit.usermanagement.services;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import tn.esprit.usermanagement.entities.Claims;
 import tn.esprit.usermanagement.enumerations.StatusClaims;
@@ -18,11 +19,11 @@ public interface ClaimsService {
     public void DeleteRejectedClaims();
     public String updateDeliveryClaims(Integer orderId, Claims newClaims, List<MultipartFile> files) throws IOException;
     public String updateOrderClaims(Integer orderId, Claims newClaims, List<MultipartFile> files) throws IOException;
-    public String OrderClaimTreatment(Integer claimId, StatusClaims status);
-    public String PostClaimTreatment(Integer claimId, StatusClaims status);
-    public String DeliviryClaimTreatment(Integer claimId, StatusClaims status);
-    public String OtherClaimTreatment(Integer claimId, StatusClaims status);
+    public ResponseEntity<Object> OrderClaimTreatment(Integer claimId, StatusClaims status);
+    public ResponseEntity<Object> PostClaimTreatment(Integer claimId, StatusClaims status);
+    public ResponseEntity<Object> DeliviryClaimTreatment(Integer claimId, StatusClaims status);
+    public ResponseEntity<Object> OtherClaimTreatment(Integer claimId, StatusClaims status);
     public void DeleteClaim(Integer id);
-    public String claimTreatment(Integer claimId, StatusClaims status);
+    public ResponseEntity<Object> claimTreatment(Integer claimId, StatusClaims status);
 
 }
