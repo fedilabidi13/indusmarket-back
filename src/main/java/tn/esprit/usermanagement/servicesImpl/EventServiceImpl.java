@@ -43,9 +43,9 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<Event> ShowEventbyUser() {
-        return eventRepo.findAllByUserId(authenticationService.currentlyAuthenticatedUser().getId());
-    }
+  public List<Event> ShowEventbyUser() {
+     return eventRepo.findAllByUserId(authenticationService.currentlyAuthenticatedUser().getId());
+   }
 
     @Override
     public void DeleteEvent(Integer eventId) {

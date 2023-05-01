@@ -8,6 +8,8 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("/tickets")
+@CrossOrigin(origins = "*")
+
 public class TicketController {
     @Autowired
     TicketServiceImpl ticketService;

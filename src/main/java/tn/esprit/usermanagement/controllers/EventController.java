@@ -12,6 +12,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/events")
+@CrossOrigin(origins = "*")
+
 public class EventController {
     @Autowired
     EventServiceImpl eventService;
@@ -25,10 +27,10 @@ public class EventController {
     }
 
     //http://localhost:8085/events/ShowEventbyUser
-    @GetMapping("/ShowEventbyUser")
-    public List<Event> ShowEventbyUser(){
-        return eventService.ShowEventbyUser();
-    }
+  @GetMapping("/ShowEventbyUser")
+  public List<Event> ShowEventbyUser(){
+      return eventService.ShowEventbyUser();
+  }
 
     //http://localhost:8085/events/addEvent
     @PostMapping("/addEvent")
