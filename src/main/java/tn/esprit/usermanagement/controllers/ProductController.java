@@ -109,6 +109,14 @@ public class ProductController {
         return productImpl.mostSoldPruducts();
     }
 
+
+    @GetMapping("/checkCurrentQuantity")
+    public int checkCurrentQuantity(@RequestParam("idProd") Integer idProd){
+        return productService.checkCurrentQuantity(idProd);
+
+    }
+
+
     @GetMapping("/ShowAllProductsForUser/{id}")
     public List<Product> ShowAllProductsForUser(@PathVariable("id") Long id){
         return productService.ShowAllProductsForUser(id);

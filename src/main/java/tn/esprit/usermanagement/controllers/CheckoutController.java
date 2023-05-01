@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,6 +19,8 @@ import tn.esprit.usermanagement.servicesImpl.AuthenticationService;
 import java.io.IOException;
 
 @Controller
+@CrossOrigin(origins = "*")
+
 
 public class CheckoutController {
 
@@ -39,20 +42,20 @@ public class CheckoutController {
     private UserRepo userRepo;
 
     @GetMapping("/checkout")
-    public String checkout (Model model, @RequestParam(required = true) String orderId)
-    {
+    public String checkout(Model model, @RequestParam("orderId") String orderId) {
+        Integer amountInt = Integer.valueOf((int) (orderRepo.getReferenceById(Integer.valueOf(orderId)).getTotalAmount()));
+        model.addAttribute("amount", amountInt);
+        model.addAttribute("stripePublicKey", stripePublicKey);
+        model.addAttribute("currency", "EUR");
+        model.addAttribute("orderId", orderId);
 
-        Integer amountint = Integer.valueOf((int) (orderRepo.getReferenceById(Integer.valueOf(orderId)).getTotalAmount()));
-        model.addAttribute("amount",amountint);
-        model.addAttribute("stripePublicKey",stripePublicKey);
-        model.addAttribute("currency","USD");
-        model.addAttribute("orderId",orderId);
-        Orders orderpaid = orderRepo.getReferenceById(Integer.valueOf(orderId));
-        orderpaid.setPaid(true);
-        orderRepo.save(orderpaid);
+        Orders orderPaid = orderRepo.getReferenceById(Integer.valueOf(orderId));
         orderService.lessQuantity(orderId);
-       // orderRepo.save(orderpaid);
-        shoppingCartRepo.delete(orderpaid.getUser().getShoppingCart());
+        orderPaid.setPaid(true);
+        orderRepo.save(orderPaid);
+
+        //shoppingCartRepo.delete(orderPaid.getUser().getShoppingCart()).orElse;
+
         return "checkout";
     }
 

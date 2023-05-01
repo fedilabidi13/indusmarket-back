@@ -4,10 +4,17 @@ package tn.esprit.usermanagement.controllers;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import tn.esprit.usermanagement.entities.CartItem;
+import tn.esprit.usermanagement.entities.Product;
+import tn.esprit.usermanagement.enumerations.Category;
 import tn.esprit.usermanagement.services.ICartItemService;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/cartItem")
+@CrossOrigin(origins = "*")
+
+
 @AllArgsConstructor
 public class CartItemController {
     private ICartItemService cartItemService;
@@ -20,7 +27,7 @@ public class CartItemController {
 
     }
 
-    @PutMapping("/updateCartItemQuantity")
+    @PostMapping("/updateCartItemQuantity")
     public void updateCartItemQuantity( @RequestParam ("cartItemId") Integer cartItemId, @RequestParam ("counterValue")Integer counterValue){
          cartItemService.updateCartItemQuantity(cartItemId ,counterValue);
     }
@@ -36,5 +43,18 @@ public class CartItemController {
       return  cartItemService.AfficherCartItem(idCartItem);
     }
 
+
+
+    @GetMapping("/CategoryMostSell")
+    public Map<String, Integer> getCartItemCountByCategory(){
+             return cartItemService.getCartItemCountByCategory();
+    }
+
+
+    @GetMapping("/getMostCommonProductByCategory")
+
+    public Map<Category, Product> getMostCommonProductByCategory(){
+        return cartItemService.getMostCommonProductByCategory();
+    }
 
 }
