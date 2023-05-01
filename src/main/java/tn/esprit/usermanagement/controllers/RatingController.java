@@ -9,24 +9,28 @@ import tn.esprit.usermanagement.servicesImpl.RatingServiceImpl;
 import java.util.List;
 @AllArgsConstructor
 @RestController
+@CrossOrigin(origins = "*")
 @RequestMapping("/rating")
 public class RatingController {
     private RatingServiceImpl ratingService;
 
-    @PostMapping("/add")
-    public Rating createRate(@RequestParam("shopId") Integer shopId , @ModelAttribute Rating ra) {
-        return ratingService.createRate(shopId,ra);
+    @PostMapping("/add/{shopId}/{value}")
+    public Rating createRate(@PathVariable ("shopId") Integer shopId ,@PathVariable("value") int value) {
+        return ratingService.createRate(shopId,value);
     }
-    @GetMapping("/findByShop")
-    public List<Rating> getAllRatesForShop(@RequestParam("shopId") Integer shopId) {
+    @GetMapping("/findByShop/{shopId}")
+    public List<Rating> getAllRatesForShop(@PathVariable("shopId") Integer shopId) {
        return ratingService.getAllRatesForShop(shopId);
    }
 
-    @GetMapping("/shopAverage")
-    public Double getAverageRatingForShop(@RequestParam("shopId") Integer shopId) {
+    @GetMapping("/shopAverage/{shopId}")
+    public Double getAverageRatingForShop(@PathVariable("shopId") Integer shopId) {
         return ratingService.getAverageRatingForShop(shopId);
     }
-
+    @GetMapping("/getRatingByUser/{shopId}")
+    public double getAverageRatingForShopByUser(@PathVariable("shopId") Integer shopId){
+        return ratingService.getRatingByUserAndShopByUser(shopId);
+    }
 }
 
 

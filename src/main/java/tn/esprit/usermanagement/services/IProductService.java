@@ -23,4 +23,5 @@ public interface IProductService {
      List<String> compareProductFeatures(int product1id, int product2id);
      String updateProductQuantity(int id ,int quantity);
      List<Product> showProductsToSpeceficUser();
+    List<Product> ShowAllProductsForUser(Long id);
     }

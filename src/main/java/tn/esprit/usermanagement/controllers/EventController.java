@@ -13,6 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/events")
 @CrossOrigin(origins = "*")
+
 public class EventController {
     @Autowired
     EventServiceImpl eventService;
@@ -29,14 +30,14 @@ public class EventController {
         return eventService.getWithId(eventId);
     }
     //http://localhost:8085/events/ShowEventbyUser
-    @GetMapping("/ShowEventbyUser")
-    public List<Event> ShowEventbyUser(){
-        return eventService.ShowEventbyUser();
-    }
+  @GetMapping("/ShowEventbyUser")
+  public List<Event> ShowEventbyUser(){
+      return eventService.ShowEventbyUser();
+  }
 
     //http://localhost:8085/events/addEvent
     @PostMapping("/addEvent")
-    public Event AddEventWithPictureAndAssignToUser(@ModelAttribute Event event, @RequestParam("files")  List<MultipartFile> files) throws IOException{
+    public Event AddEventWithPictureAndAssignToUser(@ModelAttribute Event event, @RequestParam("files") List<MultipartFile> files) throws IOException{
         return eventService.AddEventWithPictureAndAssignToUser(event.getAdresse(),event,files);
     }
 
@@ -51,13 +52,12 @@ public class EventController {
     public void UpdateEvent(@ModelAttribute Event event, @RequestParam(name = "files",required=false) List<MultipartFile> files) throws IOException{
          eventService.updateEvent(event,files);
     }
+
     //http://localhost:8085/events/deleteEvent/{eventId}
     @DeleteMapping("/deleteEvent/{eventId}")
     public void DeleteEvent(@PathVariable("eventId") Integer eventId) {
         eventService.DeleteEvent(eventId);
     }
-    //http://localhost:8085/events/accepEvent/{eventId}
-
     @PutMapping("accepEvent/{eventId}")
     public void AcceptEvent(@PathVariable("eventId") Integer eventId){
         eventService.AcceptEvent(eventId);
