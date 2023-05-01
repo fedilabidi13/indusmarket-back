@@ -166,6 +166,7 @@ public class AuthenticationService {
                 .banType(BanType.LOCK)
                 .phoneNumber(request.getPhoneNumber())
                 .enabled(false)
+                .firtAttempt(false)
                 .country(ipService.getCountry())
                 .twoFactorsAuth(false)
                 .banNumber(0)

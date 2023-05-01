@@ -14,6 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/admin")
+@CrossOrigin(origins = "*")
 @AllArgsConstructor
 
 public class AdminController {
@@ -25,11 +26,11 @@ public class AdminController {
         return ResponseEntity.ok("hello from admin endpoint");
     }
     @GetMapping("/addMod")
-    public String createModAccount(@RequestBody String email) throws IOException, GeoIp2Exception {
+    public String createModAccount(@RequestParam String email) throws IOException, GeoIp2Exception {
         return adminService.addMod(email);
     }
     @GetMapping("/ban")
-    public String banUser(@RequestBody String email)
+    public String banUser(@RequestParam String email)
     {
         return adminService.banUser(email);
     }
@@ -44,5 +45,10 @@ public class AdminController {
     public ResponseEntity<?> getcurrentuser()
     {
         return ResponseEntity.ok(authenticationService.currentlyAuthenticatedUser().getEmail());
+    }
+    @GetMapping("/users")
+    public List<User> showByrole(@RequestParam String role)
+    {
+        return adminService.getUsers(Role.valueOf(role));
     }
 }

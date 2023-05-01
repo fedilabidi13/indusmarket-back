@@ -49,8 +49,9 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public void DeleteEvent(Integer eventId) {
-        if (eventRepo.findById(eventId).get().getTickets().isEmpty()){
-            eventRepo.delete(eventRepo.findById(eventId).get());
+        Event event = eventRepo.findById(eventId).get();
+        if (event.getTickets().isEmpty()){
+            eventRepo.delete(event);
         }
     }
 
@@ -63,14 +64,13 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public void ModDeleteEvent(Integer eventId) {
-        if (!eventRepo.findById(eventId).get().getTickets().isEmpty()){
-            for (Ticket ticket : eventRepo.findById(eventId).get().getTickets()){
+        Event event = eventRepo.findById(eventId).get();
+            for (Ticket ticket : event.getTickets()){
                 emailService.sendEventEmail(ticket.getUser().getEmail(),"The event : "+ eventRepo.findById(eventId).get().getTitle() + "was deleted.");
                 ticketRepo.delete(ticket);
-            }
-            eventRepo.delete(eventRepo.findById(eventId).get());
         }
-        eventRepo.delete(eventRepo.findById(eventId).get());
+        eventRepo.delete(event);
+
     }
 
 
@@ -144,22 +144,10 @@ public class EventServiceImpl implements EventService {
     }
     @Scheduled(fixedRate = 10000) // runs every second
     @Override
-    public void DeleteEndEvent() {
-        LocalDateTime limite = LocalDateTime.now().minusMonths(12);
-        List<Event> Events = eventRepo.findByEndDateIsBefore(limite);
-        for (Event event : Events) {
-            eventRepo.delete(event);
-        }
-    }
-    @Scheduled(fixedRate = 10000) // runs every second
-    @Override
-    public void deletePssedEvent() {
-    List<Event> events = eventRepo.findAll();
+    public void deletePassedEvent() {
+    List<Event> events = eventRepo.findByEndDateIsBefore(LocalDateTime.now().minusDays(0));
         for (Event event : events){
-            if (event.getEndDate()==LocalDateTime.now().minusDays(3)){
         eventRepo.delete(event);
         }
-        }
     }
-
 }

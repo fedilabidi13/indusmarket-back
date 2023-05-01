@@ -28,18 +28,16 @@ public class Event implements Serializable {
     private String currency;
     private String method;
     private String intent;
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime startDate;
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime endDate;
     private String adresse;
     public boolean accepted=false;
     @OneToMany(cascade = CascadeType.ALL)
     private List<Media> medias;
-    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy="event")
     private List<Ticket> tickets;
-    @JsonIgnore
     @ManyToOne
     User user;
     private double price;

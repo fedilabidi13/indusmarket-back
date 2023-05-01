@@ -5,6 +5,8 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,6 +18,8 @@ import tn.esprit.usermanagement.enumerations.StatusClaims;
 import tn.esprit.usermanagement.enumerations.TypeClaim;
 import tn.esprit.usermanagement.repositories.*;
 import tn.esprit.usermanagement.services.ClaimsService;
+import tn.esprit.usermanagement.servicesImpl.ForumServiceImpl.PostServiceImpl;
+
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -54,6 +58,8 @@ public class ClaimsServiceImpl implements ClaimsService {
     Cloudinary cloudinary;
     @Autowired
     MediaRepo mediaRepo;
+    @Autowired
+    PostServiceImpl postService;
     @Override
     public List<Claims> ShowAllClaims() {
         return claimsRepo.findAll();
@@ -351,16 +357,16 @@ return claimsRepo.findByOrder(orderRepo.findById(orderId).get());
     }
 
     @Override
-    public String OrderClaimTreatment(Integer claimId, StatusClaims status) {
+    public ResponseEntity<Object> OrderClaimTreatment(Integer claimId, StatusClaims status) {
         User usr = authenticationService.currentlyAuthenticatedUser();
         if (usr.getRole() != Role.MOD) {
-            return "You are not authorized to perform this action.";
+            return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY).body("You are not authorized to perform this action");
         }
         Claims claims = claimsRepo.findById(claimId).get();
         if (claims.getStatusClaims()==StatusClaims.Resolved||claims.getStatusClaims()==StatusClaims.Rejected){
-            return "claims was treated before !";
+            return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY).body("Seen");
         } else if (claims.getStatusClaims()==StatusClaims.Pending) {
-            return "You can't treat right now !";
+            return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY).body("You can't");
         }
         else {
             if (status == StatusClaims.Resolved && claims.getTypeClaim() == TypeClaim.Order) {
@@ -398,27 +404,28 @@ return claimsRepo.findByOrder(orderRepo.findById(orderId).get());
             claims.setStatusClaims(status);
             claims.setConsultAt(LocalDateTime.now());
             claimsRepo.save(claims);
-            return "claims treated succefully !";
+            return ResponseEntity.status(HttpStatus.OK).body("{\"message\": \"Claim has been successfully treated\"}");
         }
     }
+    @Transactional
     @Override
-    public String PostClaimTreatment(Integer claimId, StatusClaims status) {
+    public ResponseEntity<Object> PostClaimTreatment(Integer claimId, StatusClaims status) {
         User usr = authenticationService.currentlyAuthenticatedUser();
         if (usr.getRole() != Role.MOD) {
-            return "You are not authorized to perform this action.";
+            return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY).body("You are not authorized to perform this action");
         }
         Claims claims = claimsRepo.findById(claimId).get();
         if (claims.getStatusClaims() == StatusClaims.Resolved || claims.getStatusClaims() == StatusClaims.Rejected) {
-            return "claims was treated before !";
+            return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY).body("Seen");
         } else if (claims.getStatusClaims() == StatusClaims.Pending) {
-            return "You can't treat right now !";
+            return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY).body("You can't");
         } else {
             if (status == StatusClaims.Resolved) {
                 if (claims.getTypeClaim() == TypeClaim.Post) {
                     long numResolvedClaims = claims.getPost().getClaims().stream()
                             .filter(c -> c.getStatusClaims() == StatusClaims.Resolved)
                             .count();
-                    if (numResolvedClaims >= 2) {
+                    if (numResolvedClaims >= 50) {
                         postRepo.delete(claims.getPost());
                     } else {
                         emailService.sendClaimEmail(claims.getPost().getUser().getEmail(), "there is a claim about your post: " + claims.getPost().getBody() + " so you should modify it!");
@@ -426,10 +433,10 @@ return claimsRepo.findByOrder(orderRepo.findById(orderId).get());
                     long numClaimedPosts = claims.getPost().getUser().getPosts().stream()
                             .filter(p -> p.getClaims() != null)
                             .count();
-                    if (numClaimedPosts >= 2) {
+                    if (numClaimedPosts >7) {
                         adminService.suspendUser(claims.getPost().getUser().getEmail());
                     }
-                    if (claims.getPost().getUser().getBanNumber() >= 5) {
+                    if (claims.getPost().getUser().getBanNumber() >= 10) {
                         adminService.banUser(claims.getPost().getUser().getEmail());
                     }
                 }
@@ -439,22 +446,22 @@ return claimsRepo.findByOrder(orderRepo.findById(orderId).get());
             claims.setStatusClaims(status);
             claims.setConsultAt(LocalDateTime.now());
             claimsRepo.save(claims);
-            return "claims treated successfully!";
+            return ResponseEntity.status(HttpStatus.OK).body("{\"message\": \"Claim has been successfully treated\"}");
         }
     }
 
     @Override
-    public String DeliviryClaimTreatment(Integer claimId, StatusClaims status) {
+    public ResponseEntity<Object> DeliviryClaimTreatment(Integer claimId, StatusClaims status) {
         User usr = authenticationService.currentlyAuthenticatedUser();
         if (usr.getRole() != Role.MOD) {
-            return "You are not authorized to perform this action.";
+            return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY).body("You are not authorized to perform this action");
         }
         Claims claims = claimsRepo.findById(claimId).orElse(null);
         if (claims == null) {
-            return "Invalid claim ID.";
+            return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY).body("Invalid Claim Id");
         }
         if (claims.getStatusClaims() != StatusClaims.In_process) {
-            return "Claim has already been resolved or rejected.";
+            return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY).body("Seen");
         }
         if (status == StatusClaims.Resolved) {
             if (claims.getTypeClaim() == TypeClaim.DELIVERY) {
@@ -480,32 +487,59 @@ return claimsRepo.findByOrder(orderRepo.findById(orderId).get());
         claims.setConsultAt(LocalDateTime.now());
         claimsRepo.save(claims);
 
-        return "Claim has been successfully treated.";
+        return ResponseEntity.status(HttpStatus.OK).body("{\"message\": \"Claim has been successfully treated\"}");
     }
 
     @Override
-    public String OtherClaimTreatment(Integer claimId, StatusClaims status) {
+    public ResponseEntity<Object> OtherClaimTreatment(Integer claimId, StatusClaims status) {
         User usr = authenticationService.currentlyAuthenticatedUser();
         if (usr.getRole() != Role.MOD) {
-            return "You are not authorized to perform this action.";
+            return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY).body("You are not authorized to perform this action");
         }
         Claims claims = claimsRepo.findById(claimId).orElse(null);
         if (claims == null) {
-            return "Invalid claim ID.";
+            return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY).body("Invalid Claim Id");
         }
-        if (claims.getStatusClaims() != StatusClaims.Pending) {
-            return "Claim has already been resolved or rejected.";
+        if (claims.getStatusClaims() != StatusClaims.In_process) {
+            return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY).body("Claim has alredy seen");
+
         }
-        if (status != StatusClaims.Resolved && claims.getTypeClaim() != TypeClaim.Other) {
+        if (status != StatusClaims.Rejected && claims.getTypeClaim() != TypeClaim.Other) {
             emailService.sendClaimEmail(claims.getUser().getEmail(), "Your claim was rejected.");
-            claims.setStatusClaims(StatusClaims.Rejected);
         } else {
             emailService.sendClaimEmail(claims.getUser().getEmail(), "Your claim was resolved. We will see what should be done about " + claims.getDescription());
-            claims.setStatusClaims(StatusClaims.Resolved);
         }
         claims.setConsultAt(LocalDateTime.now());
+        claims.setStatusClaims(status);
         claimsRepo.save(claims);
-        return "Claim has been successfully treated.";
+        return ResponseEntity.status(HttpStatus.OK).body("{\"message\": \"Claim has been successfully treated\"}");
+    }
+    @Override
+    public ResponseEntity<Object> claimTreatment(Integer claimId, StatusClaims status) {
+        Claims claims = claimsRepo.findById(claimId).orElse(null);
+        if (claims == null) {
+            return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY).body("Claim not found");
+        }
+
+        TypeClaim typeClaim = claims.getTypeClaim();
+
+        if (typeClaim == TypeClaim.Order) {
+            return OrderClaimTreatment(claimId, status);
+        } else if (typeClaim == TypeClaim.Post) {
+            return PostClaimTreatment(claimId, status);
+        } else if(typeClaim == TypeClaim.DELIVERY) {
+            return DeliviryClaimTreatment(claimId,status) ;
+        } else if (typeClaim==TypeClaim.Other) {
+            return OtherClaimTreatment(claimId,status);
+        }
+        else {
+            return ResponseEntity.status(HttpStatus.FAILED_DEPENDENCY).body("Invalid type claim");
+        }
+    }
+
+    @Override
+    public void DeleteClaim(Integer id) {
+        claimsRepo.deleteById(id);
     }
 
 }
