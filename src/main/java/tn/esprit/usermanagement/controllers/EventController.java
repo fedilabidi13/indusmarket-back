@@ -24,7 +24,10 @@ public class EventController {
     public List<Event> ShowEvents(){
         return eventService.ShowEvents();
     }
-
+    @GetMapping("/getEvent/{eventId}")
+    public Event GetEvent(@PathVariable("eventId")Integer eventId){
+        return eventService.getWithId(eventId);
+    }
     //http://localhost:8085/events/ShowEventbyUser
     @GetMapping("/ShowEventbyUser")
     public List<Event> ShowEventbyUser(){
@@ -33,7 +36,7 @@ public class EventController {
 
     //http://localhost:8085/events/addEvent
     @PostMapping("/addEvent")
-    public Event AddEventWithPictureAndAssignToUser(@ModelAttribute Event event, @RequestParam("files") List<MultipartFile> files) throws IOException{
+    public Event AddEventWithPictureAndAssignToUser(@ModelAttribute Event event, @RequestParam("files")  List<MultipartFile> files) throws IOException{
         return eventService.AddEventWithPictureAndAssignToUser(event.getAdresse(),event,files);
     }
 
@@ -45,10 +48,9 @@ public class EventController {
 
     //http://localhost:8085/events/updateEvent
     @PutMapping("/updateEvent")
-    public String UpdateEvent(Event event, List<MultipartFile> files) throws IOException{
-        return eventService.updateEvent(event,files);
+    public void UpdateEvent(@ModelAttribute Event event, @RequestParam(name = "files",required=false) List<MultipartFile> files) throws IOException{
+         eventService.updateEvent(event,files);
     }
-
     //http://localhost:8085/events/deleteEvent/{eventId}
     @DeleteMapping("/deleteEvent/{eventId}")
     public void DeleteEvent(@PathVariable("eventId") Integer eventId) {
