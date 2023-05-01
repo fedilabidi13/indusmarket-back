@@ -46,18 +46,21 @@ public class TicketServiceImpl implements TicketService {
     Cloudinary cloudinary;
 
     @Override
-    public Ticket AddTicketForEventAndAssignToUser(Ticket ticket,Integer eventId) throws IOException, WriterException {
+    public Ticket AddTicketForEventAndAssignToUser(Integer eventId) throws IOException, WriterException {
         User user = userRepo.findById(authenticationService.currentlyAuthenticatedUser().getId()).get();
         if (ticketRepo.findByUserAndEvent(user,eventRepo.findById(eventId).get())!=null){
             return ticketRepo.findByUserAndEvent(user,eventRepo.findById(eventId).get());
         }
-        Ticket savedTicket = ticketRepo.save(ticket);
+        Ticket savedTicket = new Ticket();
+        ticketRepo.save(savedTicket);
         savedTicket.setReference(refGenerator.generateTicketRef());
+        savedTicket.setDescreption(eventRepo.findById(eventId).get().getAdresse() + " at " + eventRepo.findById(eventId).get().getStartDate());
         savedTicket.setUser(user);
         savedTicket.setEvent(eventRepo.findById(eventId).get());
         // Generate the QR code data
         String qrCodeText = savedTicket.getId().toString() + " "
                 + savedTicket.getDescreption() + " "
+                
                 + "Le nom est : " + savedTicket.getUser().getFirstName() + " Le prenom est : "
                 + savedTicket.getUser().getLastName();
         // Create a new PNG image
@@ -124,34 +127,31 @@ public class TicketServiceImpl implements TicketService {
         byte[] pdfData = pdfOutputStream.toByteArray();
         // Save the PDF to a file
         String fileName = savedTicket.getReference() + ".pdf";
-        String filePath = "src/main/resources/assets/" + fileName;
+        String filePath = "C:/Users/THINKPAD/Documents/GitHub/indusmarket-front/src/assets/img/"+ fileName;
         FileOutputStream fos = new FileOutputStream(filePath);
         fos.write(pdfData);
         fos.flush();
         fos.close();
         // Create a new Pictures object with the PDF data
         Media pdfPicture = new Media();
-        pdfPicture.setName(ticket.getReference());
+        pdfPicture.setName(savedTicket.getReference());
         pdfPicture.setImagenUrl(cloudinary.uploader()
                 .upload(pdfData,
                         Map.of("public_id", UUID.randomUUID().toString()))
                 .get("url")
                 .toString());
         mediaRepo.save(pdfPicture);
-        // Add the Pictures object to the list of QR codes in the Ticket object
-        List<Media> PdfImage = new ArrayList<>();
-        PdfImage.add(pdfPicture);
-        savedTicket.setMedias(PdfImage);
+        savedTicket.setMedia(pdfPicture);
         return ticketRepo.save(savedTicket);
     }
     public String deleteTicket(Integer idTicket){
-        User user = authenticationService.currentlyAuthenticatedUser();
         Ticket ticket = ticketRepo.findById(idTicket).get();
-    if (user.getTickets().contains(ticket)){
         ticketRepo.delete(ticket);
         return "Ticket deleted succefuly";
     }
-    return "Youcan't delete this ticket";
+    @Override
+    public List<Ticket> ShowUserTickets(){
+        User user = authenticationService.currentlyAuthenticatedUser();
+        return ticketRepo.findByUser(user);
     }
-
 }

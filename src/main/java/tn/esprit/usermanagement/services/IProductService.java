@@ -25,4 +25,6 @@ public interface IProductService {
      List<Product> showProductsToSpeceficUser();
 
     public int checkCurrentQuantity(Integer idProd);
+
+    List<Product> ShowAllProductsForUser(Long id);
     }

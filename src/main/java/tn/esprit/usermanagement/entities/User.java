@@ -18,9 +18,11 @@ import tn.esprit.usermanagement.enumerations.BanType;
 import tn.esprit.usermanagement.enumerations.EtatLivreur;
 import tn.esprit.usermanagement.enumerations.Role;
 
+import javax.management.Notification;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "_user")
@@ -83,7 +85,6 @@ public class User implements UserDetails {
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL)
     List<Post> posts;
-    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     List<React> postReacts;
 
@@ -94,6 +95,9 @@ public class User implements UserDetails {
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL)
     List<Advertising> advertising;
+
+    ///WS
+
 
     @Enumerated(EnumType.STRING)
     private BanType banType;

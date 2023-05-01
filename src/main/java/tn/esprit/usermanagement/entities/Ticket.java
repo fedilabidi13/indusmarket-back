@@ -29,6 +29,6 @@ public class Ticket implements Serializable {
     @JsonIgnore
     @ManyToOne
     private Event event;
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<Media> medias;
+    @OneToOne
+    private Media media;
 }

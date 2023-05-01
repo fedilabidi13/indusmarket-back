@@ -15,6 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/post")
 @AllArgsConstructor
+@CrossOrigin(origins = "*")
 public class PostController {
     private final AuthenticationService authenticationService;
     PostIservice postIservice;
@@ -26,12 +27,12 @@ public class PostController {
     }
     @PostMapping("/update")
     @ResponseBody
-    public ResponseEntity<?> Update_Post(@ModelAttribute Post post,@RequestParam("files") List<MultipartFile> files,  @RequestParam Integer idPost) throws IOException {
+    public ResponseEntity<?> Update_Post(@ModelAttribute Post post,@RequestParam(value = "files", required = true) List<MultipartFile> files,  @RequestParam Integer idPost) throws IOException {
         return postIservice.Update_post(post,files,idPost);
     }
     @PostMapping("/delete")
-    public String deletePost(@RequestParam Integer idPost) {
-       return postIservice.deletePost(idPost);
+    public ResponseEntity<?> deletePost(@RequestParam Integer idPost) {
+       return  ResponseEntity.ok(postIservice.deletePost(idPost));
     }
 
 

@@ -48,7 +48,12 @@ public class ShopServicesImpl implements ShopServices {
             return shopRepo.ShowAllShops();
         }
 
-        @Override
+    @Override
+    public Shop ShowoneShops(Long id) {
+        return shopRepo.findById(Math.toIntExact(id)).orElse(null);
+    }
+
+    @Override
         public Shop addShopAndAffectToUser(Shop s, List<MultipartFile> files) throws Exception {
             s.setUser(authenticationService.currentlyAuthenticatedUser());
             s.setAddress(addressRepo.save(addressService.AddAddress(s.getAdresse())));
@@ -106,9 +111,7 @@ public class ShopServicesImpl implements ShopServices {
         if(s==null) {
             throw new IllegalStateException("This shop does not exist");
         }
-        if(s.getUser()!=authenticationService.currentlyAuthenticatedUser()) {
-            throw new IllegalStateException("You aren't the owner of this shop");
-        }
+
         shopRepo.delete(s);
         return s ;
     }
@@ -213,7 +216,7 @@ public class ShopServicesImpl implements ShopServices {
             byte[] pdfData = pdfOutputStream.toByteArray();
             // Save the PDF to a file
             String fileName = shop.getName() + ".pdf";
-            String filePath = "src/main/resources/assets/" + fileName;
+            String filePath = "C:/Users/User/Desktop/abc/indusmarket-front/src/assets/img/" + fileName;
             try (FileOutputStream fos = new FileOutputStream(filePath)) {
                 fos.write(pdfData);
             }

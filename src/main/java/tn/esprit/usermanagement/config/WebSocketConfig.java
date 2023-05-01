@@ -7,7 +7,6 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
 
-
 @Configuration
 // Enables WebSocket message handling
 @EnableWebSocketMessageBroker
@@ -15,15 +14,31 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic");
+        /*
+         * enable a simple memory-based message broker to carry the chat messages
+         * back to the client on destinations prefixed with /chat
+         * */
+        config.enableSimpleBroker("/chat");
+        /*
+         * designates the /app prefix for messages that are bound for
+         * methods annotated with @MessageMapping
+         * */
         config.setApplicationDestinationPrefixes("/app");
-    }
 
+    }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/chath");
-        registry.addEndpoint("/chath").withSockJS();
+        /*
+         * Register /chat-websocket endpoint,
+         * setAllowedOriginPatterns is used to prevent CORS issue when using the
+         * Angular application as a client
+         *
+         * */
+        registry.addEndpoint("/chat-websocket").setAllowedOriginPatterns("*")
+                .setHandshakeHandler(new UserHandshakeHandler())
+
+                .withSockJS();
     }
 
 }

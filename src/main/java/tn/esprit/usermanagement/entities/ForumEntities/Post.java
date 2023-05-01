@@ -31,11 +31,10 @@ public class Post implements Serializable {
 
     String body;
 
+@OneToMany
+List<PostComment> postComment;
 
 
-
-    @JsonIgnore
-    @JsonBackReference
     @ManyToOne
     User user;
 

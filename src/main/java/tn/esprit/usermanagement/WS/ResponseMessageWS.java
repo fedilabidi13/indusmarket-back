@@ -1,12 +1,12 @@
-package tn.esprit.usermanagement.servicesImpl.ChatServiceImpl;
+package tn.esprit.usermanagement.WS;
 
-public class ResponseMessage {
+public class ResponseMessageWS {
     private String content;
 
-    public ResponseMessage() {
+    public ResponseMessageWS() {
     }
 
-    public ResponseMessage(String content) {
+    public ResponseMessageWS(String content) {
         this.content = content;
     }
 
