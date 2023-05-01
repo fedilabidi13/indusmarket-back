@@ -3,6 +3,7 @@ package tn.esprit.usermanagement.entities.ForumEntities;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -27,12 +28,9 @@ public class PostComment implements Serializable{
 
     LocalDateTime commentedAt;
 
-
     @ManyToOne
-            @JsonIgnore
     User user; // The user who wants to comment
 
-    @JsonIgnore
     @ManyToOne
     Post post; // The post to comment
 
@@ -42,9 +40,12 @@ public class PostComment implements Serializable{
     PostComment postComment;
 
 
-
     @OneToMany
     List<Media> medias;
+    @JsonIgnore
+    @JsonManagedReference
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "comment")
+    private List<React> reacts;
 
 }
 

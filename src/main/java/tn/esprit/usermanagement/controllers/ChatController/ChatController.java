@@ -18,6 +18,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/chatroom")
 @AllArgsConstructor
+@CrossOrigin(origins = "*")
+
 public class ChatController {
 ChatIservice chatIservice;
 UserRepo userRepo;
