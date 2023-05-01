@@ -1,28 +1,27 @@
-package tn.esprit.usermanagement.servicesImpl.ChatServiceImpl;
+package tn.esprit.usermanagement.WS;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-public class NotificationService {
+public class NotificationServiceWS {
     private final SimpMessagingTemplate messagingTemplate;
 
     @Autowired
-    public NotificationService(SimpMessagingTemplate messagingTemplate) {
+    public NotificationServiceWS(SimpMessagingTemplate messagingTemplate) {
         this.messagingTemplate = messagingTemplate;
     }
 
     public void sendGlobalNotification() {
-        ResponseMessage message = new ResponseMessage("Global Notification");
+        ResponseMessageWS message = new ResponseMessageWS("Global Notification");
 
         messagingTemplate.convertAndSend("/chat/global-notifications", message);
     }
 
     public void sendPrivateNotification(final String userId) {
-        ResponseMessage message = new ResponseMessage("Private Notification");
+        ResponseMessageWS message = new ResponseMessageWS("Private Notification");
 
         messagingTemplate.convertAndSendToUser(userId,"/chat/private-notifications", message);
     }
 }
-

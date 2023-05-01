@@ -11,6 +11,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/badWord")
 @AllArgsConstructor
+@CrossOrigin(origins = "*")
 public class BadWordController {
     private final AuthenticationService authenticationService;
     BadWordIservice badWordIservice;

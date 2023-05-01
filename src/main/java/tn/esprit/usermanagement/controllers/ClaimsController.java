@@ -11,6 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/claims")
+@CrossOrigin(origins = "*")
 public class ClaimsController {
     @Autowired
     ClaimsServiceImpl claimsService;

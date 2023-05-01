@@ -13,13 +13,14 @@ import java.util.Map;
 import java.util.UUID;
 
 public class UserHandshakeHandler extends DefaultHandshakeHandler {
-    private final Logger LOG = LoggerFactory.getLogger(UserHandshakeHandler.class);
+        private final Logger LOG = LoggerFactory.getLogger(UserHandshakeHandler.class);
 
-    @Override
-    protected Principal determineUser(ServerHttpRequest request, WebSocketHandler wsHandler, Map<String, Object> attributes) {
-        final String randomId = UUID.randomUUID().toString();
-        LOG.info("User with ID '{}' opened the page", randomId);
+        @Override
+        protected Principal determineUser(ServerHttpRequest request, WebSocketHandler wsHandler, Map<String, Object> attributes) {
+            final String randomId = UUID.randomUUID().toString();
+            LOG.info("User with ID '{}' opened the page", randomId);
 
-        return new UserPrincipal(randomId);
-    }
+            return new UserPrincipal(randomId);
+        }
+
 }

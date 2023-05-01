@@ -18,6 +18,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/react")
 @AllArgsConstructor
+@CrossOrigin(origins = "*")
+
 public class ReactController {
     AuthenticationService authenticationService;
     ReactIservice reactIservice;

@@ -83,7 +83,7 @@ if (oldPost.getUser().equals(usr)) {
         if (post.getPostTitle() != null) {
             oldPost.setPostTitle(post.getPostTitle());
         }
-        if (post.getMedias() != null) {
+
         List<Media> mediaList = new ArrayList<>();
             for (MultipartFile multipartFile : files) {
                 Media media = new Media();
@@ -99,7 +99,7 @@ if (oldPost.getUser().equals(usr)) {
             mediaRepo.saveAll(mediaList);
             oldPost.setMedias(mediaList);
 
-        }
+
 
         postRepo.save(oldPost);
         return ResponseEntity.ok().body(oldPost);
