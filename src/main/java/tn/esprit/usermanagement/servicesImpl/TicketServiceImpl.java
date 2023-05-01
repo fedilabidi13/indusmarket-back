@@ -54,11 +54,13 @@ public class TicketServiceImpl implements TicketService {
         Ticket savedTicket = new Ticket();
         ticketRepo.save(savedTicket);
         savedTicket.setReference(refGenerator.generateTicketRef());
+        savedTicket.setDescreption(eventRepo.findById(eventId).get().getAdresse() + " at " + eventRepo.findById(eventId).get().getStartDate());
         savedTicket.setUser(user);
         savedTicket.setEvent(eventRepo.findById(eventId).get());
         // Generate the QR code data
         String qrCodeText = savedTicket.getId().toString() + " "
                 + savedTicket.getDescreption() + " "
+                
                 + "Le nom est : " + savedTicket.getUser().getFirstName() + " Le prenom est : "
                 + savedTicket.getUser().getLastName();
         // Create a new PNG image

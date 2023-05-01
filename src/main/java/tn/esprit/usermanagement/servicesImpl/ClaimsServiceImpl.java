@@ -73,7 +73,7 @@ public class ClaimsServiceImpl implements ClaimsService {
     @Override
     public List<Claims> ShowClaimsByUser() {
     User user = authenticationService.currentlyAuthenticatedUser();
-    return user.getClaims();
+    return claimsRepo.findByUser(user);
     }
 
     @Override

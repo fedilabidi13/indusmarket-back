@@ -103,12 +103,9 @@ public class EventServiceImpl implements EventService {
         // Find the event by ID
         Event optionalEvent = eventRepo.findById(event.getId()).get();
         Address newAdresse = addressService.AddAddress(event.getAdresse());
-        newAdresse.setId(eventRepo.findById(event.getId()).get().getAddress().getId());
-        Address address = addressRepo.save(newAdresse);
-        event.setAddress(address);
+        addressRepo.save(newAdresse);
+        event.setAddress(newAdresse);
         if (optionalEvent.getTickets().isEmpty()) {
-            event.setStartDate(optionalEvent.getStartDate());
-            event.setEndDate(optionalEvent.getEndDate());
             if (files == null || files.isEmpty()) {
                 event.setMedias(optionalEvent.getMedias());
             } else {
@@ -132,6 +129,8 @@ public class EventServiceImpl implements EventService {
                 event.setMedias(mediaList);
             }
             event.setUser(optionalEvent.getUser());
+            double Nbrdays = ChronoUnit.DAYS.between(event.getStartDate().toLocalDate(), event.getEndDate().toLocalDate());
+            event.setPrice(Nbrdays*200);
             eventRepo.save(event);
             return "Event updated successfully";
         }
@@ -149,5 +148,10 @@ public class EventServiceImpl implements EventService {
         for (Event event : events){
         eventRepo.delete(event);
         }
+    }
+
+    @Override
+    public Event getWithId(Integer eventId) {
+        return eventRepo.findById(eventId).get();
     }
 }

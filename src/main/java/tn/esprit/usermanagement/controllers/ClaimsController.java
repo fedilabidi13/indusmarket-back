@@ -37,8 +37,8 @@ public class ClaimsController {
 
     //http://localhost:8085/claims/addPostClaims/{postId}
     @PostMapping("/addPostClaims/{postId}")
-    public String AddClaimsToPostWithPicturesAndAssignToUser(@PathVariable("postId") Integer postId, @ModelAttribute Claims claim, @RequestParam("file") List<MultipartFile> files) throws IOException{
-        return claimsService.AddClaimsToPostWithPicturesAndAssignToUser(postId,claim,files);
+    public void AddClaimsToPostWithPicturesAndAssignToUser(@PathVariable("postId") Integer postId, @ModelAttribute Claims claim, @RequestParam("file") List<MultipartFile> files) throws IOException{
+         claimsService.AddClaimsToPostWithPicturesAndAssignToUser(postId,claim,files);
     }
 
     //http://localhost:8085/claims/addDeliveryClaims/{orderId}
