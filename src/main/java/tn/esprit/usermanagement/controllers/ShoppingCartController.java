@@ -11,6 +11,7 @@ import tn.esprit.usermanagement.services.IShoppingCartService;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "*")
 @RequestMapping("/shoppingCart")
 @AllArgsConstructor
 public class ShoppingCartController {

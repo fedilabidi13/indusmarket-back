@@ -811,6 +811,7 @@ public class AuthenticationService {
         //todo improve function
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepo.findByEmail(email).get();
+
     }
     public String enable2FA()
     {

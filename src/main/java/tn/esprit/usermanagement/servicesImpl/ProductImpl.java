@@ -224,7 +224,7 @@ public class ProductImpl implements IProductService {
         return productRepo.findByPriceBetween(minPrice, maxPrice);
     }
 
-    @Scheduled(cron = "*/5 * * * * *")
+    //@Scheduled(cron = "*/5 * * * * *")
 
     public void checkProductQuantity() {
 
@@ -441,4 +441,17 @@ public class ProductImpl implements IProductService {
 
         return products1;
     }
+
+
+
+    public int checkCurrentQuantity(Integer idProd) {
+        Product p = productRepo.findById(idProd).get();
+
+        if (p.getStock().getCurrentQuantity() != null) {
+            return 1;
+        }
+        return 0;
+    }
+
+
 }

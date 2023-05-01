@@ -109,4 +109,11 @@ public class ProductController {
     }
 
 
+    @GetMapping("/checkCurrentQuantity")
+    public int checkCurrentQuantity(@RequestParam("idProd") Integer idProd){
+        return productService.checkCurrentQuantity(idProd);
+
+    }
+
+
 }

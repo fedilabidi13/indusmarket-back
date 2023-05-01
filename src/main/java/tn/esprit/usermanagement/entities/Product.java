@@ -44,6 +44,8 @@ public class Product implements Serializable {
     @OneToMany( fetch = FetchType.EAGER)
     private List<Media> medias;
 
+
+
     @ManyToOne
     private Shop shop;
     @ManyToOne
@@ -52,7 +54,7 @@ public class Product implements Serializable {
     private LocalDateTime soldAt;
     ////Houssem Association
     @JsonIgnore
-    @ManyToMany
+    @ManyToMany(mappedBy = "products")
     private List<Orders> orders;
     private Boolean oneTimeEmail;
 }
