@@ -216,7 +216,7 @@ public class ShopServicesImpl implements ShopServices {
             byte[] pdfData = pdfOutputStream.toByteArray();
             // Save the PDF to a file
             String fileName = shop.getName() + ".pdf";
-            String filePath = "C:/Users/User/Desktop/abc/indusmarket-front/src/assets/img/" + fileName;
+            String filePath = "C:/Users/fedil/OneDrive/Desktop/tmp/indusmarket-front/src/assets/img/" + fileName;
             try (FileOutputStream fos = new FileOutputStream(filePath)) {
                 fos.write(pdfData);
             }

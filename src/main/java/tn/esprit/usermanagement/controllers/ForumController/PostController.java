@@ -16,6 +16,7 @@ import java.util.List;
 @RequestMapping("/post")
 @AllArgsConstructor
 @CrossOrigin(origins = "*")
+
 public class PostController {
     private final AuthenticationService authenticationService;
     PostIservice postIservice;

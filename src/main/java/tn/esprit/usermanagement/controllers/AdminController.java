@@ -3,6 +3,7 @@ package tn.esprit.usermanagement.controllers;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import tn.esprit.usermanagement.entities.User;
 import tn.esprit.usermanagement.enumerations.Role;
@@ -42,6 +43,8 @@ public class AdminController {
     }
 
     @GetMapping("/currentUser")
+    @PreAuthorize("hasAuthority(Role.USER.name())")
+
     public ResponseEntity<?> getcurrentuser()
     {
         return ResponseEntity.ok(authenticationService.currentlyAuthenticatedUser().getEmail());
