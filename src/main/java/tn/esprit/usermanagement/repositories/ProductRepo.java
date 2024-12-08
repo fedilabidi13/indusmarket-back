@@ -58,6 +58,8 @@ public interface ProductRepo extends JpaRepository<Product,Integer>, JpaSpecific
 
         return findAll(spec);
     }
+    @Query("select p from Product p join User u where p.shop.user.id =?1")
+    List<Product> ShowAllProductsForUser(Long id);
 
 
 }

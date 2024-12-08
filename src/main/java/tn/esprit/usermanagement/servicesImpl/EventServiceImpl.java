@@ -43,14 +43,15 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<Event> ShowEventbyUser() {
-        return eventRepo.findAllByUserId(authenticationService.currentlyAuthenticatedUser().getId());
-    }
+  public List<Event> ShowEventbyUser() {
+     return eventRepo.findAllByUserId(authenticationService.currentlyAuthenticatedUser().getId());
+   }
 
     @Override
     public void DeleteEvent(Integer eventId) {
-        if (eventRepo.findById(eventId).get().getTickets().isEmpty()){
-            eventRepo.delete(eventRepo.findById(eventId).get());
+        Event event = eventRepo.findById(eventId).get();
+        if (event.getTickets().isEmpty()){
+            eventRepo.delete(event);
         }
     }
 
@@ -63,14 +64,13 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public void ModDeleteEvent(Integer eventId) {
-        if (!eventRepo.findById(eventId).get().getTickets().isEmpty()){
-            for (Ticket ticket : eventRepo.findById(eventId).get().getTickets()){
+        Event event = eventRepo.findById(eventId).get();
+            for (Ticket ticket : event.getTickets()){
                 emailService.sendEventEmail(ticket.getUser().getEmail(),"The event : "+ eventRepo.findById(eventId).get().getTitle() + "was deleted.");
                 ticketRepo.delete(ticket);
-            }
-            eventRepo.delete(eventRepo.findById(eventId).get());
         }
-        eventRepo.delete(eventRepo.findById(eventId).get());
+        eventRepo.delete(event);
+
     }
 
 
@@ -103,12 +103,9 @@ public class EventServiceImpl implements EventService {
         // Find the event by ID
         Event optionalEvent = eventRepo.findById(event.getId()).get();
         Address newAdresse = addressService.AddAddress(event.getAdresse());
-        newAdresse.setId(eventRepo.findById(event.getId()).get().getAddress().getId());
-        Address address = addressRepo.save(newAdresse);
-        event.setAddress(address);
+        addressRepo.save(newAdresse);
+        event.setAddress(newAdresse);
         if (optionalEvent.getTickets().isEmpty()) {
-            event.setStartDate(optionalEvent.getStartDate());
-            event.setEndDate(optionalEvent.getEndDate());
             if (files == null || files.isEmpty()) {
                 event.setMedias(optionalEvent.getMedias());
             } else {
@@ -132,6 +129,8 @@ public class EventServiceImpl implements EventService {
                 event.setMedias(mediaList);
             }
             event.setUser(optionalEvent.getUser());
+            double Nbrdays = ChronoUnit.DAYS.between(event.getStartDate().toLocalDate(), event.getEndDate().toLocalDate());
+            event.setPrice(Nbrdays*200);
             eventRepo.save(event);
             return "Event updated successfully";
         }
@@ -144,22 +143,15 @@ public class EventServiceImpl implements EventService {
     }
     @Scheduled(fixedRate = 10000) // runs every second
     @Override
-    public void DeleteEndEvent() {
-        LocalDateTime limite = LocalDateTime.now().minusMonths(12);
-        List<Event> Events = eventRepo.findByEndDateIsBefore(limite);
-        for (Event event : Events) {
-            eventRepo.delete(event);
-        }
-    }
-    @Scheduled(fixedRate = 10000) // runs every second
-    @Override
-    public void deletePssedEvent() {
-    List<Event> events = eventRepo.findAll();
+    public void deletePassedEvent() {
+    List<Event> events = eventRepo.findByEndDateIsBefore(LocalDateTime.now().minusDays(0));
         for (Event event : events){
-            if (event.getEndDate()==LocalDateTime.now().minusDays(3)){
         eventRepo.delete(event);
-        }
         }
     }
 
+    @Override
+    public Event getWithId(Integer eventId) {
+        return eventRepo.findById(eventId).get();
+    }
 }

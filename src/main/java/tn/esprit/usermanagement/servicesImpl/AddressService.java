@@ -29,7 +29,7 @@ public class AddressService {
     public Address AddAddress(String address) throws IOException {
 
         OkHttpClient client = new OkHttpClient();
-        String encodedAddress = URLEncoder.encode(address, "UTF-8");
+        //String encodedAddress = URLEncoder.encode(address, "UTF-8");
         Request request = new Request.Builder()
                 .url("https://google-maps-geocoding.p.rapidapi.com/geocode/json?address="+address)
                 .get()

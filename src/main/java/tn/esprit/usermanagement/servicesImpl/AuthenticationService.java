@@ -57,7 +57,7 @@ public class AuthenticationService {
 
 
             ConfirmationToken confirmationToken = new ConfirmationToken(tokenMod, LocalDateTime.now(),
-                    LocalDateTime.now().plusMinutes(1),
+                    LocalDateTime.now().plusMinutes(15),
                     user);
             tokenService.saveConfirmationToken(confirmationToken);
             emailSender.send(request.getEmail(),buildEmailMod(tokenMod,user));
@@ -90,14 +90,14 @@ public class AuthenticationService {
             String token = UUID.randomUUID().toString();
             String phoneCode = twilioService.generateCode();
             PhoneToken phoneToken = new PhoneToken(phoneCode, LocalDateTime.now(),
-                    LocalDateTime.now().plusMinutes(1),
+                    LocalDateTime.now().plusMinutes(15),
                     user);
             ConfirmationToken confirmationToken = new ConfirmationToken(token, LocalDateTime.now(),
-                    LocalDateTime.now().plusMinutes(1),
+                    LocalDateTime.now().plusMinutes(15),
                     user);
             tokenService.saveConfirmationToken(confirmationToken);
             phoneTokenService.saveConfirmationToken(phoneToken);
-            String link = "http://localhost:8085/auth/confirm?token="+token;
+            String link = "http://localhost:4200/mail-verif?token="+token;
             emailSender.send(request.getEmail(),buildEmailVerif(token, user));
             var jwtTokenString = jwtService.generateJwtToken(user);
             twilioService.sendCode(String.valueOf(user.getPhoneNumber()),phoneCode);
@@ -111,10 +111,10 @@ public class AuthenticationService {
             String token = UUID.randomUUID().toString();
             String phoneCode= twilioService.generateCode();
             PhoneToken phoneToken = new PhoneToken(phoneCode, LocalDateTime.now(),
-                    LocalDateTime.now().plusMinutes(1),
+                    LocalDateTime.now().plusMinutes(15),
                     user);
             ConfirmationToken confirmationToken = new ConfirmationToken(token, LocalDateTime.now(),
-                    LocalDateTime.now().plusMinutes(1),
+                    LocalDateTime.now().plusMinutes(15),
                     user);
             tokenService.saveConfirmationToken(confirmationToken);
             phoneTokenService.saveConfirmationToken(phoneToken);
@@ -136,6 +136,22 @@ public class AuthenticationService {
         revokeAllUserTokens(user);
         saveJwtToken(user, jwtTokenString);
         return jwtTokenString;
+    }
+    public AuthenticationResponse authenticate2(AuthenticationRequest request)
+    {
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                request.getEmail(),
+                request.getPassword()
+        ));
+        User user = userRepo.findByEmail2(request.getEmail());
+
+        var jwtTokenString = "";
+        jwtTokenString=jwtService.generateJwtToken(user);
+        revokeAllUserTokens(user);
+        saveJwtToken(user, jwtTokenString);
+        AuthenticationResponse response = new AuthenticationResponse();
+        response.setJwtToken(jwtTokenString);
+        return response;
     }
 
     private void saveJwtToken(User user, String jwtTokenString) {
@@ -166,13 +182,13 @@ public class AuthenticationService {
                 .banType(BanType.LOCK)
                 .phoneNumber(request.getPhoneNumber())
                 .enabled(false)
+                .firtAttempt(false)
                 .country(ipService.getCountry())
                 .twoFactorsAuth(false)
                 .banNumber(0)
                 .build();
         Media media = new Media();
         media.setName("default image");
-        //todo  put an appropriate image url
         media.setImagenUrl("http://localhost/default.png");
         mediaRepo.save(media);
         user.setPicture(media);
@@ -180,14 +196,14 @@ public class AuthenticationService {
         String token = UUID.randomUUID().toString();
         String phoneCode= twilioService.generateCode();
         PhoneToken phoneToken = new PhoneToken(phoneCode, LocalDateTime.now(),
-                LocalDateTime.now().plusMinutes(1),
+                LocalDateTime.now().plusMinutes(15),
                 user);
         ConfirmationToken confirmationToken = new ConfirmationToken(token, LocalDateTime.now(),
-                LocalDateTime.now().plusMinutes(1),
+                LocalDateTime.now().plusMinutes(15),
                 user);
         tokenService.saveConfirmationToken(confirmationToken);
         phoneTokenService.saveConfirmationToken(phoneToken);
-        String link = "http://localhost:8085/auth/confirm?token="+token;
+        String link = "http://localhost:4200/mail-verif?token="+token;
         emailSender.send(request.getEmail(),buildEmail2(user,link));
         var jwtTokenString = jwtService.generateJwtToken(user);
         twilioService.sendCode(String.valueOf(user.getPhoneNumber()),phoneCode);
@@ -214,7 +230,7 @@ public class AuthenticationService {
         if (expiredAt.isBefore(LocalDateTime.now())) {
             String phoneCode= twilioService.generateCode();
             PhoneToken confirmationToken2 = new PhoneToken(phoneCode, LocalDateTime.now(),
-                    LocalDateTime.now().plusMinutes(1),
+                    LocalDateTime.now().plusMinutes(15),
                     phoneToken.getUser());
             phoneTokenService.saveConfirmationToken(confirmationToken2);
             twilioService.sendCode(String.valueOf(phoneToken.getUser().getPhoneNumber()),phoneCode);
@@ -247,10 +263,10 @@ public class AuthenticationService {
             String token2 = UUID.randomUUID().toString();
 
             ConfirmationToken confirmationToken2 = new ConfirmationToken(token2, LocalDateTime.now(),
-                    LocalDateTime.now().plusMinutes(1),
+                    LocalDateTime.now().plusMinutes(15),
                     confirmationToken.getUser());
             tokenService.saveConfirmationToken(confirmationToken2);
-            String link = "http://localhost:8085/auth/confirm?token="+token2;
+            String link = "http://localhost:4200/mail-verif?token="+token2;
             emailSender.send(confirmationToken.getUser().getEmail(),buildEmail2(confirmationToken.getUser(),link));
             return "email expired a new Email is sent!";
         }
@@ -284,10 +300,10 @@ public class AuthenticationService {
             String token2 = UUID.randomUUID().toString();
 
             ConfirmationToken confirmationToken2 = new ConfirmationToken(token2, LocalDateTime.now(),
-                    LocalDateTime.now().plusMinutes(1),
+                    LocalDateTime.now().plusMinutes(15),
                     confirmationToken.getUser());
             tokenService.saveConfirmationToken(confirmationToken2);
-            //String link = "http://localhost:8085/auth/confirm?token="+token2;
+            //String link = "http://localhost:4200/mail-verif?token="+token2;
             emailSender.send(confirmationToken.getUser().getEmail(),buildEmailVerif(token2, confirmationToken2.getUser() ));
             return "email expired a new Email is sent!";
         }
@@ -310,7 +326,7 @@ public class AuthenticationService {
         if (phoneexpiredAt.isBefore(LocalDateTime.now())) {
             String code= twilioService.generateCode();
             PhoneToken confirmationToken2 = new PhoneToken(code, LocalDateTime.now(),
-                    LocalDateTime.now().plusMinutes(1),
+                    LocalDateTime.now().plusMinutes(15),
                     phoneToken.getUser());
             phoneTokenService.saveConfirmationToken(confirmationToken2);
             twilioService.sendCode(String.valueOf(phoneToken.getUser().getPhoneNumber()),code);
@@ -346,7 +362,7 @@ public class AuthenticationService {
             String token2 = UUID.randomUUID().toString();
 
             ConfirmationToken confirmationToken2 = new ConfirmationToken(token2, LocalDateTime.now(),
-                    LocalDateTime.now().plusMinutes(1),
+                    LocalDateTime.now().plusMinutes(15),
                     confirmationToken.getUser());
             tokenService.saveConfirmationToken(confirmationToken2);
             emailSender.send(confirmationToken.getUser().getEmail(),buildEmailMod(token2, confirmationToken2.getUser() ));
@@ -382,10 +398,10 @@ public class AuthenticationService {
             String token2 = UUID.randomUUID().toString();
 
             ConfirmationToken confirmationToken2 = new ConfirmationToken(token2, LocalDateTime.now(),
-                    LocalDateTime.now().plusMinutes(1),
+                    LocalDateTime.now().plusMinutes(15),
                     confirmationToken.getUser());
             tokenService.saveConfirmationToken(confirmationToken2);
-            //String link = "http://localhost:8085/auth/confirm?token="+token2;
+            //String link = "http://localhost:4200/mail-verif?token="+token2;
             emailSender.send(confirmationToken.getUser().getEmail(),buildEmailVerif(token2, confirmationToken2.getUser()));
             return "email expired a new Email is sent!";
         }
@@ -406,7 +422,7 @@ public class AuthenticationService {
         if (phoneexpiredAt.isBefore(LocalDateTime.now())) {
             String code= twilioService.generateCode();
             PhoneToken confirmationToken2 = new PhoneToken(code, LocalDateTime.now(),
-                    LocalDateTime.now().plusMinutes(1),
+                    LocalDateTime.now().plusMinutes(15),
                     phoneToken.getUser());
             phoneTokenService.saveConfirmationToken(confirmationToken2);
             twilioService.sendCode(String.valueOf(phoneToken.getUser().getPhoneNumber()),code);
@@ -447,14 +463,14 @@ public class AuthenticationService {
         String token = UUID.randomUUID().toString();
         String phoneCode= twilioService.generateCode();
         PhoneToken phoneToken = new PhoneToken(phoneCode, LocalDateTime.now(),
-                LocalDateTime.now().plusMinutes(1),
+                LocalDateTime.now().plusMinutes(15),
                 user);
         ConfirmationToken confirmationToken = new ConfirmationToken(token, LocalDateTime.now(),
-                LocalDateTime.now().plusMinutes(1),
+                LocalDateTime.now().plusMinutes(15),
                 user);
         tokenService.saveConfirmationToken(confirmationToken);
         phoneTokenService.saveConfirmationToken(phoneToken);
-        String link = "http://localhost:8085/auth/confirm?token="+token;
+        String link = "http://localhost:4200/mail-verif?token="+token;
         emailSender.send(user.getEmail(),buildEmailVerif(token, confirmationToken.getUser()));
         return "verification required. Email and phone verification codes were sent.";
     }
@@ -475,10 +491,10 @@ public class AuthenticationService {
             String token2 = UUID.randomUUID().toString();
 
             ConfirmationToken confirmationToken2 = new ConfirmationToken(token2, LocalDateTime.now(),
-                    LocalDateTime.now().plusMinutes(1),
+                    LocalDateTime.now().plusMinutes(15),
                     confirmationToken.getUser());
             tokenService.saveConfirmationToken(confirmationToken2);
-            //String link = "http://localhost:8085/auth/confirm?token="+token2;
+            //String link = "http://localhost:4200/mail-verif?token="+token2;
             emailSender.send(confirmationToken.getUser().getEmail(),token2);
             return "email expired a new Email is sent!";
         }
@@ -500,7 +516,7 @@ public class AuthenticationService {
         if (phoneexpiredAt.isBefore(LocalDateTime.now())) {
             String code= twilioService.generateCode();
             PhoneToken confirmationToken2 = new PhoneToken(code, LocalDateTime.now(),
-                    LocalDateTime.now().plusMinutes(1),
+                    LocalDateTime.now().plusMinutes(15),
                     phoneToken.getUser());
             phoneTokenService.saveConfirmationToken(confirmationToken2);
             twilioService.sendCode(String.valueOf(phoneToken.getUser().getPhoneNumber()),code);
@@ -811,6 +827,7 @@ public class AuthenticationService {
         //todo improve function
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepo.findByEmail(email).get();
+
     }
     public String enable2FA()
     {

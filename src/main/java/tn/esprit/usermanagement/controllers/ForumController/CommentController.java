@@ -14,6 +14,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/comment")
 @AllArgsConstructor
+@CrossOrigin(origins = "*")
+
 public class CommentController {
     CommentIservice commentIservice;
 

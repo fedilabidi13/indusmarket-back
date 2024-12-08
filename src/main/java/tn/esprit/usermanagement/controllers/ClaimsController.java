@@ -1,5 +1,6 @@
 package tn.esprit.usermanagement.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import tn.esprit.usermanagement.entities.Claims;
@@ -11,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/claims")
+@CrossOrigin(origins = "*")
 public class ClaimsController {
     @Autowired
     ClaimsServiceImpl claimsService;
@@ -35,8 +37,8 @@ public class ClaimsController {
 
     //http://localhost:8085/claims/addPostClaims/{postId}
     @PostMapping("/addPostClaims/{postId}")
-    public String AddClaimsToPostWithPicturesAndAssignToUser(@PathVariable("postId") Integer postId, @ModelAttribute Claims claim, @RequestParam("file") List<MultipartFile> files) throws IOException{
-        return claimsService.AddClaimsToPostWithPicturesAndAssignToUser(postId,claim,files);
+    public void AddClaimsToPostWithPicturesAndAssignToUser(@PathVariable("postId") Integer postId, @ModelAttribute Claims claim, @RequestParam("file") List<MultipartFile> files) throws IOException{
+         claimsService.AddClaimsToPostWithPicturesAndAssignToUser(postId,claim,files);
     }
 
     //http://localhost:8085/claims/addDeliveryClaims/{orderId}
@@ -58,25 +60,30 @@ public class ClaimsController {
     }
     //http://localhost:8085/claims/orderClaimTreatment/{claimId}/{status}
     @PutMapping("/orderClaimTreatment/{claimId}/{status}")
-    public String OrderClaimTreatment(@PathVariable("claimId") Integer ClaimId, @PathVariable("status") StatusClaims status) {
+    public ResponseEntity<Object> OrderClaimTreatment(@PathVariable("claimId") Integer ClaimId, @PathVariable("status") StatusClaims status) {
         return claimsService.OrderClaimTreatment(ClaimId, status);
     }
     //http://localhost:8085/claims/postClaimTreatment/{claimId}/{status}
     @PutMapping("/postClaimTreatment/{claimId}/{status}")
-    public String PostClaimTreatment(@PathVariable("claimId") Integer ClaimId, @PathVariable("status") StatusClaims status) {
+    public ResponseEntity<Object> PostClaimTreatment(@PathVariable("claimId") Integer ClaimId, @PathVariable("status") StatusClaims status) {
         return claimsService.PostClaimTreatment(ClaimId, status);
     }
 
     //http://localhost:8085/claims/deliviryClaimTreatment/{claimId}/{status}
     @PutMapping("/deliviryClaimTreatment/{claimId}/{status}")
-    public String DeliviryClaimTreatment(@PathVariable("claimId") Integer ClaimId, @PathVariable("status") StatusClaims status) {
+    public ResponseEntity<Object> DeliviryClaimTreatment(@PathVariable("claimId") Integer ClaimId, @PathVariable("status") StatusClaims status) {
         return claimsService.DeliviryClaimTreatment(ClaimId, status);
     }
 
     //http://localhost:8085/claims/mod/otherClaimTreatment/{claimId}/{status}
     @PutMapping("/otherClaimTreatment/{claimId}/{status}")
-    public void OtherClaimTreatment(@PathVariable("claimId") Integer ClaimId, @PathVariable("status") StatusClaims status) {
-        claimsService.OtherClaimTreatment(ClaimId, status);
+    public ResponseEntity<Object> OtherClaimTreatment(@PathVariable("claimId") Integer ClaimId, @PathVariable("status") StatusClaims status) {
+       return claimsService.OtherClaimTreatment(ClaimId, status);
+    }
+    //http://localhost:8085/claims/claimTreatment/{claimId}/{status}
+    @PutMapping("/claimTreatment/{claimId}/{status}")
+    public ResponseEntity<Object> claimTreatment(@PathVariable("claimId") Integer ClaimId, @PathVariable("status") StatusClaims status) {
+        return claimsService.claimTreatment(ClaimId,status);
     }
 
     //http://localhost:8085/claims/allClaims
@@ -94,6 +101,11 @@ public class ClaimsController {
     @GetMapping("/allClaimsByType/{type}")
     public List<Claims> ShowClaimsByType(@PathVariable("type") TypeClaim typeClaim) {
         return claimsService.ShowClaimsByType(typeClaim);
+    }
+    //http://localhost:8085/claims/delete/{id}
+    @DeleteMapping("/delete/{id}")
+    public void delete(@PathVariable("id") Integer id){
+        claimsService.DeleteClaim(id);
     }
 }
 

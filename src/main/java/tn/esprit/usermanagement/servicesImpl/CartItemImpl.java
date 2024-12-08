@@ -3,10 +3,15 @@ package tn.esprit.usermanagement.servicesImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 import tn.esprit.usermanagement.entities.*;
+import tn.esprit.usermanagement.enumerations.Category;
 import tn.esprit.usermanagement.repositories.*;
 import tn.esprit.usermanagement.services.ICartItemService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -26,11 +31,8 @@ public class CartItemImpl implements ICartItemService {
     @Transactional
     public String addAndAssignToCart(Integer idProduct, Integer qte) {
         User user = authenticationService.currentlyAuthenticatedUser();
-
         Product product = productRepo.getReferenceById(idProduct);
-
-
-        if (product.getStock().getCurrentQuantity() > 0 && product.getStock().getCurrentQuantity()>=qte &&  product.getShop().getUser().getEnabled()==true ) {
+        if (product.getStock().getCurrentQuantity() > 0 && product.getStock().getCurrentQuantity()>=qte  ) {
             if (user.getShoppingCart() == null) {
                 ShoppingCart newShoppingcart = new ShoppingCart();
                 user.setShoppingCart(newShoppingcart);
@@ -41,7 +43,6 @@ public class CartItemImpl implements ICartItemService {
                 shoppingCartRepo.save(newShoppingcart);
                 cartItemRepo.save(cartItem);
                 return "cartItem added !";
-
             } else {
                 ShoppingCart shoppingCart = user.getShoppingCart();
                 CartItem cartItem = new CartItem();
@@ -72,8 +73,8 @@ public class CartItemImpl implements ICartItemService {
         int currentQuantity = theCart.getQuantity();
 
         if (theCart.getProduct().getStock().getCurrentQuantity() > 0 && currentQuantity >= 1 ) {
-            if (counterValue == 1 || counterValue == -1) {
-                int newQuantity = currentQuantity + counterValue;
+            if (counterValue >0 ) {
+                int newQuantity = counterValue;
                 theCart.setQuantity(newQuantity);
             } else {
                 throw new RuntimeException("Error: this product is not available anymore");
@@ -92,8 +93,6 @@ public class CartItemImpl implements ICartItemService {
 
         }
 
-
-
         @Override
         public CartItem AfficherCartItem (Integer idCartItem){
         CartItem cartItem = cartItemRepo.getReferenceById(idCartItem);
@@ -101,7 +100,45 @@ public class CartItemImpl implements ICartItemService {
 
          return  cartItem;
     }
+
+    @Override
+
+    public Map<String, Integer> getCartItemCountByCategory() {
+        List<CartItem> cartItems = cartItemRepo.findByShoppingCartIsNull(); // Fetch only cart items with a null shopping cart ID
+        Map<String, Integer> itemCountByCategory = new HashMap<>(); // Initialize a map to store the result
+
+        // Loop through each cart item and increment the count for its category
+        for (CartItem cartItem : cartItems) {
+            Product product = cartItem.getProduct();
+            Category category = product.getCategory(); // Assuming there is a "category" property on the Product entity
+            String categoryName = category.name(); // Convert the category object to a string using the name() method
+
+            int count = itemCountByCategory.getOrDefault(categoryName, 0); // Get the current count for the category, or 0 if it doesn't exist yet
+            itemCountByCategory.put(categoryName, count + 1); // Increment the count and update the map
+        }
+
+        return itemCountByCategory;
     }
+
+    @Override
+    public Map<Category, Product> getMostCommonProductByCategory() {
+        List<Object[]> results = cartItemRepo.findMostCommonProductByCategory();
+
+        Map<Category, Product> mostCommonProductByCategory = new HashMap<>();
+        for (Object[] result : results) {
+            Category category = (Category) result[0];
+            Product product = (Product) result[1];
+            mostCommonProductByCategory.put(category, product);
+        }
+
+        return mostCommonProductByCategory;
+    }
+
+
+
+}
+
+
 
 
 

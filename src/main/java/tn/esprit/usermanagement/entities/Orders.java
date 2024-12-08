@@ -7,6 +7,7 @@ import tn.esprit.usermanagement.enumerations.OrdersStatus;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -38,4 +39,14 @@ public class Orders implements Serializable {
     @ManyToOne
     private Delivery deliveryS;
     private String dilevryAdresse;
+
+@JsonIgnore
+    @ManyToMany
+    @JoinTable(
+            name = "order_product",
+            joinColumns = @JoinColumn(name = "order_id"),
+            inverseJoinColumns = @JoinColumn(name = "product_id"))
+    private List<Product> products = new ArrayList<>(); // initialize the list to an empty ArrayList
+
+
 }

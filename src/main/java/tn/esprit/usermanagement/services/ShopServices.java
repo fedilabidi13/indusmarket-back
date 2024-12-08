@@ -13,6 +13,7 @@ import java.util.List;
 
 public interface ShopServices {
      List<Shop> ShowAllShops();
+     Shop ShowoneShops(Long id);
      Shop addShopAndAffectToUser(Shop s, List<MultipartFile> files) throws Exception;
      Shop editShop(Shop s, List<MultipartFile> files) throws IOException;
      Shop deleteShop(int idShop);

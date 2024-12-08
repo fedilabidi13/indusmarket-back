@@ -1,3 +1,15 @@
+
+
+<!doctype html><html>
+
+
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <link href="https://js.stripe.com/v3/fingerprinted/css/elements-inner-payment-9a5db596d5477c6f61aedc3854cc92a9.css" >
+
+</head>
+
 <form action='/charge' method='POST' id='checkout-form'>
   <input type='hidden' th:value='${amount}' name='amount' />
   <label>Price:<span th:text='${amount}' /></label>
@@ -17,3 +29,4 @@
           data-zip-code='false'>
   </script>
 </form>
+</html>

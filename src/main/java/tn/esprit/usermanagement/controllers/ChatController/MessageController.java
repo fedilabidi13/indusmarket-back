@@ -16,6 +16,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/message")
 @AllArgsConstructor
+@CrossOrigin(origins = "*")
+
 public class MessageController {
     MessageIservice messageIservice;
     private AuthenticationService authenticationService;

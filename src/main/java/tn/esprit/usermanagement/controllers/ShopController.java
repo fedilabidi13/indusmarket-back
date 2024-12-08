@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 @RestController
+@CrossOrigin(origins = "*")
 @AllArgsConstructor
 @RequestMapping("/shop")
 public class ShopController {
@@ -38,8 +39,8 @@ public class ShopController {
 
 
 
-    @DeleteMapping( "/delete")
-    public Shop deleteShop(@RequestParam int idShop){
+    @DeleteMapping( "/delete/{id}")
+    public Shop deleteShop(@PathVariable ("id") int idShop){
 
         return shopServices.deleteShop(idShop);
     }
@@ -47,18 +48,24 @@ public class ShopController {
     public List<Shop> ShowAllShopsByUser(){
         return shopServices.ShowAllShopsByUser();
     }
+
+
     @GetMapping("/createCatalog")
     public List<Product> GenerateCatalog(@RequestParam("idShop") int idShop){
         return shopServices.GenerateCatalog(idShop);
     }
     @GetMapping("/findAll" )
     public List<Shop> ShowAllShops(){return shopServices.ShowAllShops();}
+
+    @GetMapping("/findone/{id}" )
+    public Shop ShowOneShops(@PathVariable Long id){return shopServices.ShowoneShops(id);
+    }
      @DeleteMapping("/removeProduct")
      public ResponseEntity<String> removeProductFromShop(@RequestParam("shopId") int shopId, @RequestParam("productId") int productId) {
         return shopServices.removeProductFromShop(shopId,productId);
      }
-    @GetMapping("/findAllProducts")
-    public ResponseEntity<List<Product>> getAllProductsOfShop(@RequestParam("shopId") int shopId) {
+    @GetMapping("/findAllProducts/{shopId}")
+    public ResponseEntity<List<Product>> getAllProductsOfShop(@PathVariable("shopId") int shopId) {
         return shopServices.getAllProductsOfShop(shopId);
     }
 

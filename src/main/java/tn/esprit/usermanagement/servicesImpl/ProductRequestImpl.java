@@ -2,6 +2,7 @@ package tn.esprit.usermanagement.servicesImpl;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import tn.esprit.usermanagement.entities.Orders;
 import tn.esprit.usermanagement.entities.Product;
 import tn.esprit.usermanagement.entities.ProductRequest;
 import tn.esprit.usermanagement.entities.User;
@@ -43,4 +44,13 @@ public class ProductRequestImpl implements IProductRequestService {
 
 
     }
+
+
+    @Override
+    public List<ProductRequest> all(Integer IdProduct) {
+        Product product = productRepository.getOne(IdProduct);
+        List<ProductRequest> requests = productRequestRepo.findByProduct(product);
+        return  requests;
+    }
+
 }

@@ -9,9 +9,11 @@ import com.google.zxing.oned.Code93Writer;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import tn.esprit.usermanagement.dto.CommunMultipartFile;
 import tn.esprit.usermanagement.entities.*;
 import tn.esprit.usermanagement.entities.ForumEntities.Media;
 import tn.esprit.usermanagement.enumerations.Category;
@@ -32,8 +34,9 @@ public class ProductImpl implements IProductService {
     private StockRepo stockRepo;
     private RefGenerator refGenerator;
     private EmailService emailService;
-    static int numberOfMostSold = 4;
+    static int numberOfMostSold = 10;
     private UserSearchHistoryRepo userSearchRepo;
+    private final ProductRequestRepo productRequestRepo;
 
     @Override
     public Product ajouter(Product product) {
@@ -58,7 +61,10 @@ public class ProductImpl implements IProductService {
         // Vérification que le shop existe dans la base de données
         Shop shop = shopRepo.findById(shopId).orElseThrow(() -> new Exception("Shop with id " + shopId + " not found."));
         // Génération du code-barres
-        String barcodeText = product.getReference();
+        String barcodeText = "reference: "+ product.getReference()+"\nname: "+
+                product.getName();
+
+
         int width = 500;
         int height = 250;
         Code93Writer qrCodeWriter = new Code93Writer();
@@ -67,8 +73,20 @@ public class ProductImpl implements IProductService {
         MatrixToImageWriter.writeToStream(bitMatrix, "PNG", pngOutputStream);
         byte[] pngData = pngOutputStream.toByteArray();
         // Enregistrement du produit dans la base de données
+       // MultipartFile multipartFile1 = new CommunMultipartFile(
+               // new ByteArrayResource(pngData), product.getReference()+".png");
         product.setShop(shop);
-        product.setBarcodeImage(pngData);
+        //product.setBarcodeImage(pngData);
+        Media media1 = new Media();
+        String url1 = cloudinary.uploader()
+                .upload(pngData,
+                        Map.of("public_id", UUID.randomUUID().toString()))
+                .get("url")
+                .toString();
+        media1.setImagenUrl(url1);
+
+        media1.setName(product.getReference()+".png");
+        product.setBarcodeImage(mediaRepo.save(media1));
         // Enregistrement de l'image du code-barres
         FileOutputStream fos = new FileOutputStream("src/main/resources/assets/" + product.getReference() + ".png");
         fos.write(pngData);
@@ -210,7 +228,7 @@ public class ProductImpl implements IProductService {
         return productRepo.findByPriceBetween(minPrice, maxPrice);
     }
 
-    @Scheduled(cron = "*/5 * * * * *")
+    //@Scheduled(cron = "*/5 * * * * *")
 
     public void checkProductQuantity() {
 
@@ -320,6 +338,7 @@ public class ProductImpl implements IProductService {
         Product p = productRepo.getReferenceById(id);
         if(p.getShop().getUser()==authenticationService.currentlyAuthenticatedUser()){
             int newQuantity = p.getStock().getCurrentQuantity() + quantity;
+            p.getStock().setCurrentQuantity(newQuantity);
             p.getStock().setInitialQuantity(newQuantity);
             p.setQuantity(newQuantity);
             p.setOneTimeEmail(true);
@@ -426,5 +445,23 @@ public class ProductImpl implements IProductService {
        List<Product> products1 = products.stream().distinct().toList();
 
         return products1;
+    }
+
+
+
+    public int checkCurrentQuantity(Integer idProd) {
+        Product p = productRepo.findById(idProd).get();
+
+        if (p.getStock().getCurrentQuantity() != null) {
+            return 1;
+        }
+        return 0;
+    }
+
+
+    @Override
+    public List<Product> ShowAllProductsForUser(Long id) {
+//        id = authenticationService.currentlyAuthenticatedUser().getId().longValue();
+        return productRepo.ShowAllProductsForUser(id);
     }
 }

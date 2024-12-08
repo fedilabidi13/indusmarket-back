@@ -13,6 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/order")
+@CrossOrigin(origins = "*")
 @AllArgsConstructor
 
 public class OrderController {
@@ -24,7 +25,7 @@ public class OrderController {
         return orderService.createOrder();
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     public void deleteOrder(@RequestParam Integer orderId) {
 
         orderService.deleteOrder(orderId);
@@ -42,7 +43,24 @@ public class OrderController {
       return   orderService.recommendProduct();
     }
 
+    @GetMapping("/orderList")
+    public List<Orders> loadCartItemOrder( ){ return orderService.loadCartItemOrder();}
 
+    @GetMapping("/AllorderList")
+    public List<Orders> loadCartItemAllOrder(){return orderService.loadCartItemAllOrder();}
+
+
+    @GetMapping("/TheOrder")
+    public List<Product> AfficherOneOrder (@RequestParam Integer orderId){
+        return orderService.AfficherOneOrder(orderId);
+    }
+
+
+    //this is for the checkout
+    @GetMapping("/TheOrderbyId")
+    public List<CartItem> AfficherOneOrderByID (@RequestParam Integer orderId){
+        return orderService.AfficherOneOrderByID(orderId);
+    }
 
 
 

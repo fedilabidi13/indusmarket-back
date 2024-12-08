@@ -18,7 +18,16 @@ public interface IOrderService {
 
     public Product recommendProduct();
 
+    public List<CartItem> AfficherOneOrderByID (Integer orderId);
+
     public void lessQuantity (String orderId);
+
+
+    public List<Orders> loadCartItemOrder();
+
+    public List<Product> AfficherOneOrder (Integer orderId);
+
+    public List<Orders> loadCartItemAllOrder();
 
 
 

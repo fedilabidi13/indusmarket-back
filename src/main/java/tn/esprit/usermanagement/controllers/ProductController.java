@@ -18,12 +18,14 @@ import tn.esprit.usermanagement.servicesImpl.ProductImpl;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "*")
 @RequestMapping("/product")
 @AllArgsConstructor
 
 public class ProductController {
     private IProductService productService;
     private ProductImpl productImpl;
+    private final ProductRepo productRepo;
 
 
     @PostMapping(path = "/add")
@@ -36,8 +38,8 @@ public class ProductController {
     public Product editProduct(@ModelAttribute Product product,@RequestParam List<MultipartFile> file) throws Exception {
         return productService.editProduct(product,file);
     }
-    @DeleteMapping(path = "/delete")
-    public void deleteProduct(@RequestParam("idProduct") int idProduct){
+    @DeleteMapping(path = "/delete/{idProduct}")
+    public void deleteProduct(@PathVariable("idProduct") int idProduct){
         productService.deleteProduct(idProduct);
     }
     @GetMapping(path ="/findByNoDiscount" )
@@ -108,4 +110,20 @@ public class ProductController {
     }
 
 
+    @GetMapping("/checkCurrentQuantity")
+    public int checkCurrentQuantity(@RequestParam("idProd") Integer idProd){
+        return productService.checkCurrentQuantity(idProd);
+
+    }
+
+
+    @GetMapping("/ShowAllProductsForUser/{id}")
+    public List<Product> ShowAllProductsForUser(@PathVariable("id") Long id){
+        return productService.ShowAllProductsForUser(id);
+    }
+    @GetMapping("/findByid")
+    public Product getAproduct(@RequestParam Integer id)
+    {
+        return productRepo.getReferenceById(id);
+    }
 }

@@ -3,6 +3,7 @@ package tn.esprit.usermanagement.controllers;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import tn.esprit.usermanagement.entities.User;
 import tn.esprit.usermanagement.enumerations.Role;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/admin")
+@CrossOrigin(origins = "*")
 @AllArgsConstructor
 
 public class AdminController {
@@ -25,11 +27,11 @@ public class AdminController {
         return ResponseEntity.ok("hello from admin endpoint");
     }
     @GetMapping("/addMod")
-    public String createModAccount(@RequestBody String email) throws IOException, GeoIp2Exception {
+    public String createModAccount(@RequestParam String email) throws IOException, GeoIp2Exception {
         return adminService.addMod(email);
     }
     @GetMapping("/ban")
-    public String banUser(@RequestBody String email)
+    public String banUser(@RequestParam String email)
     {
         return adminService.banUser(email);
     }
@@ -41,8 +43,15 @@ public class AdminController {
     }
 
     @GetMapping("/currentUser")
+    @PreAuthorize("hasAuthority(Role.USER.name())")
+
     public ResponseEntity<?> getcurrentuser()
     {
         return ResponseEntity.ok(authenticationService.currentlyAuthenticatedUser().getEmail());
+    }
+    @GetMapping("/users")
+    public List<User> showByrole(@RequestParam String role)
+    {
+        return adminService.getUsers(Role.valueOf(role));
     }
 }
